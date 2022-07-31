@@ -13,19 +13,21 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +4 App.tsx
-badd +12 index.tsx
+badd +3 App.tsx
+badd +4 index.tsx
+badd +18 App.css
+badd +5 canvas/canvas.tsx
 argglobal
 %argdel
 $argadd App.tsx
 $argadd index.tsx
-edit index.tsx
+edit canvas/canvas.tsx
 argglobal
-if bufexists(fnamemodify("index.tsx", ":p")) | buffer index.tsx | else | edit index.tsx | endif
+if bufexists(fnamemodify("canvas/canvas.tsx", ":p")) | buffer canvas/canvas.tsx | else | edit canvas/canvas.tsx | endif
 if &buftype ==# 'terminal'
-  silent file index.tsx
+  silent file canvas/canvas.tsx
 endif
-balt App.tsx
+balt App.css
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
