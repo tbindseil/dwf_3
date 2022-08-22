@@ -8,6 +8,12 @@
     // 5. list pictures
     // 6. create pictures
 
+    //
+    // hmm, there is a crud app here and a registration service
+    // i say this because the methods and routes are hard to name
+    // no need to overthink it
+    //
+
 
 
     // I think I could decode/inflate/etc a png file in a similar way to getting an image from below
