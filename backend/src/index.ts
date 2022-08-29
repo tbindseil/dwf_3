@@ -1,50 +1,26 @@
 import * as http from 'http'
+import { logic } from './logic' // TODO whats the best way to deal with importing my own code?
 
 // TJTAG write tests
+// hmmm, sees like the functionality and its unit tests live
+// in the same node package
 
+// so, already I find that this code isn't easy to test
+// looks like i need something to encapsulate the below logic
+//
+// done
+//
+// after testing the logic function, I should be able to write
+// integration tests that hit this server and make sure it works
 const server = http.createServer(function (req: any, res: any) {
     console.log(`${req.method} request received at ${req.url}`);
 
     res.statusCode = 200; // 200 = OK
     res.setHeader('Content-Type', 'application/json');
 
-    const url_tokens: String[] = req.url.split('/')
+    const url_tokens: string[] = req.url.split('/')
 
-    // TODO how to deal with req.method === 'POST'
-    if (url_tokens.length === 1 && url_tokens[0] === 'pictures') {
-        if (req.method === 'GET') {
-            // TODO return list of all photos by name and maybe include a thumbnail
-            res.write(JSON.stringify({'msg': 'all pictures'}));
-            res.end();
-        } else if (req.method === 'POST') {
-            // TODO create picture with name and other details
-            res.write(JSON.stringify({'msg': 'picture created'}));
-            res.end();
-        }
-    } else if (url_tokens.length === 2) {
-        const picture_id = url_tokens[0];
-        if (url_tokens[1] === 'clients') {
-            if (req.method === 'PUT') {
-                // TODO register a client, send them reference photo and subscribe them to updates
-                res.write(JSON.stringify({'msg': `client added to picture ${picture_id}`}));
-                res.end();
-            } else if (req.method === 'DELETE') {
-                // TODO unregister a client
-                res.write(JSON.stringify({'msg': `client removed from picture ${picture_id}`}));
-                res.end();
-            }
-        } else if (url_tokens[1] === 'update') {
-            if (req.method === 'POST') {
-                // TODO update a reference picture and send to all registered clients
-                res.write(JSON.stringify({'msg': 'received update'}));
-                res.end();
-            }
-        }
-    } else {
-        res.statusCode = 400; // 400 = Bad request
-        res.write(JSON.stringify({'msg': 'error'}));
-        res.end();
-    }
+    logic(url_tokens, req, res);
 });
 
 server.listen(8080, function () {
