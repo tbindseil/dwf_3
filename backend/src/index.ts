@@ -1,5 +1,14 @@
 import * as http from 'http'
-import { logic } from './logic' // TODO whats the best way to deal with importing my own code?
+import { Logic } from './logic' // TODO whats the best way to deal with importing my own code?
+
+import {
+    get_pictures,
+    post_picture,
+    put_client,
+    delete_client,
+    post_update,
+    error_handler
+} from './handlers/index';
 
 // TJTAG write tests
 // hmmm, sees like the functionality and its unit tests live
@@ -20,7 +29,8 @@ const server = http.createServer(function (req: any, res: any) {
 
     const url_tokens: string[] = req.url.split('/')
 
-    logic(url_tokens, req, res);
+    let logic = new Logic(get_pictures, post_picture, put_client, delete_client, post_update, error_handler);
+    logic.logic(url_tokens, req, res);
 });
 
 server.listen(8080, function () {
