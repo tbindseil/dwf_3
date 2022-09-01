@@ -2,7 +2,7 @@ import * as http from 'http'
 import { Logic } from './logic' // TODO whats the best way to deal with importing my own code?
 
 import {
-    get_pictures,
+    GetPictures,
     post_picture,
     put_client,
     delete_client,
@@ -29,7 +29,7 @@ const server = http.createServer(function (req: any, res: any) {
 
     const url_tokens: string[] = req.url.split('/')
 
-    let logic = new Logic(get_pictures, post_picture, put_client, delete_client, post_update, error_handler);
+    let logic = new Logic(new GetPictures(), post_picture, put_client, delete_client, post_update, error_handler);
     logic.logic(url_tokens, req, res);
 });
 

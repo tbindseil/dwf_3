@@ -1,14 +1,16 @@
+import {
+    API
+} from './handlers/api';
 
 export class Logic {
-    get_pictures: () => void;
+    get_pictures: API;
     post_pictures: () => void;
     put_clients: () => void;
     delete_clients: () => void;
     post_update: () => void;
     error_handler: () => void;
 
-    // TJTAG these should probably be objects
-    constructor(get_pictures: () => void,
+    constructor(get_pictures: API,
                 post_pictures: () => void,
                 put_clients: () => void,
                 delete_clients: () => void,
@@ -26,7 +28,7 @@ export class Logic {
         // TODO how to deal with req.method === 'POST'
         if (url_tokens.length === 1 && url_tokens[0] === 'pictures') {
             if (req.method === 'GET') {
-                this.get_pictures();
+                this.get_pictures.call(req, res);
             } else if (req.method === 'POST') {
                 this.post_pictures();
             }

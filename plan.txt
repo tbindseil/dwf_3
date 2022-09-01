@@ -1,3 +1,7 @@
+TODO
+1. make a linter
+
+
 
     //
     // I guess I can start with a server that can: - DONE
