@@ -8,6 +8,10 @@ import {
 
 
 export class PostPicture extends API {
+    constructor () {
+        super('POST', 'picture');
+    }
+
     public get_input(req: any): PostPictureInput {
         console.log('PostPicture.get_input');
         req;

@@ -1,5 +1,10 @@
 export class API {
-    constructor() {
+    public readonly method: string;
+    public readonly entity: string;
+
+    constructor(method: string, entity: string) {
+        this.method = method;
+        this.entity = entity;
     }
 
     public call(req: any, res: any): void {

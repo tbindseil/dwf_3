@@ -1,5 +1,6 @@
 TODO
 1. make a linter
+2. whats the best way to deal with importing my own code? backend/index.ts line 2
 
 
 

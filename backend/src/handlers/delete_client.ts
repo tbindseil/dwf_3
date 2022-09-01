@@ -8,6 +8,10 @@ import {
 
 
 export class DeleteClient extends API {
+    constructor() {
+        super('DELETE', 'client');
+    }
+
     public get_input(req: any): DeleteClientInput {
         console.log('DeleteClient.get_input');
         req;

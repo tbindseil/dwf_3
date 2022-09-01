@@ -8,6 +8,10 @@ import {
 
 
 export class PostUpdate extends API {
+    constructor() {
+        super('POST', 'update');
+    }
+
     public get_input(req: any): PostUpdateInput {
         console.log('PostUpdate.get_input');
         req;

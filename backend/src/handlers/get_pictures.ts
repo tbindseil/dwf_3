@@ -8,6 +8,10 @@ import {
 
 
 export class GetPictures extends API {
+    constructor() {
+        super('GET', 'pictures');
+    }
+
     public get_input(req: any): GetPicturesInput {
         console.log('GetPictures.get_input');
         req;

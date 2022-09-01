@@ -8,6 +8,10 @@ import {
 
 
 export class PutClient extends API {
+    constructor() {
+        super('PUT', 'client')
+    }
+
     public get_input(req: any): PutClientInput {
         console.log('PutClient.get_input');
         req;
