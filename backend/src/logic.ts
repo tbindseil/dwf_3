@@ -8,20 +8,17 @@ export class Logic {
     put_clients: API;
     delete_clients: API;
     post_update: API;
-    error_handler: API;
 
     constructor(get_pictures: API,
                 post_pictures: API,
                 put_clients: API,
                 delete_clients: API,
-                post_update: API,
-                error_handler: API) {
+                post_update: API) {
         this.get_pictures = get_pictures;
         this.post_pictures = post_pictures;
         this.put_clients = put_clients;
         this.delete_clients = delete_clients;
         this.post_update = post_update;
-        this.error_handler = error_handler;
     }
 
     public logic(url_tokens: string[], req: any, res: any): void {
@@ -49,7 +46,6 @@ export class Logic {
             res.statusCode = 400; // 400 = Bad request
             res.write(JSON.stringify({'msg': 'error'}));
             res.end();
-            // this.error_handler(); // TODO delete error handler
         }
     }
 }

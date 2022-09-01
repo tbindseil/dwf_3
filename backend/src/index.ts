@@ -7,7 +7,6 @@ import {
     PutClient,
     DeleteClient,
     PostUpdate,
-    ErrorHandler
 } from './handlers/index';
 
 // TJTAG write tests
@@ -30,7 +29,7 @@ const server = http.createServer(function (req: any, res: any) {
     const url_tokens: string[] = req.url.split('/')
 
     // TODO this doesn't need to be recreated each time
-    let logic = new Logic(new GetPictures(), new PostPicture(), new PutClient(), new DeleteClient(), new PostUpdate(), new ErrorHandler());
+    let logic = new Logic(new GetPictures(), new PostPicture(), new PutClient(), new DeleteClient(), new PostUpdate());
     logic.logic(url_tokens, req, res);
 });
 
