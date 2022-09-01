@@ -1,6 +1,6 @@
 {
   "name": "dwf-3-models-tjb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "models used in draw with friends application",
   "main": "index.ts",
   "scripts": {

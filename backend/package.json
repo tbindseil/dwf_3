@@ -14,6 +14,6 @@
     "ts-jest": "^28.0.8"
   },
   "dependencies": {
-    "dwf-3-models-tjb": "^1.0.0"
+    "dwf-3-models-tjb": "^1.0.1"
   }
 }

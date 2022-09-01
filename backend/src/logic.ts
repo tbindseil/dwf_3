@@ -4,18 +4,18 @@ import {
 
 export class Logic {
     get_pictures: API;
-    post_pictures: () => void;
-    put_clients: () => void;
-    delete_clients: () => void;
-    post_update: () => void;
-    error_handler: () => void;
+    post_pictures: API;
+    put_clients: API;
+    delete_clients: API;
+    post_update: API;
+    error_handler: API;
 
     constructor(get_pictures: API,
-                post_pictures: () => void,
-                put_clients: () => void,
-                delete_clients: () => void,
-                post_update: () => void,
-                error_handler: () => void) {
+                post_pictures: API,
+                put_clients: API,
+                delete_clients: API,
+                post_update: API,
+                error_handler: API) {
         this.get_pictures = get_pictures;
         this.post_pictures = post_pictures;
         this.put_clients = put_clients;
@@ -30,23 +30,26 @@ export class Logic {
             if (req.method === 'GET') {
                 this.get_pictures.call(req, res);
             } else if (req.method === 'POST') {
-                this.post_pictures();
+                this.post_pictures.call(req, res);
             }
         } else if (url_tokens.length === 2) {
             const picture_id = url_tokens[0];
             if (url_tokens[1] === 'clients') {
                 if (req.method === 'PUT') {
-                    this.put_clients();
+                    this.put_clients.call(req, res);
                 } else if (req.method === 'DELETE') {
-                    this.delete_clients();
+                    this.delete_clients.call(req, res);
                 }
             } else if (url_tokens[1] === 'update') {
                 if (req.method === 'POST') {
-                    this.post_update
+                    this.post_update.call(req, res);
                 }
             }
         } else {
-            this.error_handler();
+            res.statusCode = 400; // 400 = Bad request
+            res.write(JSON.stringify({'msg': 'error'}));
+            res.end();
+            // this.error_handler(); // TODO delete error handler
         }
     }
 }

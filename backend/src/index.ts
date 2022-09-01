@@ -3,11 +3,11 @@ import { Logic } from './logic' // TODO whats the best way to deal with importin
 
 import {
     GetPictures,
-    post_picture,
-    put_client,
-    delete_client,
-    post_update,
-    error_handler
+    PostPicture,
+    PutClient,
+    DeleteClient,
+    PostUpdate,
+    ErrorHandler
 } from './handlers/index';
 
 // TJTAG write tests
@@ -29,7 +29,8 @@ const server = http.createServer(function (req: any, res: any) {
 
     const url_tokens: string[] = req.url.split('/')
 
-    let logic = new Logic(new GetPictures(), post_picture, put_client, delete_client, post_update, error_handler);
+    // TODO this doesn't need to be recreated each time
+    let logic = new Logic(new GetPictures(), new PostPicture(), new PutClient(), new DeleteClient(), new PostUpdate(), new ErrorHandler());
     logic.logic(url_tokens, req, res);
 });
 

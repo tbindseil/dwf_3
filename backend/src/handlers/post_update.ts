@@ -1,6 +1,24 @@
-export function post_update(): void {
-    console.log('post_update');
-    // TODO update a reference picture and send to all registered clients
-    // res.write(JSON.stringify({'msg': 'received update'}));
-    // res.end();
+import {
+    PostUpdateInput,
+    PostUpdateOutput
+} from 'dwf-3-models-tjb';
+import {
+    API
+} from './api';
+
+
+export class PostUpdate extends API {
+    public get_input(req: any): PostUpdateInput {
+        console.log('PostUpdate.get_input');
+        req;
+        return {};
+    }
+
+    public process(input: PostUpdateInput): PostUpdateOutput {
+        console.log('PostUpdate.process');
+        input;
+        return {
+            msg: 'received udpate'
+        }
+    }
 }

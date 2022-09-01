@@ -1,6 +1,24 @@
-export function delete_client(): void {
-    console.log('delete_client');
-    // TODO unregister a client
-    // res.write(JSON.stringify({'msg': `client removed from picture ${picture_id}`}));
-    // res.end();
+import {
+    DeleteClientInput,
+    DeleteClientOutput
+} from 'dwf-3-models-tjb';
+import {
+    API
+} from './api';
+
+
+export class DeleteClient extends API {
+    public get_input(req: any): DeleteClientInput {
+        console.log('DeleteClient.get_input');
+        req;
+        return {};
+    }
+
+    public process(input: DeleteClientInput): DeleteClientOutput {
+        console.log('DeleteClient.process');
+        input;
+        return {
+            msg: 'client removed from picture'
+        }
+    }
 }
