@@ -12,5 +12,8 @@
     "@types/jest": "^28.1.8",
     "jest": "^28.0.1",
     "ts-jest": "^28.0.8"
+  },
+  "dependencies": {
+    "dwf-3-models-tjb": "^1.0.0"
   }
 }

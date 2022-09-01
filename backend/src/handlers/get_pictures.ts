@@ -1,3 +1,8 @@
+import {
+    GetPicturesInput,
+    GetPicturesOutput
+} from 'dwf-3-models-tjb'
+
 export function get_pictures(req: any, res: any): void {
     // TODO return list of all photos by name and maybe include a thumbnail
     console.log('get_pictures');
@@ -12,17 +17,7 @@ export function get_pictures(req: any, res: any): void {
     res.end();
 }
 
-interface GetPicturesInput {
-}
-
-interface GetPicturesOutput {
-    msg: string;
-}
-
 export function make_get_pictures_input(req: any): GetPicturesInput {
     req;
     return {};
 }
-
-
-// TJTAG keep doing this ^^^^

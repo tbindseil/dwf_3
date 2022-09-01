@@ -7,6 +7,7 @@ export class Logic {
     post_update: () => void;
     error_handler: () => void;
 
+    // TJTAG these should probably be objects
     constructor(get_pictures: () => void,
                 post_pictures: () => void,
                 put_clients: () => void,
