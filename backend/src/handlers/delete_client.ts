@@ -2,9 +2,7 @@ import {
     DeleteClientInput,
     DeleteClientOutput
 } from 'dwf-3-models-tjb';
-import {
-    API
-} from './api';
+import API from './api';
 
 
 export class DeleteClient extends API {

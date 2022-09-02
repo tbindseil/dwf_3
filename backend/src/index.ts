@@ -1,9 +1,7 @@
 import * as http from 'http'
-import { Router } from './router'
+import API from './handlers/api';
+import Router from './router'
 
-import {
-    API
-} from './handlers/api';
 import {
     GetPictures,
     PostPicture,

@@ -1,6 +1,6 @@
-export class API {
-    public readonly method: string;
-    public readonly entity: string;
+export default class API {
+    private method: string;
+    private entity: string;
 
     constructor(method: string, entity: string) {
         this.method = method;
@@ -9,9 +9,7 @@ export class API {
 
     public call(req: any, res: any): void {
         const input = this.get_input(req);
-        const output = this.process(input); // umm this might not by typeable
-
-        console.log(`output is ${output}`);
+        const output = this.process(input);
 
         res.write(JSON.stringify(output));
         res.end();
@@ -27,5 +25,13 @@ export class API {
         input;
         console.log('API.process is abstract');
         return {};
+    }
+
+    public getMethod() {
+        return this.method;
+    }
+
+    public getEntity() {
+        return this.entity;
     }
 }

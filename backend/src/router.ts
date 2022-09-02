@@ -1,8 +1,6 @@
-import {
-    API
-} from './handlers/api';
+import API from './handlers/api';
 
-export class Router {
+export default class Router {
     private methods: Map<string, API>;
 
     constructor() {
@@ -10,7 +8,7 @@ export class Router {
     }
 
     public add_method(api: API) {
-        const key = this.get_key(api.method, api.entity);
+        const key = this.get_key(api.getMethod(), api.getEntity());
 
         if (!this.methods.has(key)) {
             this.methods.set(key, api);
@@ -18,7 +16,7 @@ export class Router {
     }
 
     public route(req: any, res: any): void {
-        const key = this.get_key(req.method, req.url.split('/').at(-1));
+        const key = this.get_key(req.method, req.url.split('/').at(1));
 
         if (!this.methods.has(key)) {
             res.statusCode = 400; // 400 = Bad request

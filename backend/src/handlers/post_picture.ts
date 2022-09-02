@@ -2,9 +2,7 @@ import {
     PostPictureInput,
     PostPictureOutput
 } from 'dwf-3-models-tjb';
-import {
-    API
-} from './api';
+import API from './api';
 
 
 export class PostPicture extends API {

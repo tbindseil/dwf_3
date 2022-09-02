@@ -2,9 +2,7 @@ import {
     PostUpdateInput,
     PostUpdateOutput
 } from 'dwf-3-models-tjb';
-import {
-    API
-} from './api';
+import API from './api';
 
 
 export class PostUpdate extends API {
