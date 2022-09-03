@@ -7,24 +7,23 @@ export default class API {
         this.entity = entity;
     }
 
-    public call(req: any, res: any): void {
+    public call(req: any): string {
         const input = this.get_input(req);
         const output = this.process(input);
 
-        res.write(JSON.stringify(output));
-        res.end();
+        const serialized_output = JSON.stringify(output);
+
+        return serialized_output;
     }
 
     public get_input(req: any): any {
         req;
-        console.log('API.get_input is abstract');
-        return {};
+        throw new Error('api.get_input not implemented');
     }
 
     public process(input: any): any {
         input;
-        console.log('API.process is abstract');
-        return {};
+        throw new Error('api.process not implemented');
     }
 
     public getMethod() {

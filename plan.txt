@@ -2,7 +2,7 @@ TODO
 1. make a linter
 1a. camel case instead of snake case
 2. whats the best way to deal with importing my own code? backend/index.ts line 2
-
+3. vim buffers move to back
 
 
     //

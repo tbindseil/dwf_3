@@ -52,7 +52,7 @@ describe('Router Tests', () => {
 
             const mockCall = mockAPIInstance.call as jest.Mock;
             expect(mockCall).toHaveBeenCalledTimes(1);
-            expect(mockCall).toHaveBeenCalledWith(registeredReq, res);
+            expect(mockCall).toHaveBeenCalledWith(registeredReq);
         });
 
         it('Ends the result after a successful API call', () => {

@@ -25,8 +25,8 @@ export default class Router {
             return;
         }
 
-        // TODO hmmm
-        this.methods.get(key)!.call(req, res);
+        const output = this.methods.get(key)!.call(req);
+        res.write(output);
         res.end();
     }
 
