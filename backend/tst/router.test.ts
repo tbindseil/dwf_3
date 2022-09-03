@@ -4,101 +4,77 @@ import Router from '../src/router';
 jest.mock('../src/handlers/api');
 const mockAPI = jest.mocked(API, true);
 
-beforeEach(() => {
-    mockAPI.mockClear();
-});
 
-it('Routes to an API after the API is registered', () => {
-    const router = new Router();
-    const method = 'METHOD';
-    const entity = 'ENTITY';
-    const req = {
-        method: method,
-        url: `/${entity}/`
-    };
-    const res = {
-        statusCode: 0,
-        write: (s: string) => {s;},
-        end: () => {}
-    }
-
-    const mockAPIInstance = new API(method, entity);
-
-    const mockGetEntity = mockAPIInstance.getEntity as jest.Mock;
-    mockGetEntity.mockImplementation(() => { return entity });
-    const mockGetMethod = mockAPIInstance.getMethod as jest.Mock;
-    mockGetMethod.mockImplementation(() => { return method });
-
-    router.add_method(mockAPIInstance);
-
-    router.route(req, res);
-
-    const mockCall = mockAPIInstance.call as jest.Mock;
-    expect(mockCall).toHaveBeenCalledTimes(1);
-    expect(mockCall).toHaveBeenCalledWith(req, res);
-});
-
-it('Ends the result after a successful API call', () => {
-    const router = new Router();
-    const method = 'METHOD';
-    const entity = 'ENTITY';
-    const req = {
-        method: method,
-        url: `/${entity}/`
-    };
-    let ended = false;
-    const res = {
-        statusCode: 0,
-        write: (s: string) => {s;},
-        end: () => { ended = true; }
-    }
-
-    const mockAPIInstance = new API(method, entity);
-
-    const mockGetEntity = mockAPIInstance.getEntity as jest.Mock;
-    mockGetEntity.mockImplementation(() => { return entity });
-    const mockGetMethod = mockAPIInstance.getMethod as jest.Mock;
-    mockGetMethod.mockImplementation(() => { return method });
-
-    router.add_method(mockAPIInstance);
-
-    router.route(req, res);
-
-    expect(ended).toBeTruthy();
-});
-
-it('Writes error message to and closes the result when an unregistered API is called', () => {
-    const router = new Router();
+describe('Router Tests', () => {
     const registeredMethod = 'REGISTERED_METHOD';
-    const regesteredEntity = 'REGISTERED_ENTITY';
-    const method = 'METHOD';
-    const entity = 'ENTITY';
-    const req = {
-        method: method,
-        url: `/${entity}/`
+    const registeredEntity = 'REGISTERED_ENTITY';
+    const unregisteredMethod = 'UNREGISTERED_METHOD';
+    const unregisteredEntity = 'UNREGISTERED_ENTITY';
+
+    const registeredReq = {
+        method: registeredMethod,
+        url: `/${registeredEntity}/`
     };
-    let ended = false;
-    let written = false;
-    let whatWasWritten = '';
+
+    let ended: boolean;
+    let written: boolean;
+    let whatWasWritten: string;
     const res = {
         statusCode: 0,
         write: (s: string) => { whatWasWritten = s; written = true; },
         end: () => { ended = true; }
-    }
+    };
 
-    const mockAPIInstance = new API(registeredMethod, regesteredEntity);
+    let router: Router;
+    let mockAPIInstance: API;
 
-    const mockGetMethod = mockAPIInstance.getMethod as jest.Mock;
-    mockGetMethod.mockImplementation(() => { return registeredMethod });
-    const mockGetEntity = mockAPIInstance.getEntity as jest.Mock;
-    mockGetEntity.mockImplementation(() => { return regesteredEntity });
+    beforeEach(() => {
+        mockAPI.mockClear();
+        router = new Router();
 
-    router.add_method(mockAPIInstance);
+        mockAPIInstance = new API(registeredMethod, registeredEntity);
 
-    router.route(req, res);
+        const mockGetMethod = mockAPIInstance.getMethod as jest.Mock;
+        mockGetMethod.mockImplementation(() => { return registeredMethod });
+        const mockGetEntity = mockAPIInstance.getEntity as jest.Mock;
+        mockGetEntity.mockImplementation(() => { return registeredEntity });
 
-    expect(written).toBeTruthy();
-    expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error'}));
-    expect(res.statusCode).toEqual(400);
-    expect(ended).toBeTruthy();
+        router.add_method(mockAPIInstance);
+
+        ended = false;
+        written = false;
+        whatWasWritten = '';
+    });
+
+    describe('Router with a registered API', () => {
+        it('Routes to an API after the API is registered', () => {
+            router.route(registeredReq, res);
+
+            const mockCall = mockAPIInstance.call as jest.Mock;
+            expect(mockCall).toHaveBeenCalledTimes(1);
+            expect(mockCall).toHaveBeenCalledWith(registeredReq, res);
+        });
+
+        it('Ends the result after a successful API call', () => {
+            router.route(registeredReq, res);
+
+            expect(ended).toBeTruthy();
+        });
+    });
+
+    describe('Router with an unregistered API', () => {
+        const unregisteredReq = {
+            method: unregisteredMethod,
+            url: `/${unregisteredEntity}/`
+        };
+
+        it('Writes error message to and closes the result when an unregistered API is called', () => {
+            router.route(unregisteredReq, res);
+
+            expect(written).toBeTruthy();
+            expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error'}));
+            expect(res.statusCode).toEqual(400);
+            expect(ended).toBeTruthy();
+        });
+    });
 });
