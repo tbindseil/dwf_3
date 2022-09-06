@@ -10,10 +10,12 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^28.1.8",
+    "@types/pg": "^8.6.5",
     "jest": "^28.0.1",
     "ts-jest": "^28.0.8"
   },
   "dependencies": {
-    "dwf-3-models-tjb": "^1.0.1"
+    "dwf-3-models-tjb": "^1.0.1",
+    "pg": "^8.8.0"
   }
 }

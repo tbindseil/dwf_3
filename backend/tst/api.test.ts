@@ -7,6 +7,7 @@ const specialInput = { test: 'SPECIAL_INPUT' };
 const specialOutput = { test: 'SPECIAL_OUTPUT' };
 const serializedSpecialOutput = JSON.stringify({ test: 'SPECIAL_OUTPUT' });
 
+
 class TestAPI extends API {
     constructor(entity: string, method: string) {
         super(method, entity);
