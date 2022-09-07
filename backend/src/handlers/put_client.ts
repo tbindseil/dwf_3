@@ -10,9 +10,9 @@ export class PutClient extends API {
         super('PUT', 'client')
     }
 
-    public async get_input(req: any): Promise<PutClientInput> {
+    public async get_input(body: any): Promise<PutClientInput> {
         console.log('PutClient.get_input');
-        req;
+        body;
         return {};
     }
 

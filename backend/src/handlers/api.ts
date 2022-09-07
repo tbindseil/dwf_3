@@ -7,8 +7,8 @@ export default class API {
         this.entity = entity;
     }
 
-    public async call(req: any): Promise<string> {
-        const input = await this.get_input(req);
+    public async call(body: any): Promise<string> {
+        const input = await this.get_input(body);
         const output = await this.process(input);
 
         const serialized_output = JSON.stringify(output);
@@ -16,8 +16,8 @@ export default class API {
         return serialized_output;
     }
 
-    public async get_input(req: any): Promise<any> {
-        req;
+    public async get_input(body: any): Promise<any> {
+        body;
         throw new Error('api.get_input not implemented');
     }
 

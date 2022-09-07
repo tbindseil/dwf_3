@@ -10,9 +10,9 @@ export class PostUpdate extends API {
         super('POST', 'update');
     }
 
-    public async get_input(req: any): Promise<PostUpdateInput> {
+    public async get_input(body: any): Promise<PostUpdateInput> {
         console.log('PostUpdate.get_input');
-        req;
+        body;
         return {};
     }
 
