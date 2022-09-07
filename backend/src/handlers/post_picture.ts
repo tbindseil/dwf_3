@@ -12,15 +12,7 @@ export class PostPicture extends API {
     }
 
     // so, I could move all of the buffer shit into api, then, this would remain unchanged except it would have a tighter interface with the json.parse done in the parent class
-    public async get_input(req: any): Promise<PostPictureInput> {
-        const buffers: Uint8Array[] = [];
-
-        for await (const chunk of req) {
-            buffers.push(chunk);
-        }
-
-        const data = Buffer.concat(buffers).toString();
-        const body = JSON.parse(data);
+    public async get_input(body: any): Promise<PostPictureInput> {
         return {
             name: body.name
         };
