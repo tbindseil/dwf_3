@@ -25,9 +25,16 @@ export default class Router {
             return;
         }
 
-        const output = this.methods.get(key)!.call(req);
-        res.write(output);
-        res.end();
+        try {
+            console.log('0');
+            const output = this.methods.get(key)!.call(req);
+            console.log('1');
+            res.write(output);
+            console.log('2');
+            res.end();
+        } catch (error) {
+            console.log(`error is: ${error}`);
+        }
     }
 
     private get_key(method: string, entity: string): string {

@@ -3,6 +3,16 @@ TODO
 1a. camel case instead of snake case
 2. whats the best way to deal with importing my own code? backend/index.ts line 2
 3. vim buffers move to back
+4. move method and entity constants to their own file (backend handlers dir)
+
+
+
+orm and db management:
+* maybe could translate ts models to python models, then just use sql alchemy
+** this leaves the actual ORM to custom typescript stuff
+** this also adds the translation of ts modules to python modules up to me also
+*** this might be the deal breaker but is worth investigation
+** could this be done by reading alembic from the database?
 
 
     //
