@@ -1,4 +1,5 @@
 import API from '../src/handlers/api';
+import * as stream_request from '../src/stream_request';
 import Router from '../src/router';
 
 jest.mock('../src/handlers/api');
@@ -25,6 +26,15 @@ describe('Router Tests', () => {
         end: () => { ended = true; }
     };
 
+    const streamReadResult = {
+        key: 'value'
+    };
+    const mockStreamRequest = jest.spyOn(stream_request, 'stream_request');
+    mockStreamRequest.mockImplementation(async (req: any): Promise<any> => {
+        req;
+        return await streamReadResult;
+    });
+
     let router: Router;
     let mockAPIInstance: API;
 
@@ -47,17 +57,22 @@ describe('Router Tests', () => {
     });
 
     describe('Router with a registered API', () => {
-        it('Routes to an API after the API is registered', () => {
-            router.route(registeredReq, res);
+        it('Routes to an API after the API is registered', async () => {
+            await router.route(registeredReq, res);
 
             const mockCall = mockAPIInstance.call as jest.Mock;
             expect(mockCall).toHaveBeenCalledTimes(1);
-            expect(mockCall).toHaveBeenCalledWith(registeredReq);
+            expect(mockCall).toHaveBeenCalledWith(streamReadResult);
         });
 
-        it('Ends the result after a successful API call', () => {
-            router.route(registeredReq, res);
+        it('Ends the result after a successful API call', async () => {
+            const output = 'output';
+            const mockCall = mockAPIInstance.call as jest.Mock;
+            mockCall.mockImplementation((body: any) => { body; return output });
 
+            await router.route(registeredReq, res);
+
+            expect(whatWasWritten).toEqual(output);
             expect(ended).toBeTruthy();
         });
     });
@@ -68,8 +83,8 @@ describe('Router Tests', () => {
             url: `/${unregisteredEntity}/`
         };
 
-        it('Writes error message to and closes the result when an unregistered API is called', () => {
-            router.route(unregisteredReq, res);
+        it('Writes error message to and closes the result when an unregistered API is called', async () => {
+            await router.route(unregisteredReq, res);
 
             expect(written).toBeTruthy();
             expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error'}));

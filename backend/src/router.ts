@@ -1,4 +1,5 @@
 import API from './handlers/api';
+import { stream_request } from './stream_request';
 
 export default class Router {
     private methods: Map<string, API>;
@@ -34,17 +35,4 @@ export default class Router {
     private get_key(method: string, entity: string): string {
         return `${method}${entity}`;
     }
-}
-
-// alright, next up test this and changes to router/api, then start repeating this structure
-// maybe test post before repeating
-async function stream_request(req: any): Promise<any> {
-    const buffers: Uint8Array[] = [];
-
-    for await (const chunk of req) {
-        buffers.push(chunk);
-    }
-
-    const data = Buffer.concat(buffers).toString();
-    return JSON.parse(data);
 }
