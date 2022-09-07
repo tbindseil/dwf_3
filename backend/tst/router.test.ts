@@ -87,7 +87,7 @@ describe('Router Tests', () => {
             await router.route(unregisteredReq, res);
 
             expect(written).toBeTruthy();
-            expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error'}));
+            expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error, invalid method or entity'}));
             expect(res.statusCode).toEqual(400);
             expect(ended).toBeTruthy();
         });

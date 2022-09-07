@@ -2,7 +2,7 @@ import {
     PostPictureInput,
     PostPictureOutput
 } from 'dwf-3-models-tjb';
-import API from './api';
+import API, { APIError } from './api';
 import * as db from '../db';
 
 
@@ -21,9 +21,7 @@ export class PostPicture extends API {
         const name = input.name;
 
         if (!name) {
-            return {
-                msg: 'name not provided, picture not created'
-            };
+            throw new APIError(400, 'name not provided, picture not created');
         }
 
         const query = `insert into test_auto_increment (name) values ($1);`
@@ -32,12 +30,7 @@ export class PostPicture extends API {
         try {
             await db.query(query, params);
         } catch (error) {
-            // could probably be encasulated in the API class
-            // honestly just needs more thought I think
-            // throw error;
-            return {
-                msg: 'picture not created'
-            }
+            throw new APIError(500, 'database issue, picture not created');
         }
 
         const new_picture = {

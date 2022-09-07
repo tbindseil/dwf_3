@@ -1,4 +1,4 @@
-import API from './handlers/api';
+import API, { APIError } from './handlers/api';
 import { stream_request } from './stream_request';
 
 export default class Router {
@@ -20,16 +20,30 @@ export default class Router {
         const key = this.get_key(req.method, req.url.split('/').at(1));
 
         if (!this.methods.has(key)) {
-            res.statusCode = 400;
-            res.write(JSON.stringify({'msg': 'error'}));
+            res.statusCode = 404;
+            res.write(JSON.stringify({'msg': 'error, invalid method or entity'}));
             res.end();
             return;
         }
 
-        const body = await stream_request(req);
-        const output = await this.methods.get(key)!.call(body)
-        res.write(output);
-        res.end();
+        try {
+            const body = await stream_request(req);
+            const output = await this.methods.get(key)!.call(body)
+            res.write(output);
+            res.end();
+        } catch (error: any) {
+            let body, statusCode;
+            if (error instanceof APIError) {
+                body = error.message;
+                statusCode = error.statusCode;
+            } else {
+                statusCode = 500;
+                body = JSON.stringify({'msg': 'unknown error'});
+            }
+            res.statusCode = statusCode;
+            res.write(body);
+            res.end();
+        }
     }
 
     private get_key(method: string, entity: string): string {

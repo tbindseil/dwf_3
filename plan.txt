@@ -4,6 +4,13 @@ TODO
 2. whats the best way to deal with importing my own code? backend/index.ts line 2
 3. vim buffers move to back
 4. move method and entity constants to their own file (backend handlers dir)
+5. rename handler dir to api
+
+
+ok, so now I have the ability to read input params,
+to finalize the routing and handling of requests, i need to figure out errors
+then, i need to figure out how to learn about objects that are posted/fetched/deleted etc for returning message to clients
+
 
 
 
