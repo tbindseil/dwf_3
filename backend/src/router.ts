@@ -19,22 +19,20 @@ export default class Router {
         const key = this.get_key(req.method, req.url.split('/').at(1));
 
         if (!this.methods.has(key)) {
-            res.statusCode = 400; // 400 = Bad request
+            res.statusCode = 400;
             res.write(JSON.stringify({'msg': 'error'}));
             res.end();
             return;
         }
 
-        try {
-            console.log('0');
-            const output = this.methods.get(key)!.call(req);
-            console.log('1');
-            res.write(output);
-            console.log('2');
-            res.end();
-        } catch (error) {
-            console.log(`error is: ${error}`);
-        }
+        // get data from req here, then pass it in to the callcall below
+
+
+        this.methods.get(key)!.call(req)
+            .then((output: string) => {
+                res.write(output);
+                res.end();
+            });
     }
 
     private get_key(method: string, entity: string): string {

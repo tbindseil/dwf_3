@@ -11,31 +11,22 @@ export class PostPicture extends API {
         super('POST', 'picture');
     }
 
+    // so, I could move all of the buffer shit into api, then, this would remain unchanged except it would have a tighter interface with the json.parse done in the parent class
     public async get_input(req: any): Promise<PostPictureInput> {
-        console.log('PostPicture.get_input');
-        let body = '';
-        await req.on('data', (chunk: any) => {
-            body += chunk;
-        });
-        const body_obj = JSON.parse(body);
+        const buffers: Uint8Array[] = [];
 
-        /* req.on('data', (chunk: any) => {
-            body += chunk;
-        });
-        req.on('end', () => {
-            console.log(`in callback, body is: ${body}`);
-        });
-        console.log(`after callback, body is: ${body}`);
-
-        const body_obj = JSON.parse(body);*/
-
-        return {
-            name: body_obj.name
+        for await (const chunk of req) {
+            buffers.push(chunk);
         }
+
+        const data = Buffer.concat(buffers).toString();
+        const body = JSON.parse(data);
+        return {
+            name: body.name
+        };
     }
 
-    public process(input: PostPictureInput): PostPictureOutput {
-        console.log('PostPicture.process');
+    public async process(input: PostPictureInput): Promise<PostPictureOutput> {
         const name = input.name;
 
         if (!name) {
@@ -47,18 +38,23 @@ export class PostPicture extends API {
         const query = `insert into test_auto_increment (name) values ($1);`
         const params = [name];
 
-        let success_obj = {
-            success: false
+        try {
+            await db.query(query, params);
+        } catch (error) {
+            // could probably be encasulated in the API class
+            // honestly just needs more thought I think
+            // throw error;
+            return {
+                msg: 'picture not created'
+            }
         }
 
-        db.query(query, params, (err: any, result: any) => {
-            this.processQueryResult(err, result, success_obj);
-        });
+        const new_picture = {
+            name: 'todo actually get pic from result'
+        };
 
-        // could probably be encasulated in the API class
-        // honestly just needs more thought I think
         return {
-            msg: `picture ${success_obj.success ? 'successfully' : 'not'} created: ${JSON.stringify}`
+            msg: `picture successfully created: ${JSON.stringify(new_picture)}`
         }
     }
 }

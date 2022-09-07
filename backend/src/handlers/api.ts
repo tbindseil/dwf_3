@@ -7,32 +7,13 @@ export default class API {
         this.entity = entity;
     }
 
-    public call(req: any): string {
-        console.log('1.1');
-        const input = this.get_input(req);
-        console.log('1.2');
-        const output = this.process(input);
-        console.log('1.3');
+    public async call(req: any): Promise<string> {
+        const input = await this.get_input(req);
+        const output = await this.process(input);
 
         const serialized_output = JSON.stringify(output);
 
         return serialized_output;
-    }
-
-    public processQueryResult(err: any, result: any, success_obj: { success: boolean }): void {
-        if (err) {
-            console.log(`err is ${err}`);
-            success_obj.success = false;
-        } else {
-            success_obj.success = true;
-        }
-
-        this.onSuccess(result);
-    }
-
-    public onSuccess(result: any): void {
-        // be default, do nothing
-        console.log(`result is ${JSON.stringify(result)}`);
     }
 
     public async get_input(req: any): Promise<any> {
@@ -40,7 +21,7 @@ export default class API {
         throw new Error('api.get_input not implemented');
     }
 
-    public process(input: any): any {
+    public async process(input: any): Promise<any> {
         input;
         throw new Error('api.process not implemented');
     }
