@@ -13,12 +13,12 @@ class TestAPI extends API {
         super(method, entity);
     }
 
-    public get_input(req: any): any {
+    public async get_input(req: any): Promise<any> {
         req;
         return specialInput
     }
 
-    public process(input: any): any {
+    public async process(input: any): Promise<any> {
         if (input === specialInput) {
             return specialOutput;
         } else {
@@ -29,24 +29,20 @@ class TestAPI extends API {
 
 
 describe('API Tests', () => {
-    it('calls', () => {
+    it('calls', async () => {
         const api = new TestAPI(entity, method);
-        const result = api.call({});
+        const result = await api.call({});
         expect(result).toEqual(serializedSpecialOutput);       
     });
 
-    it('throws on get_input', () => {
+    it('throws on get_input', async () => {
         const api = new API(entity, method);
-        expect(() => {
-            api.get_input({})
-        }).toThrow('api.get_input not implemented');
+        await expect(api.get_input({})).rejects.toThrow('api.get_input not implemented');
     });
 
-    it('throws on process', () => {
+    it('throws on process', async () => {
         const api = new API(entity, method);
-        expect(() => {
-            api.process({})
-        }).toThrow('api.process not implemented');
+        await expect(api.process({})).rejects.toThrow('api.process not implemented');
     });
 
     it('method getter', () => {
