@@ -2,7 +2,8 @@ import {
     PostPictureInput,
     PostPictureOutput
 } from 'dwf-3-models-tjb';
-import API, { APIError } from './api';
+import API from './api';
+import APIError from './api_error';
 import * as db from '../db';
 
 

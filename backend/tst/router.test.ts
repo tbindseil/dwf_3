@@ -1,4 +1,5 @@
 import API from '../src/handlers/api';
+import APIError from '../src/handlers/api_error';
 import * as stream_request from '../src/stream_request';
 import Router from '../src/router';
 
@@ -68,11 +69,35 @@ describe('Router Tests', () => {
         it('Ends the result after a successful API call', async () => {
             const output = 'output';
             const mockCall = mockAPIInstance.call as jest.Mock;
-            mockCall.mockImplementation((body: any) => { body; return output });
+            mockCall.mockImplementation((body: any) => { body; return output; });
 
             await router.route(registeredReq, res);
 
             expect(whatWasWritten).toEqual(output);
+            expect(ended).toBeTruthy();
+        });
+
+        it('Handles APIError', async () => {
+            const apiErrorStatusCode = 123;
+            const apiErrorMsg = 'apiErrorMsg';
+            const mockCall = mockAPIInstance.call as jest.Mock;
+            mockCall.mockImplementation((body: any) => { body; throw new APIError(apiErrorStatusCode, apiErrorMsg); });
+
+            await router.route(registeredReq, res);
+
+            expect(res.statusCode).toEqual(apiErrorStatusCode);
+            expect(whatWasWritten).toEqual(apiErrorMsg);
+            expect(ended).toBeTruthy();
+        });
+
+        it('Handles non APIError', async () => {
+            const mockCall = mockAPIInstance.call as jest.Mock;
+            mockCall.mockImplementation((body: any) => { body; throw {}; });
+
+            await router.route(registeredReq, res);
+
+            expect(res.statusCode).toEqual(Router.DEFAULT_ERROR_STATUS_CODE);
+            expect(whatWasWritten).toEqual(Router.DEFAULT_ERROR_MSG);
             expect(ended).toBeTruthy();
         });
     });
@@ -88,7 +113,7 @@ describe('Router Tests', () => {
 
             expect(written).toBeTruthy();
             expect(whatWasWritten).toEqual(JSON.stringify({'msg': 'error, invalid method or entity'}));
-            expect(res.statusCode).toEqual(400);
+            expect(res.statusCode).toEqual(404);
             expect(ended).toBeTruthy();
         });
     });

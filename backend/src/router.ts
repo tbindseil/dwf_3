@@ -1,7 +1,11 @@
-import API, { APIError } from './handlers/api';
+import API from './handlers/api';
+import APIError from './handlers/api_error';
 import { stream_request } from './stream_request';
 
 export default class Router {
+    public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
+    public static readonly DEFAULT_ERROR_MSG = JSON.stringify({'msg': 'unknown error'});
+
     private methods: Map<string, API>;
 
     constructor() {
@@ -37,8 +41,8 @@ export default class Router {
                 body = error.message;
                 statusCode = error.statusCode;
             } else {
-                statusCode = 500;
-                body = JSON.stringify({'msg': 'unknown error'});
+                statusCode = Router.DEFAULT_ERROR_STATUS_CODE;
+                body = Router.DEFAULT_ERROR_MSG;
             }
             res.statusCode = statusCode;
             res.write(body);
