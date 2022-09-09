@@ -1,4 +1,4 @@
-import API from '../src/handlers/api';
+import API from '../../src/handlers/api';
 
 const method = 'METHOD';
 const entity = 'ENTITY';
