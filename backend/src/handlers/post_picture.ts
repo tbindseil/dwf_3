@@ -7,12 +7,12 @@ import APIError from './api_error';
 import * as db from '../db';
 
 
-export class PostPicture extends API {
+export default class PostPicture extends API {
     constructor () {
         super('POST', 'picture');
     }
 
-    public async get_input(body: any): Promise<PostPictureInput> {
+    public getInput(body: any): PostPictureInput {
         return {
             name: body.name
         };

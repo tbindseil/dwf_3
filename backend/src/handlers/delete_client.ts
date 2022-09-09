@@ -10,8 +10,8 @@ export class DeleteClient extends API {
         super('DELETE', 'client');
     }
 
-    public async get_input(body: any): Promise<DeleteClientInput> {
-        console.log('DeleteClient.get_input');
+    public getInput(body: any): DeleteClientInput {
+        console.log('DeleteClient.getInput');
         body;
         return {};
     }

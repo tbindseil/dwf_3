@@ -13,7 +13,7 @@ class TestAPI extends API {
         super(method, entity);
     }
 
-    public async get_input(req: any): Promise<any> {
+    public getInput(req: any): any {
         req;
         return specialInput
     }
@@ -32,12 +32,12 @@ describe('API Tests', () => {
     it('calls', async () => {
         const api = new TestAPI(entity, method);
         const result = await api.call({});
-        expect(result).toEqual(serializedSpecialOutput);       
+        expect(result).toEqual(serializedSpecialOutput);
     });
 
-    it('throws on get_input', async () => {
+    it('throws on getInput', () => {
         const api = new API(entity, method);
-        await expect(api.get_input({})).rejects.toThrow('api.get_input not implemented');
+        expect(() => api.getInput({})).toThrow('api.getInput not implemented');
     });
 
     it('throws on process', async () => {

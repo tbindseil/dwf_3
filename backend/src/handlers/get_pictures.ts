@@ -11,8 +11,8 @@ export class GetPictures extends API {
         super('GET', 'pictures');
     }
 
-    public async get_input(body: any): Promise<GetPicturesInput> {
-        console.log('GetPictures.get_input');
+    public getInput(body: any): GetPicturesInput {
+        console.log('GetPictures.getInput');
         body;
         return {};
     }
