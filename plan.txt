@@ -6,6 +6,7 @@ TODO
 4. move method and entity constants to their own file (backend handlers dir)
 5. rename handler dir to api
 6. need to find a more generic way to verify that an object matches an interface (see post picture input in post picture api)
+7. wrap " console.log(`blank is: ${blank}`); "
 
 
 ok, so now I have the ability to read input params,

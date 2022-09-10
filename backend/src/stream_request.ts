@@ -6,5 +6,9 @@ export async function stream_request(req: any): Promise<any> {
     }
 
     const data = Buffer.concat(buffers).toString();
-    return JSON.parse(data);
+    try {
+        return JSON.parse(data);
+    } catch (error: any) {
+        return {};
+    }
 }

@@ -18,20 +18,20 @@ export class PostPicture extends API {
                 name: body.name
             };
         } else {
-            throw new APIError(400, 'name not provided, picture not created'); // could probably be moved to a better place
+            throw new APIError(400, 'name not provided, picture not created');
         }
     }
 
     public async process(input: PostPictureInput): Promise<PostPictureOutput> {
         const name = input.name;
 
-        const query = `insert into test_auto_increment (name) values ($1);`
+        const query = 'insert into picture (name) values ($1);'
         const params = [name];
 
         try {
             await db.query(query, params);
         } catch (error) {
-            throw new APIError(500, 'database issue, picture not created'); // could probably be moved to some other place
+            throw new APIError(500, 'database issue, picture not created');
         }
 
         return {

@@ -41,6 +41,7 @@ export default class Router {
                 body = error.message;
                 statusCode = error.statusCode;
             } else {
+                console.log(`error is: ${error}`);
                 statusCode = Router.DEFAULT_ERROR_STATUS_CODE;
                 body = Router.DEFAULT_ERROR_MSG;
             }

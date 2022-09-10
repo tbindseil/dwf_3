@@ -29,7 +29,7 @@ describe('PostPicture Tests', () => {
         postPicture.process({name: name});
 
         expect(mockQuery).toHaveBeenCalledTimes(1);
-        expect(mockQuery).toHaveBeenCalledWith(`insert into test_auto_increment (name) values ($1);`, [name]);
+        expect(mockQuery).toHaveBeenCalledWith(`insert into picture (name) values ($1);`, [name]);
     });
 
     it('throws an api error when the database query fails', async () => {

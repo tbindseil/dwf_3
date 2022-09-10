@@ -11,4 +11,11 @@ describe('Test stream_request method', () => {
         const ret = await stream_request(s);
         expect(ret).toEqual(expectedObj);
     });
+
+    it('handles empty string', async () => {
+        const expectedObj = {};
+        const s = stream.Readable.from([Buffer.from('')]);
+        const ret = await stream_request(s);
+        expect(ret).toEqual(expectedObj);
+    });
 });
