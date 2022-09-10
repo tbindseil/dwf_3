@@ -7,23 +7,23 @@ import APIError from './api_error';
 import * as db from '../db';
 
 
-export default class PostPicture extends API {
+export class PostPicture extends API {
     constructor () {
         super('POST', 'picture');
     }
 
     public getInput(body: any): PostPictureInput {
-        return {
-            name: body.name
-        };
+        if ('name' in body) {
+            return {
+                name: body.name
+            };
+        } else {
+            throw new APIError(400, 'name not provided, picture not created'); // could probably be moved to a better place
+        }
     }
 
     public async process(input: PostPictureInput): Promise<PostPictureOutput> {
         const name = input.name;
-
-        if (!name) {
-            throw new APIError(400, 'name not provided, picture not created');
-        }
 
         const query = `insert into test_auto_increment (name) values ($1);`
         const params = [name];
@@ -31,15 +31,11 @@ export default class PostPicture extends API {
         try {
             await db.query(query, params);
         } catch (error) {
-            throw new APIError(500, 'database issue, picture not created');
+            throw new APIError(500, 'database issue, picture not created'); // could probably be moved to some other place
         }
 
-        const new_picture = {
-            name: 'todo actually get pic from result'
-        };
-
         return {
-            msg: `picture successfully created: ${JSON.stringify(new_picture)}`
+            msg: 'picture successfully created'
         }
     }
 }

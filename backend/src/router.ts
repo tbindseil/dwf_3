@@ -13,7 +13,7 @@ export default class Router {
     }
 
     public add_method(api: API) {
-        const key = this.get_key(api.getMethod(), api.getEntity());
+        const key = this.getKey(api.getMethod(), api.getEntity());
 
         if (!this.methods.has(key)) {
             this.methods.set(key, api);
@@ -21,7 +21,7 @@ export default class Router {
     }
 
     public async route(req: any, res: any): Promise<void> {
-        const key = this.get_key(req.method, req.url.split('/').at(1));
+        const key = this.getKey(req.method, req.url.split('/').at(1));
 
         if (!this.methods.has(key)) {
             res.statusCode = 404;
@@ -50,7 +50,7 @@ export default class Router {
         }
     }
 
-    private get_key(method: string, entity: string): string {
+    private getKey(method: string, entity: string): string {
         return `${method}${entity}`;
     }
 }

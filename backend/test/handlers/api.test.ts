@@ -29,6 +29,11 @@ class TestAPI extends API {
 
 
 describe('API Tests', () => {
+    let api: API;
+    beforeEach(() => {
+        api = new API(method, entity);
+    });
+
     it('calls', async () => {
         const api = new TestAPI(entity, method);
         const result = await api.call({});
@@ -36,23 +41,19 @@ describe('API Tests', () => {
     });
 
     it('throws on getInput', () => {
-        const api = new API(entity, method);
         expect(() => api.getInput({})).toThrow('api.getInput not implemented');
     });
 
     it('throws on process', async () => {
-        const api = new API(entity, method);
         await expect(api.process({})).rejects.toThrow('api.process not implemented');
     });
 
     it('method getter', () => {
-        const api = new API(method, entity);
         const returnedMethod = api.getMethod();
         expect(returnedMethod).toEqual(method);
     });
 
     it('entity getter', () => {
-        const api = new API(method, entity);
         const returnedEntity = api.getEntity();
         expect(returnedEntity).toEqual(entity);
     });
