@@ -36,8 +36,8 @@ describe('Router Tests', () => {
         return await streamReadResult;
     });
 
-    let router: Router;
     let mockAPIInstance: API;
+    let router: Router;
 
     beforeEach(() => {
         mockAPI.mockClear();

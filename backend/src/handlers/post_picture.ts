@@ -31,15 +31,14 @@ export class PostPicture extends API {
     public async process(input: PostPictureInput): Promise<PostPictureOutput> {
         const name = input.name;
         const createdBy = input.createdBy;
-        const createdAt = new Date().toString();
-
-        const filename = `${name}_${createdBy}_${createdAt}.png`;
-
-        const query = 'insert into picture (name) values ($1);'
-        const params = [name];
+        const filesystem = this.pictureAccessor.getFileSystem();
 
         try {
-            this.pictureAccessor.createNewPicture(filename);
+            const filename = await this.pictureAccessor.createNewPicture(name, createdBy);
+
+            const query = 'insert into picture (name, createdBy, filename, filesystem) values ($1, $2, $3, $4);'
+            const params = [name, createdBy, filename, filesystem];
+
             await db.query(query, params);
         } catch (error) {
             throw new APIError(500, 'database issue, picture not created');

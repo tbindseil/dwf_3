@@ -1,4 +1,5 @@
 import PictureAccessor from './picture_accessor';
+import generatePictureFilename from './filename_generator';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -12,12 +13,18 @@ export default class LocalPictureAccessor extends PictureAccessor {
         this.baseDirectory = baseDirectory;
     }
 
-    public async createNewPicture(filename: string): Promise<void> {
+    public async createNewPicture(pictureName: string, createdBy: string): Promise<string> {
+        const filename = generatePictureFilename(pictureName, createdBy);
         try {
             await fs.promises.copyFile(this.prototypeFileName, path.join(this.baseDirectory, filename), fs.constants.COPYFILE_EXCL);
         } catch (error: any) {
             console.log(`issue creating new picture: ${JSON.stringify(error)}`);
             throw error;
         }
+        return filename;
+    }
+
+    public getFileSystem(): string {
+        return 'LOCAL';
     }
 }
