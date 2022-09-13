@@ -1,4 +1,7 @@
 export interface Picture {
     id: number,
-    name: string
+    name: string,
+    createdBy: string,
+    filename: string
+    filesystem: string
 }
