@@ -26,6 +26,7 @@ export class GetPictures extends API {
         try {
             const result = await db.query(query, params);
             return {
+                // extract created by and filename
                 pictures: result.rows.map((row: any) => { return {
                     id: row.id,
                     name: row.name

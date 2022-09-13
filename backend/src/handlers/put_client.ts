@@ -13,7 +13,10 @@ export class PutClient extends API {
     public getInput(body: any): PutClientInput {
         console.log('PutClient.getInput');
         body;
-        return {};
+        return {
+            ipAddress: body.ipAddress,
+            pictureId: body.pictureId
+        };
     }
 
     public async process(input: PutClientInput): Promise<PutClientOutput> {

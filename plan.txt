@@ -9,6 +9,66 @@ TODO
 7. wrap " console.log(`blank is: ${blank}`); "
 
 
+before I even do any of the below, we need to
+(upon post picture)
+1. create an empty 100x100 png
+2. upload it to s3
+3. get key (assuming same bucket for now)
+4. no no no
+5. i don't wanna deal with aws yet
+
+so,
+0. for prototype pattern, create empty white png - done base_directory/pictures/default/solid_white.png
+(upon post picture)
+1. create an empty 100x100 png (use the prototype pattern here!)
+2. save it to a directory on local machine
+3. add location, ie local file system, and key, ie filename as picture name + user name + time stamp, to row in pictures db
+3a. maybe add created by also?
+4. upon get pictures, return those extra fields as well
+5. have a get picture api wehre the actual file is transferred, this is now possible with the location field
+
+
+hmmm, how do i handle this?
+well, updates are commands, and they are sent through a chain of commands
+so far, the chain is just two,
+
+no,
+
+the picture updater sends to all subscribed clients in addition to updating the master copy of the picture, as if the master copy of the picture is a subscribed client
+
+so, there are two cases for when a new client subscribes to a picture
+1. they are the first client
+2. they are not the first client
+
+if 1,
+set everything up
+* set of clients, initially it is this first subscriber and the master photo handler
+** so, objects are:
+*** client => subscribed client
+          |=> master copy client
+
+    client has an interface that is:
+    handle update, subscribed client . handle update serializes and sends to the client (is that an ip address? probably a socket actually)
+                   master copy client . handle update implements the same logic as a client does on the front end, ie it updates the photo
+    initialize,    subscribed client . initialize will create a socket to send the serialized updates to the client
+                   master copy client . intialize will open the photo from an accessor (local file system for now, s3 later)
+if 2,
+add the client to the set of clients, basically call initialize on the client, add it to the set, and we're good to go
+
+
+so, put client should include enough info to initialize the client and the master copy client, this is the photo id, and the client ip address
+
+lastly, how should the server respond to a client that is registering? I think they --should-- have to respond with a copy of the picture at the point in time of registration
+  ie, the server will lock the picture, register the client, send the picture as a png to the client, then unlock
+
+the only thing that is coming to mind as a little funky is that the client will have to get the picture setup and then start processing updates,
+    (or it has to lock everything down till its done setting the picture up but that is obviously dumb)
+
+
+
+
+
+
 ok, so now I have the ability to read input params,
 to finalize the routing and handling of requests, i need to figure out errors
 then, i need to figure out how to learn about objects that are posted/fetched/deleted etc for returning message to clients
