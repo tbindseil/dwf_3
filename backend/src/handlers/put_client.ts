@@ -24,6 +24,8 @@ export class PutClient extends API {
 
     public async process(input: PutClientInput): Promise<PutClientOutput> {
         this.broadcastMediator.addClient(input.pictureId, input.ipAddress);
+        // this will need to return the picture at the time that the client registration takes place
+        // this does not necessarily eliminate the need for get picture because that can happen independently of registration
         return {
             msg: 'client added to picture'
         }

@@ -18,7 +18,7 @@ const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/solid_white
 
 const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirectory);
 
-const broadcastMediator = new BroadcastMediator();
+const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
 const router = new Router();
 const apis = [
