@@ -64,13 +64,13 @@ describe('PostPicture Tests', () => {
         expect(mockQuery).toHaveBeenCalledWith(expectedQuery, expectedParams);
     });
 
-    it('throws an api error when the database query fails', async () => {
+    it('throws an api error when the creation of the new picture fails', async () => {
         const mockCreateNewPicture = mockLocalPictureAccessorInstance.createNewPicture as jest.Mock;
         mockCreateNewPicture.mockImplementation((pictureName: string, createdBy: string) => { pictureName; createdBy; throw new Error(); });
         await expect(postPicture.process(body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
     });
 
-    it('throws an api error when the creation of the new picture fails', async () => {
+    it('throws an api error when the database query fails', async () => {
         mockQuery.mockImplementation((query: string, params: any[]) => { query; params; throw new Error(); });
         await expect(postPicture.process(body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
     });

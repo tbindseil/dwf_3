@@ -12,6 +12,7 @@ describe('Router Tests', () => {
     const registeredEntity = 'REGISTERED_ENTITY';
     const unregisteredMethod = 'UNREGISTERED_METHOD';
     const unregisteredEntity = 'UNREGISTERED_ENTITY';
+    const mockContentType = 'mockContentType';
 
     const registeredReq = {
         method: registeredMethod,
@@ -21,10 +22,13 @@ describe('Router Tests', () => {
     let ended: boolean;
     let written: boolean;
     let whatWasWritten: string;
+    let str1Given: string;
+    let str2Given: string;
     const res = {
         statusCode: 0,
         write: (s: string) => { whatWasWritten = s; written = true; },
-        end: () => { ended = true; }
+        end: () => { ended = true; },
+        setHeader: (str1: string, str2: string) => { str1Given = str1; str2Given = str2; }
     };
 
     const streamReadResult = {
@@ -49,12 +53,16 @@ describe('Router Tests', () => {
         mockGetMethod.mockImplementation(() => { return registeredMethod });
         const mockGetEntity = mockAPIInstance.getEntity as jest.Mock;
         mockGetEntity.mockImplementation(() => { return registeredEntity });
+        const mockGetContentType = mockAPIInstance.getContentType as jest.Mock;
+        mockGetContentType.mockImplementation(() => { return mockContentType; });
 
         router.add_method(mockAPIInstance);
 
         ended = false;
         written = false;
         whatWasWritten = '';
+        str1Given = '';
+        str2Given = '';
     });
 
     describe('Router with a registered API', () => {
@@ -73,6 +81,8 @@ describe('Router Tests', () => {
 
             await router.route(registeredReq, res);
 
+            expect(str1Given).toEqual('Content-Type');
+            expect(str2Given).toEqual(mockContentType);
             expect(whatWasWritten).toEqual(output);
             expect(ended).toBeTruthy();
         });
