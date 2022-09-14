@@ -43,5 +43,9 @@ export class GetPicture extends API {
     public getContentType(): string {
         return 'image/png';
     }
+
+    public serializeOutput(output: any): any {
+        return output;
+    }
 }
 

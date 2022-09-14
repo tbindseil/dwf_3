@@ -62,4 +62,9 @@ describe('API Tests', () => {
         const contentType = api.getContentType();
         expect(contentType).toEqual('application/json');
     });
+
+    it('uses JSON.stringify to serialize output by default', () => {
+        const resultingSerializedOutput = api.serializeOutput(specialOutput);
+        expect(resultingSerializedOutput).toEqual(serializedSpecialOutput);
+    });
 });

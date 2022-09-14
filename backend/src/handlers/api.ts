@@ -11,7 +11,7 @@ export default class API {
         const input = this.getInput(body);
         const output = await this.process(input);
 
-        const serialized_output = JSON.stringify(output);
+        const serialized_output = this.serializeOutput(output);
 
         return serialized_output;
     }
@@ -36,5 +36,9 @@ export default class API {
 
     public getContentType(): string {
         return 'application/json';
+    }
+
+    public serializeOutput(output: any): any {
+        return JSON.stringify(output);
     }
 }
