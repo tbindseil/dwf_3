@@ -24,6 +24,15 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return filename;
     }
 
+    public async getPicture(filename: string): Promise<Buffer> {
+        try {
+            return await fs.promises.readFile(path.join(this.baseDirectory, filename));
+        } catch (error: any) {
+            console.log(`issue reading picture contents, ${JSON.stringify(error)}`);
+            throw error;
+        }
+    }
+
     public getFileSystem(): string {
         return 'LOCAL';
     }

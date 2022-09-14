@@ -33,4 +33,8 @@ export default class API {
     public getEntity() {
         return this.entity;
     }
+
+    public getContentType(): string {
+        return 'application/json';
+    }
 }

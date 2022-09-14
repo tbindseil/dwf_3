@@ -8,4 +8,9 @@ export default class PictureAccessor {
     public getFileSystem(): string {
         throw new Error('PictureAccessor.createNewPicture not implemented');
     }
+
+    public async getPicture(filename: string): Promise<Buffer> {
+        filename;
+        throw new Error('PictureAccessor.getPicture not implemented');
+    }
 }

@@ -33,6 +33,8 @@ export default class Router {
         try {
             const body = await stream_request(req);
             const output = await this.methods.get(key)!.call(body)
+            res.statusCode = 200;
+            res.setHeader('Content-Type', this.methods.get(key)!.getContentType());
             res.write(output);
             res.end();
         } catch (error: any) {

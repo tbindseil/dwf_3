@@ -57,4 +57,9 @@ describe('API Tests', () => {
         const returnedEntity = api.getEntity();
         expect(returnedEntity).toEqual(entity);
     });
+
+    it('gives json content type by default', () => {
+        const contentType = api.getContentType();
+        expect(contentType).toEqual('application/json');
+    });
 });
