@@ -9,6 +9,19 @@ TODO
 7. wrap " console.log(`blank is: ${blank}`); "
 
 
+now, time for the queue stuff
+I'll be working on put client api
+
+what has to go there?
+
+0. establish some mechanism for tracking (in memory) a picture's queue
+1a. if no clients, add requested client and syncing client
+1b. if clients exist, add requested client
+-- so always add client --
+
+
+
+
 before I even do any of the below, we need to
 (upon post picture)
 1. create an empty 100x100 png
@@ -25,7 +38,7 @@ so,
 3. add location, ie local file system, and key, ie filename as picture name + user name + time stamp, to row in pictures db - done
 3a. maybe add created by also? - done
 4. upon get pictures, return those extra fields as well - done
-5. have a get picture api wehre the actual file is transferred, this is now possible with the location field
+5. have a get picture api wehre the actual file is transferred, this is now possible with the location field - done
 
 
 hmmm, how do i handle this?

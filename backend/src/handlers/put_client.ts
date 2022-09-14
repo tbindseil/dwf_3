@@ -3,16 +3,19 @@ import {
     PutClientOutput
 } from 'dwf-3-models-tjb';
 import API from './api';
+import BroadcastMediator from '../broadcast/broadcast_mediator';
 
 
 export class PutClient extends API {
-    constructor() {
-        super('PUT', 'client')
+    private readonly broadcastMediator: BroadcastMediator;
+
+    constructor(broadcastMediator: BroadcastMediator) {
+        super('PUT', 'client');
+
+        this.broadcastMediator = broadcastMediator;
     }
 
     public getInput(body: any): PutClientInput {
-        console.log('PutClient.getInput');
-        body;
         return {
             ipAddress: body.ipAddress,
             pictureId: body.pictureId
@@ -20,8 +23,7 @@ export class PutClient extends API {
     }
 
     public async process(input: PutClientInput): Promise<PutClientOutput> {
-        console.log('PutClient.process');
-        input;
+        this.broadcastMediator.addClient(input.pictureId, input.ipAddress);
         return {
             msg: 'client added to picture'
         }
