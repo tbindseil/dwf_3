@@ -14,11 +14,16 @@ I'll be working on put client api
 
 what has to go there?
 
-0. establish some mechanism for tracking (in memory) a picture's queue
-1a. if no clients, add requested client and syncing client
-1b. if clients exist, add requested client
--- so always add client --
+0. establish some mechanism for tracking (in memory) a picture's queue - done
+1a. if no clients, add requested client and syncing client - done
+1b. if clients exist, add requested client - done
+2. when a client registers, the update queue is locked
+looks like I need an update queue
 
+
+before diving into the update queue, i checked on locking and was reminded that node is single threaded
+what this means, not fully sure yet
+maybe I'll just ignore locking for now, and see if I can understand what is happneing in the context of the code that i write
 
 
 

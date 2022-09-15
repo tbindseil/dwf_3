@@ -1,8 +1,8 @@
 import Client from './client';
 import BroadcastClient from './broadcast_client';
 import PictureSyncClient from './picture_sync_client';
-
 import PictureAccessor from '../picture_accessor/picture_accessor';
+import { Update } from 'dwf-3-models-tjb';
 
 
 export default class BroadcastMediator {
@@ -23,13 +23,10 @@ export default class BroadcastMediator {
         this.clients.get(pictureId)!.add(new BroadcastClient(ipAddress));
     }
 
-    public handleUpdate(update: any) {
-        // get picture ID from update
-        // for each client in clients.get(pictureId)
-        // client.handleUpdate(update)
+    public handleUpdate(update: Update) {
+        // i think this still gets fucked up with locking and stuff
+
+        const pictureId = update.pictureId;
+        this.clients.get(pictureId)?.forEach(client => client.handleUpdate(update));
     }
 }
-
-/**
- *  THIS THING'S GOTTA LOCK IT DOWN
- */

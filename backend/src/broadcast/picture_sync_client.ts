@@ -1,5 +1,6 @@
 import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
+import { Update } from 'dwf-3-models-tjb';
 
 export default class PictureSyncClient extends Client {
     private readonly pictureId: string;
@@ -17,7 +18,7 @@ export default class PictureSyncClient extends Client {
         // so that means we gotta get an async thread going???
     }
 
-    public handleUpdate(update: any): void {
+    public handleUpdate(update: Update): void {
         // then, in Handle update, update copy(s) of buffers
         //
         // which means we gotta implement the logic for updating buffer with an update in a library so we can
