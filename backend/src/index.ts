@@ -1,4 +1,5 @@
 import * as http from 'http'
+import { Server } from 'socket.io';
 import API from './handlers/api';
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
@@ -19,6 +20,11 @@ const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/solid_white
 const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirectory);
 
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
+
+const io = new Server();
+io.on('connection', (socket) => {
+    console.log(`on connection, and typeof socket is: ${typeof socket}`);
+});
 
 const router = new Router();
 const apis = [

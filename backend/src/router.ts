@@ -31,7 +31,18 @@ export default class Router {
         }
 
         try {
-            const body = await stream_request(req);
+            const body = await stream_request(req); // basically, all pieces of code need to be atomic between awaits
+            // so what are the atomic parts (check time of each)
+            // 1. updating the photo (in memory i think) and posting the update to the queues
+            // 2. registering a client to a picture and returning the picture 
+            // I think these can all be atomic
+            // there are two things to learn next
+            // 1. how to create a socket - use socket.io
+            // 2. how to unpack a png into a pixel array - check out jimp: https://www.npmjs.com/package/jimp
+            //
+            //
+            // i think i might actually want a db of updates
+            // this is because the client could disconnect and reconnect, and at that point, we either resync the photo or use the db to get the missed updates
             const output = await this.methods.get(key)!.call(body)
             res.statusCode = 200;
             res.setHeader('Content-Type', this.methods.get(key)!.getContentType());

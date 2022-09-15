@@ -24,6 +24,23 @@ looks like I need an update queue
 before diving into the update queue, i checked on locking and was reminded that node is single threaded
 what this means, not fully sure yet
 maybe I'll just ignore locking for now, and see if I can understand what is happneing in the context of the code that i write
+even after a little bit of code has been implemented i can see a problem
+
+here is the sequence of events and yields that is problematic:
+1. user registers
+2. reading the file yields
+3. while file is being read, another user posts an update to the same photo
+4. well, as long as they register for the queue before blocking, things are ok
+5. also post update needs to not block
+6. but blocking to read input is weird
+
+
+basically, this is gonna require some dedicated testing machinery
+
+
+or maybe there are alternatives to this at a high level
+like:
+1. post every update to a database
 
 
 

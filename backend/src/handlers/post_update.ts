@@ -13,7 +13,7 @@ export class PostUpdate extends API {
     public getInput(body: any): PostUpdateInput {
         console.log('PostUpdate.getInput');
         body;
-        return {};
+        return {body.};
     }
 
     public async process(input: PostUpdateInput): Promise<PostUpdateOutput> {
