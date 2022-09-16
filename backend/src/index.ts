@@ -21,10 +21,33 @@ const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirector
 
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
-const io = new Server();
+// TODO i think i need to pass server instance of http.createserver into creation of io
+const io = new Server({
+    cors: {
+        origin: 'http://localhost:3000', // wtf, why is this the address of the web page?
+        methods: ["GET", "POST"]
+    }
+});
+let interval: any;
 io.on('connection', (socket) => {
     console.log(`on connection, and typeof socket is: ${typeof socket}`);
+    if (interval) {
+        clearInterval(interval);
+    }
+    interval = setInterval(() => getApiAndEmit(socket), 1000);
+    socket.on("disconnect", () => {
+        console.log("Client disconnected");
+        clearInterval(interval);
+    });
 });
+io.listen(6543);
+
+
+const getApiAndEmit = (socket: any) => {
+    const response = new Date();
+    // Emitting a new message. Will be consumed by the client
+    socket.emit("FromAP", response);
+};
 
 const router = new Router();
 const apis = [

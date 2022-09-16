@@ -5,3 +5,5 @@ Test with: 'node test' from the <project_root>/backend dir
 
 to save database ddl as sql commands:
 Click on Tables -> Views Tables -> Select All tables in right window Right click selection -> Generate SQL" -> DDL
+
+to link to local modules, run `npm link /Users/tj/Projects/dwf_3/models/` from ~/Projects/dwf_3/backend
