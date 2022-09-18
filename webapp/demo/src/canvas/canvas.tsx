@@ -7,9 +7,7 @@ const ENDPOINT = 'http://127.0.0.1:6543/';
 function Canvas() {
     const [response, setResponse] = useState('');
     useEffect(() => {
-        console.log('making socket');
         const socket = io(ENDPOINT);
-        console.log('done making socket');
         socket.on('FromAP', data => {
             setResponse(data);
         });

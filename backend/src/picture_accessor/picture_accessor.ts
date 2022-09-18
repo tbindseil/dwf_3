@@ -13,4 +13,9 @@ export default class PictureAccessor {
         filename;
         throw new Error('PictureAccessor.getPicture not implemented');
     }
+
+    public getRaster(filename: string): any {
+        filename;
+        throw new Error('PictureAccessor.getRaster not implemented');
+    }
 }

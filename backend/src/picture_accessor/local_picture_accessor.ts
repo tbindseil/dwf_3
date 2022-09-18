@@ -2,6 +2,7 @@ import PictureAccessor from './picture_accessor';
 import generatePictureFilename from './filename_generator';
 import * as fs from 'fs';
 import path from 'path';
+import Jimp from 'jimp';
 
 export default class LocalPictureAccessor extends PictureAccessor {
     private readonly prototypeFileName: string;
@@ -31,6 +32,17 @@ export default class LocalPictureAccessor extends PictureAccessor {
             console.log(`issue reading picture contents, ${JSON.stringify(error)}`);
             throw error;
         }
+    }
+
+    public async getRaster(filename: string): Promise<any> {
+        const contents = await Jimp.read(path.join(this.baseDirectory, filename))
+            //.then(contents => {
+                // console.log(`contents are: ${contents}`);
+                // console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
+            // });
+        console.log(`contents are: ${contents}`);
+        console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
+        return contents;
     }
 
     public getFileSystem(): string {

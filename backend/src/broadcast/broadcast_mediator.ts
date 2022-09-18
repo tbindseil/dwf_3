@@ -14,10 +14,10 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public addClient(pictureId: string, ipAddress: string) {
+    public addClient(pictureId: string, filename: string, ipAddress: string) {
         if (!this.clients.has(pictureId)) {
             this.clients.set(pictureId, new Set());
-            this.clients.get(pictureId)!.add(new PictureSyncClient(pictureId, this.pictureAccessor));
+            this.clients.get(pictureId)!.add(new PictureSyncClient(filename, this.pictureAccessor));
         }
 
         this.clients.get(pictureId)!.add(new BroadcastClient(ipAddress));
