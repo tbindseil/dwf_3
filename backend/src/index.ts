@@ -4,7 +4,7 @@ import API from './handlers/api';
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import Router from './router'
-import { pictureRequestHandler } from './socket_functions';
+import { pictureRequestHandler, updateHandler } from './socket_functions';
 
 import {
     GetPictures,
@@ -13,7 +13,7 @@ import {
     PostUpdate,
 } from './handlers/index';
 
-import { PictureRequest } from 'dwf-3-models-tjb';
+import { PictureRequest, PixelUpdate } from 'dwf-3-models-tjb';
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from 'dwf-3-models-tjb';
 
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
@@ -51,6 +51,9 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 io.on('connection', (socket) => {
     socket.on('picture_request', async (pictureRequest: PictureRequest) => {
         pictureRequestHandler(pictureRequest, broadcastMediator, pictureAccessor, socket);
+    });
+    socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
+        updateHandler(pixelUpdate, broadcastMediator);
     });
 });
 io.listen(6543);

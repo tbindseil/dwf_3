@@ -5,7 +5,7 @@ import PictureAccessor from '../picture_accessor/picture_accessor';
 
 import { Socket } from 'socket.io';
 import {
-    Update,
+    PixelUpdate,
     ServerToClientEvents,
     ClientToServerEvents,
     InterServerEvents,
@@ -31,10 +31,10 @@ export default class BroadcastMediator {
         this.clients.get(filename)!.add(new BroadcastClient(socket));
     }
 
-    public handleUpdate(update: Update) {
+    public handleUpdate(pixelUpdate: PixelUpdate) {
         // i think this still gets fucked up with locking and stuff
 
-        const filename = update.filename;
-        this.clients.get(filename)?.forEach(client => client.handleUpdate(update));
+        const filename = pixelUpdate.filename;
+        this.clients.get(filename)?.forEach(client => client.handleUpdate(pixelUpdate));
     }
 }

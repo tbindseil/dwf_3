@@ -1,7 +1,7 @@
 import Client from './client';
 import { Socket } from 'socket.io';
 import {
-    Update,
+    PixelUpdate,
     ServerToClientEvents,
     ClientToServerEvents,
     InterServerEvents,
@@ -17,7 +17,7 @@ export default class BroadcastClient extends Client {
         this.socket = socket;
     }
 
-    public handleUpdate(update: Update): void {
-        // this.socket.emit(update);
+    public handleUpdate(pixelUpdate: PixelUpdate): void {
+        this.socket.emit('server_to_client_update', pixelUpdate);
     }
 }
