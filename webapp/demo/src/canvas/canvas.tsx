@@ -9,10 +9,12 @@ function Canvas() {
     const [imgDataState, setImgDataState] = useState(new ImageData(200, 200));
 
     const filename = 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png';
-    const redFileName = 'red.png';
+    const redFileName = 'red.png'; // 0xff, 0x00, 0x00, 0xff
+    const greenFileName = 'green.png'; // 0x00, 0xff, 0x00, 0xff
+    const blueFileName = 'blue.png'; // 0x00, 0x00, 0xff, 0xff
     const socket = io(ENDPOINT);
     const requestPictureFunction = () => {
-        socket.emit('picture_request', {filename: redFileName});
+        socket.emit('picture_request', {filename: blueFileName});
     };
 
     socket.on('picture_response', (response: PutClientOutput) => {
@@ -32,14 +34,16 @@ function Canvas() {
         let ctx = canvas!.getContext('2d');
         let imgData = ctx!.getImageData(0, 0, response.width, response.height); // Ahh, using !
         console.log(`dv.length is: ${dv.byteLength} and imgData.data.length is: ${imgData.data.length}`);
+        const howManyToPrint = 16;
         for (let i = 0; i < imgData.data.length; ++i) {
-            // let x = (i / 4) % 40; 
-            // let y = Math.floor(i / 160); 
-            // imgData.data[i] = pixelData1[x][y].r; 
-            // imgData.data[i + 1] = pixelData1[x][y].g; 
-            // imgData.data[i + 2] = pixelData1[x][y].b; 
-            // imgData.data[i + 3] = 255; 
-            imgData.data[i] = dv.getUint8(i);
+            if (i < howManyToPrint) {
+                console.log(`i is: ${i} and dv.getUint8(i) is ${dv.getUint8(i)}`);
+            }
+            if (dv.getUint8(i) == 128) {
+                imgData.data[i] = 255;
+            } else {
+                imgData.data[i] = dv.getUint8(i);
+            }
         }
         ctx!.putImageData(imgData, 0, 0);
         console.log(`done putting data`);
