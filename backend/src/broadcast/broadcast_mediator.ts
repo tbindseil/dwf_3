@@ -22,7 +22,7 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public addClient(filename: string, socket: Socket<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>) {
+    public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
         if (!this.clients.has(filename)) {
             this.clients.set(filename, new Set());
             this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor));

@@ -1,13 +1,9 @@
-export interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
+export interface ClientToServerEvents {
     picture_request: (pictureRequest: PictureRequest) => void;
 }
 
-export interface ClientToServerEvents {
-    hello: () => void;
-    picture_response: (pictureBuffer: PictureResponse) => void;
+export interface ServerToClientEvents {
+    picture_response: (pictureResponse: PictureResponse) => void;
 }
 
 export interface InterServerEvents {

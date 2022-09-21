@@ -42,7 +42,7 @@ server.listen(8080, function () {
     console.log('Listening on port http://localhost:8080');
 });
 
-const io = new Server<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>(server, {
+const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
     cors: {
         origin: 'http://localhost:3000', // wtf, why is this the address of the web page?
         methods: ["GET", "POST"]

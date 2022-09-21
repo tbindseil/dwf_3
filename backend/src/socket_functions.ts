@@ -12,8 +12,8 @@ import PictureAccessor from './picture_accessor/picture_accessor';
 export async function pictureRequestHandler(pictureRequest: PictureRequest,
                                             broadcastMediator: BroadcastMediator,
                                             pictureAccessor: PictureAccessor,
-                                            socket: Socket<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>): Promise<void> {
+                                            socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
     broadcastMediator.addClient(pictureRequest.filename, socket);
-    const pictureBuffer = await pictureAccessor.getRaster(pictureRequest.filename);
-    socket.emit('picture_response', pictureBuffer);
+    const pictureResponse = await pictureAccessor.getRaster(pictureRequest.filename);
+    socket.emit('picture_response', pictureResponse);
 }

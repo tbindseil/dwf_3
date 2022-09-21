@@ -9,9 +9,9 @@ import {
 } from 'dwf-3-models-tjb';
 
 export default class BroadcastClient extends Client {
-    private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>;
+    private readonly socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
-    constructor(socket: Socket<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>) {
+    constructor(socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
         super();
 
         this.socket = socket;
