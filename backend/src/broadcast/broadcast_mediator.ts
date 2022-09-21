@@ -34,7 +34,10 @@ export default class BroadcastMediator {
     public handleUpdate(pixelUpdate: PixelUpdate) {
         // i think this still gets fucked up with locking and stuff
 
+        console.log(`broadcastMediator.handleUpdate and x is: ${pixelUpdate.x} and y is: ${pixelUpdate.y}`);
+
         const filename = pixelUpdate.filename;
+        // TODO if client is for a user that gives update, skip the update
         this.clients.get(filename)?.forEach(client => client.handleUpdate(pixelUpdate));
     }
 }

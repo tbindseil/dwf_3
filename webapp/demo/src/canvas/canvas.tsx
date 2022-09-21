@@ -14,6 +14,7 @@ function Canvas() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    // TODO get all files and pick one, then leave and disconnect cleanly
     const filename = 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png';
     const redFilename = 'red.png';
     const greenFilename = 'green.png';
@@ -27,7 +28,12 @@ function Canvas() {
         const dv = new DataView(pictureResponse.data);
 
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
+
+        canvas.width = pictureResponse.width;
+        canvas.height = pictureResponse.height;
+
         let ctx = canvas!.getContext('2d');
+        // TODO imageDataState?
         let imageData = ctx!.getImageData(0, 0, pictureResponse.width, pictureResponse.height); // Ahh, using !
         for (let i = 0; i < imageData.data.length; ++i) {
             // red: 0xff, 0x00, 0x00, 0xff
@@ -38,21 +44,40 @@ function Canvas() {
         }
         ctx!.putImageData(imageData, 0, 0);
 
+        console.log(`@@ calling setImageWidth with ${pictureResponse.width}`);
         setImageWidth(pictureResponse.width);
         setImageHeight(pictureResponse.height);
 
         setimageDataState(imageData);
     });
 
-    socket.on('server_to_client_update', (pixelUpdate: PixelUpdate) => {
+    const updateImageData = (pixelUpdate: PixelUpdate): void => {
+        console.log(`    updateImageData and pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
         const imageDataOffset = 4 * (pixelUpdate.x * imageWidth + pixelUpdate.y);
         const red = pixelUpdate.red > 255 ? 255 : pixelUpdate.red;
         const green = pixelUpdate.green > 255 ? 255 : pixelUpdate.green;
         const blue = pixelUpdate.blue > 255 ? 255 : pixelUpdate.blue;
+        console.log(`    updateImageData and imageDataOffset is: ${imageDataOffset} and imageWidth is: ${imageWidth}`);
 
         imageDataState.data[imageDataOffset] = red;
         imageDataState.data[imageDataOffset + 1] = green;
         imageDataState.data[imageDataOffset + 2] = blue;
+        setimageDataState(imageDataState);
+
+        // let ctx = canvas!.getContext('2d');
+        // ctx!.putImageData(imageDataState, 0, 0);
+        updateCanvas();
+    };
+
+    const updateCanvas = (): void => {
+        let canvas = document.getElementById('canvas') as HTMLCanvasElement;
+        let ctx = canvas!.getContext('2d');
+        ctx!.putImageData(imageDataState, 0, 0);
+    };
+
+    socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {
+        console.log('server_to_client_update handler');
+        // updateImageData(pixelUpdate);
     });
 
     return (
@@ -75,15 +100,29 @@ function Canvas() {
             </button>
             <canvas id='canvas'
                     ref={canvasRef}
-                    style={{'width': `${imageWidth}px`, 'height': `${imageHeight}px`}}
                     onClick={(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-                        // console.log(`event is: ${JSON.stringify(event)}`);
-                        console.log('event is:');
-                        console.log(event);
-                        console.log(`canvasRef.current?.offsetLeft is: ${canvasRef.current?.offsetLeft}`);
-                        console.log(`canvasRef.current?.offsetTop is: ${canvasRef.current?.offsetTop}`);
-                        console.log(`canvasRef.current?.width is: ${canvasRef.current?.width}`);
-                        console.log(`canvasRef.current?.height is: ${canvasRef.current?.height}`);
+                        // console.log('event is:');
+                        // console.log(event);
+                        // console.log(`canvasRef.current?.offsetLeft is: ${canvasRef.current?.offsetLeft}`);
+                        // console.log(`canvasRef.current?.offsetTop is: ${canvasRef.current?.offsetTop}`);
+
+                        // for now just gonna do black pixels
+                        const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
+                        const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
+                        const pixelUpdate = {
+                            filename: redFilename,
+                            createdBy: 'tj',
+                            x: x,
+                            y: y,
+                            red: 255,
+                            green: 255,
+                            blue: 255,
+                        };
+
+                        console.log(`pixelUpdate being emitted is: ${JSON.stringify(pixelUpdate)}`);
+                        updateImageData(pixelUpdate);
+
+                        socket.emit('client_to_server_udpate', pixelUpdate);
                     }}>
             </canvas>
 
