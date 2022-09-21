@@ -4,6 +4,7 @@ export interface PutClientInput {
 }
 
 export interface PutClientOutput {
-    msg: string;
-    buffer: any;
+    width: number,
+    height: number,
+    data: Buffer
 }

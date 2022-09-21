@@ -1,4 +1,4 @@
-import { PutClientInput } from '../put_client';
+import { PutClientInput, PutClientOutput } from '../put_client';
 
 export interface ServerToClientEvents {
     noArg: () => void;
@@ -9,7 +9,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
     hello: () => void;
-    picture_response: (pictureBuffer: Uint8Array) => void;
+    picture_response: (pictureBuffer: PutClientOutput) => void;
 }
 
 export interface InterServerEvents {

@@ -6,31 +6,79 @@ import { PutClientOutput } from 'dwf-3-models-tjb';
 const ENDPOINT = 'http://127.0.0.1:6543/';
 
 function Canvas() {
-    const [response, setResponse] = useState('');
+    const [imgDataState, setImgDataState] = useState(new ImageData(200, 200));
+
+    const filename = 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png';
+    const redFileName = 'red.png';
+    const socket = io(ENDPOINT);
+    const requestPictureFunction = () => {
+        socket.emit('picture_request', {filename: redFileName});
+    };
+
+    socket.on('picture_response', (response: PutClientOutput) => {
+        console.log(`response is: ${response}`);
+        console.log(`stringified response is: ${JSON.stringify(response)}`);
+        console.log(`byteLength is: ${response.data.byteLength}`);
+        console.log(`isView is: ${ArrayBuffer.isView(response)}`);
+        const dv = new DataView(response.data);
+        console.log(`now, isView? ${ArrayBuffer.isView(dv)}`);
+        const firstByte = dv.getUint8(1);
+        console.log(`first byte is: ${firstByte}`);
+
+        console.log(`width is: ${response.width}`);
+        console.log(`height is: ${response.height}`);
+
+        let canvas = document.getElementById('canvas') as HTMLCanvasElement;
+        let ctx = canvas!.getContext('2d');
+        let imgData = ctx!.getImageData(0, 0, response.width, response.height); // Ahh, using !
+        console.log(`dv.length is: ${dv.byteLength} and imgData.data.length is: ${imgData.data.length}`);
+        for (let i = 0; i < imgData.data.length; ++i) {
+            // let x = (i / 4) % 40; 
+            // let y = Math.floor(i / 160); 
+            // imgData.data[i] = pixelData1[x][y].r; 
+            // imgData.data[i + 1] = pixelData1[x][y].g; 
+            // imgData.data[i + 2] = pixelData1[x][y].b; 
+            // imgData.data[i + 3] = 255; 
+            imgData.data[i] = dv.getUint8(i);
+        }
+        ctx!.putImageData(imgData, 0, 0);
+        console.log(`done putting data`);
+
+        setImgDataState(imgData);
+
+        /*
+        console.log('ummm');
+        const bytesToPrint = 12;
+        for (let i = 0; i++; i < bytesToPrint) {
+            console.log(`byte num ${i} is ${response[i]}`);
+        }
+        console.log('here');
+        response.forEach(byte => console.log(`byte is: ${byte}`));
+        console.log('there');
+        */
+        // response.forEach(byte => console.log(`byte is: 
+
+        // https://stackoverflow.com/questions/26692575/html5-canvas-fastest-way-to-display-an-array-of-pixel-colors-on-the-screen
+        // ctx2.drawImage(c1, 0, 0, 400, 300);
+
+    });
     useEffect(() => {
-        const socket = io(ENDPOINT);
-        socket.on('FromAP', data => {
-            setResponse(data);
-        });
-
-        // TODO make the below strings in the model package?
-        const pictureId = '3';
-        socket.on('picture_response', (response: PutClientOutput) => {
-            console.log(`stringified response is: ${JSON.stringify(response)}`);
-
-            // https://stackoverflow.com/questions/26692575/html5-canvas-fastest-way-to-display-an-array-of-pixel-colors-on-the-screen
-            // ctx2.drawImage(c1, 0, 0, 400, 300);
-
-        });
-        socket.emit('picture_request', {filename: 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png'});
-
+        
     }, []);
+                // It's <time dateTime={response}>{response}</time>
+
     return (
         <div className="Canvas">
             canvas works
             <p>
-                It's <time dateTime={response}>{response}</time>
+                its time to show the raster
             </p>
+            <button onClick={requestPictureFunction} >
+                request picture
+            </button>
+            <canvas id='canvas'>
+            </canvas>
+
         </div>
     );
 }

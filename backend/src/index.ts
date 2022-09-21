@@ -32,36 +32,20 @@ const io = new Server<ServerToClientEvents, ClientToServerEvents, InterServerEve
         methods: ["GET", "POST"]
     }
 });
-let interval: any;
 io.on('connection', (socket) => {
     console.log(`on connection, and typeof socket is: ${typeof socket}`);
-    if (interval) {
-        clearInterval(interval);
-    }
-    interval = setInterval(() => getApiAndEmit(socket), 1000);
-    socket.on("disconnect", () => {
-        console.log("Client disconnected");
-        clearInterval(interval);
-    });
-
-
     socket.on('picture_request', async (pictureRequest: PutClientInput) => {
         // TODO what happens if I send a non conforming argument?
         // const pictureBuffer = putClient.process(pictureRequest);
         broadcastMediator.addClient(pictureRequest.filename, socket);
         const pictureBuffer = await pictureAccessor.getRaster(pictureRequest.filename);
+        console.log('sending picture buffer');
+        console.log(`pictureBuffer is: ${pictureBuffer}`);
+        console.log(`stringified, it is: ${JSON.stringify(pictureBuffer)}`);
         socket.emit('picture_response', pictureBuffer);
-        console.log('just sent picture buffer');
     });
 });
 io.listen(6543);
-
-
-const getApiAndEmit = (socket: any) => {
-    const response = new Date();
-    // Emitting a new message. Will be consumed by the client
-    socket.emit("FromAP", response);
-};
 
 const router = new Router();
 const apis = [
