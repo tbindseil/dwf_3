@@ -6,3 +6,4 @@ export * from './delete_client';
 export * from './post_update';
 export * from './updates/update';
 export * from './updates/pixel_update';
+export * from './socket_models/socket_models';

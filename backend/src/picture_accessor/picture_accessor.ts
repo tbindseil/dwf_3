@@ -14,7 +14,7 @@ export default class PictureAccessor {
         throw new Error('PictureAccessor.getPicture not implemented');
     }
 
-    public getRaster(filename: string): any {
+    public async getRaster(filename: string): Promise<Uint8Array> {
         filename;
         throw new Error('PictureAccessor.getRaster not implemented');
     }

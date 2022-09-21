@@ -22,7 +22,7 @@ function Canvas() {
             // ctx2.drawImage(c1, 0, 0, 400, 300);
 
         });
-        socket.emit('picture_request', );
+        socket.emit('picture_request', {filename: 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png'});
 
     }, []);
     return (

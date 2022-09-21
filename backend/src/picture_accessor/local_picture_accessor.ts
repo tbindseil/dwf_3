@@ -34,15 +34,16 @@ export default class LocalPictureAccessor extends PictureAccessor {
         }
     }
 
-    public async getRaster(filename: string): Promise<any> {
+    public async getRaster(filename: string): Promise<Uint8Array> {
         const contents = await Jimp.read(path.join(this.baseDirectory, filename))
             //.then(contents => {
                 // console.log(`contents are: ${contents}`);
                 // console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
             // });
-        console.log(`contents are: ${contents}`);
-        console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
-        return contents;
+        // console.log(`contents are: ${contents}`);
+        // console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
+        // console.log(`typeof contents are: ${typeof contents}`);
+        return contents.bitmap.data;
     }
 
     public getFileSystem(): string {

@@ -2,7 +2,15 @@ import Client from './client';
 import BroadcastClient from './broadcast_client';
 import PictureSyncClient from './picture_sync_client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
-import { Update } from 'dwf-3-models-tjb';
+
+import { Socket } from 'socket.io';
+import {
+    Update,
+    ServerToClientEvents,
+    ClientToServerEvents,
+    InterServerEvents,
+    SocketData
+} from 'dwf-3-models-tjb';
 
 
 export default class BroadcastMediator {
@@ -14,13 +22,13 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public addClient(filename: string, ipAddress: string) {
+    public addClient(filename: string, socket: Socket<ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData>) {
         if (!this.clients.has(filename)) {
             this.clients.set(filename, new Set());
             this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor));
         }
 
-        this.clients.get(filename)!.add(new BroadcastClient(ipAddress));
+        this.clients.get(filename)!.add(new BroadcastClient(socket));
     }
 
     public handleUpdate(update: Update) {

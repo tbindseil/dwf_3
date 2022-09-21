@@ -18,13 +18,12 @@ export class PutClient extends API {
     }
 
     public getInput(body: any): PutClientInput {
-        if ('ipAddress' in body && 'filename' in body) {
+        if ('filename' in body) {
             return {
-                ipAddress: body.ipAddress,
                 filename: body.filename
             };
         } else {
-            throw new APIError(400, 'ipAddress and filename must be provided, client not registered');
+            throw new APIError(400, 'filename must be provided, client not registered');
         }
     }
 
@@ -47,7 +46,7 @@ export class PutClient extends API {
         }
         */
 
-        this.broadcastMediator.addClient(input.filename, input.ipAddress);
+        // this.broadcastMediator.addClient(input.filename);
         return {
             msg: 'client added to picture',
             buffer: 'buffer'
