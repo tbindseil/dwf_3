@@ -14,6 +14,8 @@ import {
     PostUpdate,
 } from './handlers/index';
 
+import { PutClientInput } from 'dwf-3-models-tjb'; // TODO this and other socket stuff probably needs to be encapsulated
+
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/solid_white.png';
 
@@ -22,6 +24,7 @@ const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirector
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
 // TODO i think i need to pass server instance of http.createserver into creation of io
+const putClient = new PutClient(broadcastMediator);
 const io = new Server({
     cors: {
         origin: 'http://localhost:3000', // wtf, why is this the address of the web page?
@@ -39,6 +42,13 @@ io.on('connection', (socket) => {
         console.log("Client disconnected");
         clearInterval(interval);
     });
+
+
+    socket.on('picture_request', (pictureRequest: PutClientInput) => {
+        // TODO what happens if I send a non conforming argument?
+        const pictureBuffer = putClient.process(pictureRequest);
+        socket.emit('picture_response', pictureBuffer);
+    });
 });
 io.listen(6543);
 
@@ -54,7 +64,6 @@ const apis = [
     new GetPictures(),
     new GetPicture(pictureAccessor),
     new PostPicture(pictureAccessor),
-    new PutClient(broadcastMediator),
     new DeleteClient(),
     new PostUpdate()
 ];

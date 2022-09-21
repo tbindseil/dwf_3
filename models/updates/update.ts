@@ -1,4 +1,4 @@
 export interface Update {
-    pictureId: string,
+    filename: string,
     createdBy: string,
 }

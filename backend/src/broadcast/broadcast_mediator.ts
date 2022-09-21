@@ -14,19 +14,19 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public addClient(pictureId: string, filename: string, ipAddress: string) {
-        if (!this.clients.has(pictureId)) {
-            this.clients.set(pictureId, new Set());
-            this.clients.get(pictureId)!.add(new PictureSyncClient(filename, this.pictureAccessor));
+    public addClient(filename: string, ipAddress: string) {
+        if (!this.clients.has(filename)) {
+            this.clients.set(filename, new Set());
+            this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor));
         }
 
-        this.clients.get(pictureId)!.add(new BroadcastClient(ipAddress));
+        this.clients.get(filename)!.add(new BroadcastClient(ipAddress));
     }
 
     public handleUpdate(update: Update) {
         // i think this still gets fucked up with locking and stuff
 
-        const pictureId = update.pictureId;
-        this.clients.get(pictureId)?.forEach(client => client.handleUpdate(update));
+        const filename = update.filename;
+        this.clients.get(filename)?.forEach(client => client.handleUpdate(update));
     }
 }
