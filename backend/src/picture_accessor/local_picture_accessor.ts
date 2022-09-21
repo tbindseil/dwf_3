@@ -3,7 +3,7 @@ import generatePictureFilename from './filename_generator';
 import * as fs from 'fs';
 import path from 'path';
 import Jimp from 'jimp';
-import { PutClientOutput } from 'dwf-3-models-tjb';
+import { PictureResponse } from 'dwf-3-models-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
     private readonly prototypeFileName: string;
@@ -35,15 +35,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
         }
     }
 
-    public async getRaster(filename: string): Promise<PutClientOutput> {
+    public async getRaster(filename: string): Promise<PictureResponse> {
         const contents = await Jimp.read(path.join(this.baseDirectory, filename))
-            //.then(contents => {
-                // console.log(`contents are: ${contents}`);
-                // console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
-            // });
-        // console.log(`contents are: ${contents}`);
-        // console.log(`stringified.. contents are: ${JSON.stringify(contents)}`);
-        // console.log(`typeof contents are: ${typeof contents}`);
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,

@@ -1,4 +1,4 @@
-import { PutClientOutput } from 'dwf-3-models-tjb';
+import { PictureResponse } from 'dwf-3-models-tjb';
 
 export default class PictureAccessor {
     public async createNewPicture(pictureName: string, createdBy: string): Promise<string> {
@@ -16,7 +16,7 @@ export default class PictureAccessor {
         throw new Error('PictureAccessor.getPicture not implemented');
     }
 
-    public async getRaster(filename: string): Promise<PutClientOutput> {
+    public async getRaster(filename: string): Promise<PictureResponse> {
         filename;
         throw new Error('PictureAccessor.getRaster not implemented');
     }
