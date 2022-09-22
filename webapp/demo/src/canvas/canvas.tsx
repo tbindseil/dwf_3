@@ -53,7 +53,7 @@ function Canvas() {
 
     const updateImageData = (pixelUpdate: PixelUpdate): void => {
         console.log(`    updateImageData and pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
-        const imageDataOffset = 4 * (pixelUpdate.x * imageWidth + pixelUpdate.y);
+        const imageDataOffset = 4 * (pixelUpdate.y * imageWidth + pixelUpdate.x);
         const red = pixelUpdate.red > 255 ? 255 : pixelUpdate.red;
         const green = pixelUpdate.green > 255 ? 255 : pixelUpdate.green;
         const blue = pixelUpdate.blue > 255 ? 255 : pixelUpdate.blue;
