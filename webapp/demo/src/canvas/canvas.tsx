@@ -7,9 +7,7 @@ import { SocketContext } from '../context/socket';
 function Canvas() {
     const socket = useContext(SocketContext);
 
-    console.log('creating raster state');
     const [raster, setRaster] = useState(new Raster(0, 0, new ArrayBuffer(0)));
-    console.log(`after creating raster state and w h are ${raster.width} ${raster.height}`);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -22,29 +20,27 @@ function Canvas() {
         socket.emit('picture_request', {filename: filename});
     };
 
-    // this thing's gotta be in a library so the picture_sync_client can use it as well
-    const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
-        const saved = raster.saveBufferForDebug();
-        console.log(`pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
-        raster.handlePixelUpdate(pixelUpdate);
-        console.log('here');
-        raster.printBufferDifference(saved);
-        updateCanvas();
-    }, [raster]);
-
     const updateCanvas = useCallback((): void => {
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
         let ctx = canvas!.getContext('2d');
         // TODO should raster provide buffer? or should raster take in context and put image data?
-        console.log(`in updateCanvas and w h are ${raster.width} and ${raster.height}`);
         const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
         ctx!.putImageData(id, 0, 0);
     }, [raster]);
 
+    // this thing's gotta be in a library so the picture_sync_client can use it as well
+    const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
+        const saved = raster.saveBufferForDebug();
+        raster.handlePixelUpdate(pixelUpdate);
+        raster.printBufferDifference(saved);
+        updateCanvas();
+    }, [raster, updateCanvas]);
+
     const server_to_client_update_callback = useCallback((pixelUpdate: PixelUpdate): void => {
         console.log(`server_to_client_update and raster w h is ${raster.width} ${raster.height}`);
+        console.log(raster);
         updateImageData(pixelUpdate);
-    }, [updateImageData])
+    }, [raster, updateImageData])
 
     const picture_response_callback = useCallback((pictureResponse: PictureResponse) => {
         // const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, pictureResponse.data);
@@ -66,20 +62,40 @@ function Canvas() {
             nextImageData.data[i] = asArray[i];
         }
         // TODO can i just wholesale save this incoming chunk of mem? I think that is what the raster class will do
-        console.log('putting image data');
         ctx!.putImageData(nextImageData, 0, 0);
 
-        console.log(`(just put image data) setting nextRaster w and h to ${pictureResponse.width} and ${pictureResponse.height}`);
+        console.log(`setting nextRaster w and h to ${pictureResponse.width} and ${pictureResponse.height}`);
         const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
         setRaster(nextRaster);
-    }, [setRaster]);
+    }, [raster, setRaster]);
+
+    const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+        // for now just gonna do white pixels
+        const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
+        const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
+        const pixelUpdate = {
+            filename: blueFilename, // TJTAG TODO this is hard coded
+            createdBy: 'tj',
+            x: x,
+            y: y,
+            red: 255,
+            green: 255,
+            blue: 255,
+        };
+
+        updateImageData(pixelUpdate);
+
+        socket.emit('client_to_server_udpate', pixelUpdate);
+    }, [raster, updateImageData, socket]);
 
     useEffect(() => {
         console.log(`resetting socket handlers: raster w and h are: ${raster.width} ${raster.height}`);
+        socket.removeListener('picture_response');
         socket.on('picture_response', picture_response_callback);
 
+        socket.removeListener('server_to_client_update');
         socket.on('server_to_client_update', server_to_client_update_callback);
-    }, [picture_response_callback, server_to_client_update_callback]);
+    }, [socket, picture_response_callback, server_to_client_update_callback, raster]);
 
     return (
         <div className="Canvas">
@@ -101,24 +117,7 @@ function Canvas() {
             </button>
             <canvas id='canvas'
                     ref={canvasRef}
-                    onClick={(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-                        // for now just gonna do black pixels
-                        const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
-                        const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
-                        const pixelUpdate = {
-                            filename: blueFilename, // TJTAG TODO this is hard coded
-                            createdBy: 'tj',
-                            x: x,
-                            y: y,
-                            red: 255,
-                            green: 255,
-                            blue: 255,
-                        };
-
-                        updateImageData(pixelUpdate);
-
-                        socket.emit('client_to_server_udpate', pixelUpdate);
-                    }}>
+                    onClick={click}>
             </canvas>
 
         </div>

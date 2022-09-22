@@ -29,9 +29,9 @@ export class Raster {
         const green = this.clamp(pixelUpdate.green);
         const blue = this.clamp(pixelUpdate.blue);
 
-        console.log('raster.handlePixelUpdate:');
-        console.log(`  raster.width: ${this.width} raster.height: ${this.height}`);
-        console.log(`  imageDataOffset: ${imageDataOffset} red: ${red} blue: ${blue} green: ${green}`);
+        // console.log('raster.handlePixelUpdate:');
+        // console.log(`  raster.width: ${this.width} raster.height: ${this.height}`);
+        // console.log(`  imageDataOffset: ${imageDataOffset} red: ${red} blue: ${blue} green: ${green}`);
 
         this.asArray[imageDataOffset] = red;
         this.asArray[imageDataOffset + 1] = green;
@@ -43,7 +43,7 @@ export class Raster {
     }
 
     public saveBufferForDebug(): Uint8ClampedArray {
-        console.log(`this.asArray.length is: ${this.asArray.length}`);
+        // console.log(`this.asArray.length is: ${this.asArray.length}`);
         const ret = new Uint8ClampedArray(this.asArray.length);
         for (let i = 0; i < ret.length; ++i) {
             ret[i] = this.asArray[i];
