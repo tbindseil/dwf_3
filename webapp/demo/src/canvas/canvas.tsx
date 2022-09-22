@@ -34,15 +34,7 @@ function Canvas() {
         updateCanvas();
     }, [raster, updateCanvas]);
 
-    const server_to_client_update_callback = useCallback((pixelUpdate: PixelUpdate): void => {
-        updateImageData(pixelUpdate);
-    }, [raster, updateImageData])
-
     const picture_response_callback = useCallback((pictureResponse: PictureResponse) => {
-        // const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, pictureResponse.data);
-        // nextImageData.data is readonly, that makes it difficult to do what i want to do
-        // maybe i can pass it as the array when creating the raster object?
-
         const asArray = new Uint8Array(pictureResponse.data);
 
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -60,7 +52,6 @@ function Canvas() {
         // TODO can i just wholesale save this incoming chunk of mem? I think that is what the raster class will do
         ctx!.putImageData(nextImageData, 0, 0);
 
-        console.log(`setting nextRaster w and h to ${pictureResponse.width} and ${pictureResponse.height}`);
         const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
         setRaster(nextRaster);
     }, [setRaster]);
@@ -85,13 +76,12 @@ function Canvas() {
     }, [updateImageData, socket]);
 
     useEffect(() => {
-        console.log(`resetting socket handlers: raster w and h are: ${raster.width} ${raster.height}`);
         socket.removeListener('picture_response');
         socket.on('picture_response', picture_response_callback);
 
         socket.removeListener('server_to_client_update');
-        socket.on('server_to_client_update', server_to_client_update_callback);
-    }, [socket, picture_response_callback, server_to_client_update_callback]);
+        socket.on('server_to_client_update', updateImageData);
+    }, [socket, picture_response_callback]);
 
     return (
         <div className="Canvas">
