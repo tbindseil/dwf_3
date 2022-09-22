@@ -1,11 +1,14 @@
 import './App.css';
+import { SocketContext, socket } from './context/socket';
 import Canvas from './canvas/canvas';
 
 function App() {
   return (
-    <div className="App">
-      <Canvas />
-    </div>
+    <SocketContext.Provider value={socket}>
+        <div className="App">
+            <Canvas />
+        </div>
+    </SocketContext.Provider>
   );
 }
 

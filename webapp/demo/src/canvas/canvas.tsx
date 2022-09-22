@@ -1,9 +1,7 @@
 import '../App.css';
-import { useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { useContext, useState, useRef, useCallback } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
-
-const ENDPOINT = 'http://127.0.0.1:6543/';
+import { SocketContext } from '../context/socket';
 
 function Canvas() {
     const [imageDataState, setimageDataState] = useState(new ImageData(200, 200));
@@ -19,7 +17,7 @@ function Canvas() {
     const redFilename = 'red.png';
     const greenFilename = 'green.png';
     const blueFilename = 'blue.png';
-    const socket = io(ENDPOINT);
+    const socket = useContext(SocketContext);
     const requestPictureFunction = (filename: string) => {
         socket.emit('picture_request', {filename: filename});
     };
@@ -77,7 +75,7 @@ function Canvas() {
 
     socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {
         console.log('server_to_client_update handler');
-        // updateImageData(pixelUpdate);
+        updateImageData(pixelUpdate);
     });
 
     return (
