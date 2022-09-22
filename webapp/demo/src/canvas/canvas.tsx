@@ -30,15 +30,11 @@ function Canvas() {
 
     // this thing's gotta be in a library so the picture_sync_client can use it as well
     const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
-        const saved = raster.saveBufferForDebug();
         raster.handlePixelUpdate(pixelUpdate);
-        raster.printBufferDifference(saved);
         updateCanvas();
     }, [raster, updateCanvas]);
 
     const server_to_client_update_callback = useCallback((pixelUpdate: PixelUpdate): void => {
-        console.log(`server_to_client_update and raster w h is ${raster.width} ${raster.height}`);
-        console.log(raster);
         updateImageData(pixelUpdate);
     }, [raster, updateImageData])
 
@@ -67,7 +63,7 @@ function Canvas() {
         console.log(`setting nextRaster w and h to ${pictureResponse.width} and ${pictureResponse.height}`);
         const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
         setRaster(nextRaster);
-    }, [raster, setRaster]);
+    }, [setRaster]);
 
     const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
         // for now just gonna do white pixels
@@ -86,7 +82,7 @@ function Canvas() {
         updateImageData(pixelUpdate);
 
         socket.emit('client_to_server_udpate', pixelUpdate);
-    }, [raster, updateImageData, socket]);
+    }, [updateImageData, socket]);
 
     useEffect(() => {
         console.log(`resetting socket handlers: raster w and h are: ${raster.width} ${raster.height}`);
@@ -95,7 +91,7 @@ function Canvas() {
 
         socket.removeListener('server_to_client_update');
         socket.on('server_to_client_update', server_to_client_update_callback);
-    }, [socket, picture_response_callback, server_to_client_update_callback, raster]);
+    }, [socket, picture_response_callback, server_to_client_update_callback]);
 
     return (
         <div className="Canvas">
