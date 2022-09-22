@@ -1,5 +1,5 @@
 import '../App.css';
-import { useCallback, useContext, useState, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
@@ -22,7 +22,31 @@ function Canvas() {
         socket.emit('picture_request', {filename: filename});
     };
 
-    socket.on('picture_response', (pictureResponse: PictureResponse) => {
+    // this thing's gotta be in a library so the picture_sync_client can use it as well
+    const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
+        const saved = raster.saveBufferForDebug();
+        console.log(`pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
+        raster.handlePixelUpdate(pixelUpdate);
+        console.log('here');
+        raster.printBufferDifference(saved);
+        updateCanvas();
+    }, [raster]);
+
+    const updateCanvas = useCallback((): void => {
+        let canvas = document.getElementById('canvas') as HTMLCanvasElement;
+        let ctx = canvas!.getContext('2d');
+        // TODO should raster provide buffer? or should raster take in context and put image data?
+        console.log(`in updateCanvas and w h are ${raster.width} and ${raster.height}`);
+        const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
+        ctx!.putImageData(id, 0, 0);
+    }, [raster]);
+
+    const server_to_client_update_callback = useCallback((pixelUpdate: PixelUpdate): void => {
+        console.log(`server_to_client_update and raster w h is ${raster.width} ${raster.height}`);
+        updateImageData(pixelUpdate);
+    }, [updateImageData])
+
+    const picture_response_callback = useCallback((pictureResponse: PictureResponse) => {
         // const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, pictureResponse.data);
         // nextImageData.data is readonly, that makes it difficult to do what i want to do
         // maybe i can pass it as the array when creating the raster object?
@@ -48,40 +72,14 @@ function Canvas() {
         console.log(`(just put image data) setting nextRaster w and h to ${pictureResponse.width} and ${pictureResponse.height}`);
         const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
         setRaster(nextRaster);
-    });
+    }, [setRaster]);
 
-    // this thing's gotta be in a library so the picture_sync_client can use it as well
-    const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
-        const saved = raster.saveBufferForDebug();
-        console.log(`pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
-        raster.handlePixelUpdate(pixelUpdate);
-        console.log('here');
-        raster.printBufferDifference(saved);
-        updateCanvas();
-    }, [raster, setRaster]);
+    useEffect(() => {
+        console.log(`resetting socket handlers: raster w and h are: ${raster.width} ${raster.height}`);
+        socket.on('picture_response', picture_response_callback);
 
-    /*const updateImageData = (pixelUpdate: PixelUpdate): void => {
-        const saved = raster.saveBufferForDebug();
-        console.log(`pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
-        raster.handlePixelUpdate(pixelUpdate);
-        console.log('here');
-        raster.printBufferDifference(saved);
-        updateCanvas();
-    };*/
-
-    const updateCanvas = (): void => {
-        let canvas = document.getElementById('canvas') as HTMLCanvasElement;
-        let ctx = canvas!.getContext('2d');
-        // TODO should raster provide buffer? or should raster take in context and put image data?
-        console.log(`in updateCanvas and w h are ${raster.width} and ${raster.height}`);
-        const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
-        ctx!.putImageData(id, 0, 0);
-    };
-
-    socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {
-        console.log(`server_to_client_update and raster w h is ${raster.width} ${raster.height}`);
-        updateImageData(pixelUpdate);
-    });
+        socket.on('server_to_client_update', server_to_client_update_callback);
+    }, [picture_response_callback, server_to_client_update_callback]);
 
     return (
         <div className="Canvas">
