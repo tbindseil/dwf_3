@@ -27,5 +27,5 @@ export interface PictureRequest {
 export interface PictureResponse {
     width: number,
     height: number,
-    data: Buffer
+    data: ArrayBuffer
 }

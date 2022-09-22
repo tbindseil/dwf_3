@@ -1,13 +1,13 @@
 import '../App.css';
 import { useContext, useState, useRef } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
 
 function Canvas() {
     const socket = useContext(SocketContext);
 
-    const [imageData, setimageData] = useState(new ImageData(200, 200));
-    const [imageWidth, setImageWidth] = useState(0);
+    const [raster, setRaster] = useState(new Raster(0, 0, new ArrayBuffer(0)));
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -21,43 +21,43 @@ function Canvas() {
     };
 
     socket.on('picture_response', (pictureResponse: PictureResponse) => {
-        const dv = new DataView(pictureResponse.data);
+        // const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, pictureResponse.data);
+        // nextImageData.data is readonly, that makes it difficult to do what i want to do
+        // maybe i can pass it as the array when creating the raster object?
+
+        const asArray = new Uint8Array(pictureResponse.data);
 
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
+        // TODO maybe I can have a canvas component that takes in a Raster?
+        // or the canvas component handles all this?
         canvas.width = pictureResponse.width;
         canvas.height = pictureResponse.height;
 
         let ctx = canvas!.getContext('2d');
         let nextImageData = ctx!.getImageData(0, 0, pictureResponse.width, pictureResponse.height); // Ahh, using !
         for (let i = 0; i < nextImageData.data.length; ++i) {
-            nextImageData.data[i] = dv.getUint8(i);
+            nextImageData.data[i] = asArray[i];
         }
+        // TODO can i just wholesale save this incoming chunk of mem? I think that is what the raster class will do
         ctx!.putImageData(nextImageData, 0, 0);
 
-        setImageWidth(pictureResponse.width);
-        setimageData(nextImageData);
+        const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
+        setRaster(nextRaster);
     });
 
     // this thing's gotta be in a library so the picture_sync_client can use it as well
     const updateImageData = (pixelUpdate: PixelUpdate): void => {
-        const imageDataOffset = 4 * (pixelUpdate.y * imageWidth + pixelUpdate.x);
-        const red = pixelUpdate.red > 255 ? 255 : pixelUpdate.red;
-        const green = pixelUpdate.green > 255 ? 255 : pixelUpdate.green;
-        const blue = pixelUpdate.blue > 255 ? 255 : pixelUpdate.blue;
-
-        imageData.data[imageDataOffset] = red;
-        imageData.data[imageDataOffset + 1] = green;
-        imageData.data[imageDataOffset + 2] = blue;
-        setimageData(imageData);
-
+        raster.handlePixelUpdate(pixelUpdate);
         updateCanvas();
     };
 
     const updateCanvas = (): void => {
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
         let ctx = canvas!.getContext('2d');
-        ctx!.putImageData(imageData, 0, 0);
+        // TODO should raster provide buffer? or should raster take in context and put image data?
+        const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
+        ctx!.putImageData(id, 0, 0);
     };
 
     socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {
