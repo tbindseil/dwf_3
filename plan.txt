@@ -9,6 +9,14 @@ TODO
 7. wrap " console.log(`blank is: ${blank}`); "
 
 
+
+color order
+// red: 0xff, 0x00, 0x00, 0xff
+// green: 0x00, 0xff, 0x00, 0xff
+// blue: 0x00, 0x00, 0xff, 0xff
+
+
+
 now, time for the queue stuff
 I'll be working on put client api
 

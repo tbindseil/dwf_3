@@ -22,7 +22,7 @@ export default class PictureSyncClient extends Client {
 
     }
 
-    public handleUpdate(pixelUpdate: PixelUpdate): void {
+    public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string): void {
         // then, in Handle update, update copy(s) of buffers
         //
         // which means we gotta implement the logic for updating buffer with an update in a library so we can

@@ -17,7 +17,10 @@ export default class BroadcastClient extends Client {
         this.socket = socket;
     }
 
-    public handleUpdate(pixelUpdate: PixelUpdate): void {
-        this.socket.emit('server_to_client_update', pixelUpdate);
+    public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string): void {
+        console.log(`emitting message and socketId is: ${this.socket.id}`);
+        if (sourceSocketId !== this.socket.id) {
+            this.socket.emit('server_to_client_update', pixelUpdate);
+        }
     }
 }

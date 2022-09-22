@@ -31,11 +31,9 @@ export default class BroadcastMediator {
         this.clients.get(filename)!.add(new BroadcastClient(socket));
     }
 
-    public handleUpdate(pixelUpdate: PixelUpdate) {
+    public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
         // i think this still gets fucked up with locking and stuff
 
-        const filename = pixelUpdate.filename;
-        // TODO if client is for a user that gives update, skip the update
-        this.clients.get(filename)?.forEach(client => client.handleUpdate(pixelUpdate));
+        this.clients.get(pixelUpdate.filename)?.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
     }
 }

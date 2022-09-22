@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
         pictureRequestHandler(pictureRequest, broadcastMediator, pictureAccessor, socket);
     });
     socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
-        updateHandler(pixelUpdate, broadcastMediator);
+        updateHandler(pixelUpdate, broadcastMediator, socket.id);
     });
 });
 io.listen(6543);

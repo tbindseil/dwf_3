@@ -4,11 +4,10 @@ import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { SocketContext } from '../context/socket';
 
 function Canvas() {
-    const [imageDataState, setimageDataState] = useState(new ImageData(200, 200));
-    void imageDataState;
+    const socket = useContext(SocketContext);
 
+    const [imageData, setimageData] = useState(new ImageData(200, 200));
     const [imageWidth, setImageWidth] = useState(0);
-    const [imageHeight, setImageHeight] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -17,7 +16,6 @@ function Canvas() {
     const redFilename = 'red.png';
     const greenFilename = 'green.png';
     const blueFilename = 'blue.png';
-    const socket = useContext(SocketContext);
     const requestPictureFunction = (filename: string) => {
         socket.emit('picture_request', {filename: filename});
     };
@@ -31,43 +29,35 @@ function Canvas() {
         canvas.height = pictureResponse.height;
 
         let ctx = canvas!.getContext('2d');
-        // TODO imageDataState?
-        let imageData = ctx!.getImageData(0, 0, pictureResponse.width, pictureResponse.height); // Ahh, using !
-        for (let i = 0; i < imageData.data.length; ++i) {
-            // red: 0xff, 0x00, 0x00, 0xff
-            // green: 0x00, 0xff, 0x00, 0xff
-            // blue: 0x00, 0x00, 0xff, 0xff
-
-            imageData.data[i] = dv.getUint8(i);
+        let nextImageData = ctx!.getImageData(0, 0, pictureResponse.width, pictureResponse.height); // Ahh, using !
+        for (let i = 0; i < nextImageData.data.length; ++i) {
+            nextImageData.data[i] = dv.getUint8(i);
         }
-        ctx!.putImageData(imageData, 0, 0);
+        ctx!.putImageData(nextImageData, 0, 0);
 
         setImageWidth(pictureResponse.width);
-        setImageHeight(pictureResponse.height);
-
-        setimageDataState(imageData);
+        setimageData(nextImageData);
     });
 
+    // this thing's gotta be in a library so the picture_sync_client can use it as well
     const updateImageData = (pixelUpdate: PixelUpdate): void => {
         const imageDataOffset = 4 * (pixelUpdate.y * imageWidth + pixelUpdate.x);
         const red = pixelUpdate.red > 255 ? 255 : pixelUpdate.red;
         const green = pixelUpdate.green > 255 ? 255 : pixelUpdate.green;
         const blue = pixelUpdate.blue > 255 ? 255 : pixelUpdate.blue;
 
-        imageDataState.data[imageDataOffset] = red;
-        imageDataState.data[imageDataOffset + 1] = green;
-        imageDataState.data[imageDataOffset + 2] = blue;
-        setimageDataState(imageDataState);
+        imageData.data[imageDataOffset] = red;
+        imageData.data[imageDataOffset + 1] = green;
+        imageData.data[imageDataOffset + 2] = blue;
+        setimageData(imageData);
 
-        // let ctx = canvas!.getContext('2d');
-        // ctx!.putImageData(imageDataState, 0, 0);
         updateCanvas();
     };
 
     const updateCanvas = (): void => {
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
         let ctx = canvas!.getContext('2d');
-        ctx!.putImageData(imageDataState, 0, 0);
+        ctx!.putImageData(imageData, 0, 0);
     };
 
     socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {

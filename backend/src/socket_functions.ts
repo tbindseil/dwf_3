@@ -19,6 +19,6 @@ export async function pictureRequestHandler(pictureRequest: PictureRequest,
     socket.emit('picture_response', pictureResponse);
 }
 
-export function updateHandler(pixelUpdate: PixelUpdate, broadcastMediator: BroadcastMediator): void {
-    broadcastMediator.handleUpdate(pixelUpdate);
+export function updateHandler(pixelUpdate: PixelUpdate, broadcastMediator: BroadcastMediator, sourceSocketId: string): void {
+    broadcastMediator.handleUpdate(pixelUpdate, sourceSocketId);
 }
