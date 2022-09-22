@@ -1,5 +1,5 @@
 import '../App.css';
-import { useContext, useState, useRef, useCallback } from 'react';
+import { useContext, useState, useRef } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { SocketContext } from '../context/socket';
 
@@ -42,7 +42,6 @@ function Canvas() {
         }
         ctx!.putImageData(imageData, 0, 0);
 
-        console.log(`@@ calling setImageWidth with ${pictureResponse.width}`);
         setImageWidth(pictureResponse.width);
         setImageHeight(pictureResponse.height);
 
@@ -50,12 +49,10 @@ function Canvas() {
     });
 
     const updateImageData = (pixelUpdate: PixelUpdate): void => {
-        console.log(`    updateImageData and pixelUpdate is: ${JSON.stringify(pixelUpdate)}`);
         const imageDataOffset = 4 * (pixelUpdate.y * imageWidth + pixelUpdate.x);
         const red = pixelUpdate.red > 255 ? 255 : pixelUpdate.red;
         const green = pixelUpdate.green > 255 ? 255 : pixelUpdate.green;
         const blue = pixelUpdate.blue > 255 ? 255 : pixelUpdate.blue;
-        console.log(`    updateImageData and imageDataOffset is: ${imageDataOffset} and imageWidth is: ${imageWidth}`);
 
         imageDataState.data[imageDataOffset] = red;
         imageDataState.data[imageDataOffset + 1] = green;
@@ -74,7 +71,6 @@ function Canvas() {
     };
 
     socket.on('server_to_client_update', (pixelUpdate: PixelUpdate): void => {
-        console.log('server_to_client_update handler');
         updateImageData(pixelUpdate);
     });
 
@@ -99,16 +95,11 @@ function Canvas() {
             <canvas id='canvas'
                     ref={canvasRef}
                     onClick={(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-                        // console.log('event is:');
-                        // console.log(event);
-                        // console.log(`canvasRef.current?.offsetLeft is: ${canvasRef.current?.offsetLeft}`);
-                        // console.log(`canvasRef.current?.offsetTop is: ${canvasRef.current?.offsetTop}`);
-
                         // for now just gonna do black pixels
                         const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
                         const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
                         const pixelUpdate = {
-                            filename: redFilename,
+                            filename: blueFilename, // TJTAG TODO this is hard coded
                             createdBy: 'tj',
                             x: x,
                             y: y,
@@ -117,7 +108,6 @@ function Canvas() {
                             blue: 255,
                         };
 
-                        console.log(`pixelUpdate being emitted is: ${JSON.stringify(pixelUpdate)}`);
                         updateImageData(pixelUpdate);
 
                         socket.emit('client_to_server_udpate', pixelUpdate);
