@@ -56,9 +56,9 @@ io.on('connection', (socket) => {
         updateHandler(pixelUpdate, broadcastMediator, socket.id);
     });
 
-    socket.on('disconnect', (reason: string) => {
-        console.log(`socket disconnecting. Socket id: ${socket.id} and reason: ${reason}`);
-        broadcastMediator.removeClient(socket);
+    socket.on('unsubscribe', (filename: string) => {
+        console.log(`socket unsubscribe. Socket id: ${socket.id} and filename: ${filename}`);
+        broadcastMediator.removeClient(filename, socket);
     });
 });
 io.listen(6543);

@@ -6,7 +6,6 @@ export class Raster {
     private readonly asArray: Uint8ClampedArray;
 
     constructor(width: number, height: number, buffer: ArrayBuffer) {
-        console.log(`raster constructor called with w h as ${width} ${height}`);
         this.width = width;
         this.height = height;
         this.asArray = new Uint8ClampedArray(buffer);

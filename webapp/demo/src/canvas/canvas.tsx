@@ -11,14 +11,19 @@ function Canvas() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // TODO get all files and pick one, then leave and disconnect cleanly
+    // TODO get all files and pick one, then leave and unsubscribe cleanly
     const filename = 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png';
     const redFilename = 'red.png';
     const greenFilename = 'green.png';
     const blueFilename = 'blue.png';
+
     const requestPictureFunction = (filename: string) => {
         socket.emit('picture_request', {filename: filename});
     };
+
+    const unsubscribeFunction = (filename: string) => {
+        socket.emit('unsubscribe', filename);
+    }
 
     const updateCanvas = useCallback((): void => {
         if (raster.width === 0 || raster.height === 0) {
@@ -99,6 +104,9 @@ function Canvas() {
             </button>
             <button onClick={() => { requestPictureFunction(blueFilename) }} >
                 request blue picture
+            </button>
+            <button onClick={() => { unsubscribeFunction(blueFilename) }} >
+                unsubscribe
             </button>
             <canvas id='canvas'
                     ref={canvasRef}

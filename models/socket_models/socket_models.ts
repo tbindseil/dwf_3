@@ -3,6 +3,7 @@ import { PixelUpdate } from '../updates/pixel_update';
 export interface ClientToServerEvents {
     picture_request: (pictureRequest: PictureRequest) => void;
     client_to_server_udpate: (pixelUpdate: PixelUpdate) => void;
+    unsubscribe: (filename: string) => void;
 }
 
 export interface ServerToClientEvents {

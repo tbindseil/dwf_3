@@ -15,7 +15,7 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 
 export default class BroadcastMediator {
-    private static readonly BROADCAST_CLIENT_KEY = 'BROADCAST_CLIENT_KEY';
+    private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
 
     private readonly pictureAccessor: PictureAccessor;
 
@@ -34,10 +34,10 @@ export default class BroadcastMediator {
             this.filenameToClients.set(filename, new Map());
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
-            this.filenameToClients.get(filename)!.set(socket.id, new PictureSyncClient(this.pictureAccessor, raster));
+            this.filenameToClients.get(filename)!.set(BroadcastMediator.PICTURE_SYNC_KEY, new PictureSyncClient(this.pictureAccessor, raster));
         }
 
-        this.filenameToClients.get(filename)!.set(BroadcastMediator.BROADCAST_CLIENT_KEY, new BroadcastClient(socket));
+        this.filenameToClients.get(filename)!.set(socket.id, new BroadcastClient(socket));
     }
 
     // first, remove the client that is disconnecting
@@ -57,12 +57,12 @@ export default class BroadcastMediator {
         }
 
         // temporary to test saving of file
-        this.filenameToClients.get(filename)?.get(BroadcastMediator.BROADCAST_CLIENT_KEY)?.forcePictureWrite();
+        this.filenameToClients.get(filename)?.get(BroadcastMediator.PICTURE_SYNC_KEY)?.forcePictureWrite();
 
         this.filenameToClients.get(filename)?.delete(socket.id);
         if (this.filenameToClients.get(filename)?.keys.length === 1) {
-            if (this.filenameToClients.get(filename)?.has(BroadcastMediator.BROADCAST_CLIENT_KEY)) {
-                this.filenameToClients.get(filename)?.delete(BroadcastMediator.BROADCAST_CLIENT_KEY);
+            if (this.filenameToClients.get(filename)?.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
+                this.filenameToClients.get(filename)?.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                 this.filenameToClients.delete(filename);
             } else {
                 console.log(`heads up, last client for filename: ${filename} is not the broadcast client`);

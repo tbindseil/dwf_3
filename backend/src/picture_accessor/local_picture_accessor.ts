@@ -10,6 +10,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
     private readonly prototypeFileName: string;
     private readonly baseDirectory: string;
 
+    private readonly testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
+
     constructor(prototypeFileName: string, baseDirectory: string) {
         super();
         this.prototypeFileName = prototypeFileName;
@@ -52,8 +54,9 @@ export default class LocalPictureAccessor extends PictureAccessor {
         // });
 
         const jimg = new Jimp(raster.width, raster.height);
-        jimg.bitmap.data = new Buffer(raster.getBuffer());
-        jimg.write('writter_from_raster.png');
+        // jimg.bitmap.data = new Buffer(raster.getBuffer());
+        jimg.bitmap.data = Buffer.from(raster.getBuffer());
+        jimg.write(path.join(this.testDirectory, 'writter_from_raster.png'));
         // TODO why isn't the above blocking?
         // jjimg.getBuffer(Jimp.MIME_PNG, (err, result) => {
             // jres.set('Content-Type', Jimp.MIME_PNG);
