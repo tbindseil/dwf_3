@@ -11,6 +11,7 @@ import {
     InterServerEvents,
     SocketData
 } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 
 
 export default class BroadcastMediator {
@@ -22,13 +23,22 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
+    public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
         if (!this.clients.has(filename)) {
             this.clients.set(filename, new Set());
-            this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor));
+            const rasterObject = await this.pictureAccessor.getRaster(filename);
+            const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
+            this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor, raster));
         }
 
         this.clients.get(filename)!.add(new BroadcastClient(socket));
+    }
+
+    public async removeClient(socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): void {
+        // TODO how to take in socket (it has an id)
+        // and find the BOTH the picture (ie filename) and the client (socket id) to remove
+        //
+        //
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {

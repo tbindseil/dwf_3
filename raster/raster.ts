@@ -3,8 +3,7 @@ import { PixelUpdate } from 'dwf-3-models-tjb';
 export class Raster {
     public readonly width: number;
     public readonly height: number;
-    // private readonly asArray: Uint8ClampedArray;
-    readonly asArray: Uint8ClampedArray;
+    private readonly asArray: Uint8ClampedArray;
 
     constructor(width: number, height: number, buffer: ArrayBuffer) {
         console.log(`raster constructor called with w h as ${width} ${height}`);
@@ -29,10 +28,6 @@ export class Raster {
         const green = this.clamp(pixelUpdate.green);
         const blue = this.clamp(pixelUpdate.blue);
 
-        // console.log('raster.handlePixelUpdate:');
-        // console.log(`  raster.width: ${this.width} raster.height: ${this.height}`);
-        // console.log(`  imageDataOffset: ${imageDataOffset} red: ${red} blue: ${blue} green: ${green}`);
-
         this.asArray[imageDataOffset] = red;
         this.asArray[imageDataOffset + 1] = green;
         this.asArray[imageDataOffset + 2] = blue;
@@ -43,7 +38,6 @@ export class Raster {
     }
 
     public saveBufferForDebug(): Uint8ClampedArray {
-        // console.log(`this.asArray.length is: ${this.asArray.length}`);
         const ret = new Uint8ClampedArray(this.asArray.length);
         for (let i = 0; i < ret.length; ++i) {
             ret[i] = this.asArray[i];

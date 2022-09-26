@@ -55,5 +55,10 @@ io.on('connection', (socket) => {
     socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
         updateHandler(pixelUpdate, broadcastMediator, socket.id);
     });
+
+    socket.on('disconnect', (reason: string) => {
+        console.log(`socket disconnecting. Socket id: ${socket.id} and reason: ${reason}`);
+        broadcastMediator.removeClient(socket);
+    });
 });
 io.listen(6543);

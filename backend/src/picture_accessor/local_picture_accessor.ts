@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import path from 'path';
 import Jimp from 'jimp';
 import { PictureResponse } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
     private readonly prototypeFileName: string;
@@ -42,6 +43,21 @@ export default class LocalPictureAccessor extends PictureAccessor {
             height: contents.bitmap.height,
             data: contents.bitmap.data
         };
+    }
+
+    public async writeRaster(raster: Raster): Promise<void> {
+        // await Jimp.write('writter_from_raster.png');
+        // new Jimp({data: raster.getBuffer(), raster.width, raster.height}, (err, image) => {
+            // image.write('writter_from_raster');
+        // });
+
+        const jimg = new Jimp(raster.width, raster.height);
+        jimg.bitmap.data = new Buffer(raster.getBuffer());
+        jimg.write('writter_from_raster.png');
+        // jjimg.getBuffer(Jimp.MIME_PNG, (err, result) => {
+            // jres.set('Content-Type', Jimp.MIME_PNG);
+            // res.send(result);
+        // });
     }
 
     public getFileSystem(): string {

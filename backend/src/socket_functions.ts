@@ -14,8 +14,8 @@ export async function pictureRequestHandler(pictureRequest: PictureRequest,
                                             broadcastMediator: BroadcastMediator,
                                             pictureAccessor: PictureAccessor,
                                             socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
-    broadcastMediator.addClient(pictureRequest.filename, socket);
-    const pictureResponse = await pictureAccessor.getRaster(pictureRequest.filename);
+    await broadcastMediator.addClient(pictureRequest.filename, socket);
+    const pictureResponse = await pictureAccessor.getRaster(pictureRequest.filename); // TODO this is happening way too much..
     socket.emit('picture_response', pictureResponse);
 }
 
