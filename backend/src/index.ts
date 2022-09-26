@@ -17,7 +17,7 @@ import { PictureRequest, PixelUpdate } from 'dwf-3-models-tjb';
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from 'dwf-3-models-tjb';
 
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
-const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/solid_white.png';
+const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
 
 const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirectory);
 
