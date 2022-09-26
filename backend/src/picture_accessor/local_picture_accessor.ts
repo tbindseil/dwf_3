@@ -29,6 +29,33 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return filename;
     }
 
+
+    public createNewPicture_with_dimensions(width_supplied: number): string {
+        const phi = (1 + Math.sqrt(5)) / 2; // roughly 1.618033988749894
+        const width = 1000;
+        const height = Math.ceil(width * phi);
+
+        const asArray = new Uint8ClampedArray(4 * width * height);
+        for (let i = 0; i < asArray.length; ++i) {
+            if (i % 4 === 3) {
+                asArray[i] = 0xff;
+            }
+        }
+
+        const buffer = Buffer.from(asArray);
+
+        // Jimp.write(buffer);
+        const jimg = new Jimp(width, height);
+
+        jimg.bitmap.data = buffer;
+        const filename = `sample_${width}_${height}.png`;
+        const testDirectory = '/Users/tj/Projects/dwf_3/pictures/test';
+        jimg.write(path.join(testDirectory, filename));
+
+        return filename;
+    }
+
+
     public async getPicture(filename: string): Promise<Buffer> {
         try {
             return await fs.promises.readFile(path.join(this.baseDirectory, filename));
@@ -48,20 +75,12 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async writeRaster(raster: Raster): Promise<void> {
-        // await Jimp.write('writter_from_raster.png');
-        // new Jimp({data: raster.getBuffer(), raster.width, raster.height}, (err, image) => {
-            // image.write('writter_from_raster');
-        // });
-
         const jimg = new Jimp(raster.width, raster.height);
-        // jimg.bitmap.data = new Buffer(raster.getBuffer());
+
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
+        //
+        // TODO why isn't this blocking?
         jimg.write(path.join(this.testDirectory, 'writter_from_raster.png'));
-        // TODO why isn't the above blocking?
-        // jjimg.getBuffer(Jimp.MIME_PNG, (err, result) => {
-            // jres.set('Content-Type', Jimp.MIME_PNG);
-            // res.send(result);
-        // });
     }
 
     public getFileSystem(): string {

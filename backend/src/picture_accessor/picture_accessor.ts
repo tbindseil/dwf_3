@@ -26,4 +26,9 @@ export default class PictureAccessor {
         raster;
         throw new Error('PictureAccessor.getRaster not implemented');
     }
+
+    public createNewPicture_with_dimensions(width_supplied: number): string {
+        width_supplied;
+        throw new Error('PictureAccessor.createNewPicture_with_dimensions not implemented');
+    }
 }
