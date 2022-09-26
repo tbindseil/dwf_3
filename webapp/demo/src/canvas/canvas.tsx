@@ -21,40 +21,33 @@ function Canvas() {
     };
 
     const updateCanvas = useCallback((): void => {
+        if (raster.width === 0 || raster.height === 0) {
+            console.log('raster width or height is 0, not updating');
+            return;
+        }
+
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
         let ctx = canvas!.getContext('2d');
-        // TODO should raster provide buffer? or should raster take in context and put image data?
         const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
         ctx!.putImageData(id, 0, 0);
     }, [raster]);
 
-    // this thing's gotta be in a library so the picture_sync_client can use it as well
     const updateImageData = useCallback((pixelUpdate: PixelUpdate): void => {
         raster.handlePixelUpdate(pixelUpdate);
         updateCanvas();
     }, [raster, updateCanvas]);
 
     const picture_response_callback = useCallback((pictureResponse: PictureResponse) => {
-        const asArray = new Uint8Array(pictureResponse.data);
-
         let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
-        // TODO maybe I can have a canvas component that takes in a Raster?
-        // or the canvas component handles all this?
         canvas.width = pictureResponse.width;
         canvas.height = pictureResponse.height;
 
-        let ctx = canvas!.getContext('2d');
-        let nextImageData = ctx!.getImageData(0, 0, pictureResponse.width, pictureResponse.height); // Ahh, using !
-        for (let i = 0; i < nextImageData.data.length; ++i) {
-            nextImageData.data[i] = asArray[i];
-        }
-        // TODO can i just wholesale save this incoming chunk of mem? I think that is what the raster class will do
-        ctx!.putImageData(nextImageData, 0, 0);
-
-        const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, nextImageData.data);
+        const nextRaster = new Raster(pictureResponse.width, pictureResponse.height, pictureResponse.data);
         setRaster(nextRaster);
-    }, [setRaster]);
+
+        updateCanvas();
+    }, [setRaster, updateCanvas]);
 
     const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
         // for now just gonna do white pixels
@@ -74,6 +67,12 @@ function Canvas() {
 
         socket.emit('client_to_server_udpate', pixelUpdate);
     }, [updateImageData, socket]);
+
+    useEffect(() => {
+        // currently, this only covers when initially receiving the raster becasue the raster state updates asynchronously
+        // I think it could be used to ping pong though
+        updateCanvas();
+    }, [raster]);
 
     useEffect(() => {
         socket.removeListener('picture_response');
