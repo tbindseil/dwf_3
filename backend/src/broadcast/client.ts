@@ -7,4 +7,8 @@ export default class Client {
         sourceSocketId;
         throw new Error('Client.handleUpdate not implemented');
     }
+
+    public forcePictureWrite(): void {
+        throw new Error('Client.forcePictureWrite not implemented');
+    }
 }

@@ -1,4 +1,5 @@
 import { PictureResponse } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 
 export default class PictureAccessor {
     public async createNewPicture(pictureName: string, createdBy: string): Promise<string> {
@@ -18,6 +19,11 @@ export default class PictureAccessor {
 
     public async getRaster(filename: string): Promise<PictureResponse> {
         filename;
+        throw new Error('PictureAccessor.getRaster not implemented');
+    }
+
+    public async writeRaster(raster: Raster): Promise<void> {
+        raster;
         throw new Error('PictureAccessor.getRaster not implemented');
     }
 }

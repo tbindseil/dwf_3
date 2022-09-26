@@ -54,6 +54,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
         const jimg = new Jimp(raster.width, raster.height);
         jimg.bitmap.data = new Buffer(raster.getBuffer());
         jimg.write('writter_from_raster.png');
+        // TODO why isn't the above blocking?
         // jjimg.getBuffer(Jimp.MIME_PNG, (err, result) => {
             // jres.set('Content-Type', Jimp.MIME_PNG);
             // res.send(result);

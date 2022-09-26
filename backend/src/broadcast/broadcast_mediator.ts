@@ -15,35 +15,64 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 
 export default class BroadcastMediator {
-    private readonly clients: Map<string, Set<Client>>;
+    private static readonly BROADCAST_CLIENT_KEY = 'BROADCAST_CLIENT_KEY';
+
     private readonly pictureAccessor: PictureAccessor;
 
+    // this maps filename to all clients, where each client has a unique socket id to fetch instantly
+    private readonly filenameToClients: Map<string, Map<string, Client>>;
+
     constructor(pictureAccessor: PictureAccessor) {
-        this.clients = new Map();
+        this.filenameToClients = new Map();
         this.pictureAccessor = pictureAccessor;
     }
 
     public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
-        if (!this.clients.has(filename)) {
-            this.clients.set(filename, new Set());
+        console.log(`adding client, filename: ${filename} and socket id: ${socket.id}`);
+
+        if (!this.filenameToClients.has(filename)) {
+            this.filenameToClients.set(filename, new Map());
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
-            this.clients.get(filename)!.add(new PictureSyncClient(filename, this.pictureAccessor, raster));
+            this.filenameToClients.get(filename)!.set(socket.id, new PictureSyncClient(this.pictureAccessor, raster));
         }
 
-        this.clients.get(filename)!.add(new BroadcastClient(socket));
+        this.filenameToClients.get(filename)!.set(BroadcastMediator.BROADCAST_CLIENT_KEY, new BroadcastClient(socket));
     }
 
-    public async removeClient(socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): void {
-        // TODO how to take in socket (it has an id)
-        // and find the BOTH the picture (ie filename) and the client (socket id) to remove
-        //
-        //
+    // first, remove the client that is disconnecting
+    // then, if only one client left,
+    // make sure its the broadcast client and remove that
+    public removeClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): void {
+        console.log(`remove client, filename: ${filename} and socket id: ${socket.id}`);
+
+        if (!this.filenameToClients.has(filename)) {
+            console.log(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            return;
+        }
+
+        if (!this.filenameToClients.get(filename)?.has(socket.id)) {
+            console.log(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+            return;
+        }
+
+        // temporary to test saving of file
+        this.filenameToClients.get(filename)?.get(BroadcastMediator.BROADCAST_CLIENT_KEY)?.forcePictureWrite();
+
+        this.filenameToClients.get(filename)?.delete(socket.id);
+        if (this.filenameToClients.get(filename)?.keys.length === 1) {
+            if (this.filenameToClients.get(filename)?.has(BroadcastMediator.BROADCAST_CLIENT_KEY)) {
+                this.filenameToClients.get(filename)?.delete(BroadcastMediator.BROADCAST_CLIENT_KEY);
+                this.filenameToClients.delete(filename);
+            } else {
+                console.log(`heads up, last client for filename: ${filename} is not the broadcast client`);
+            }
+        }
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
         // i think this still gets fucked up with locking and stuff
 
-        this.clients.get(pixelUpdate.filename)?.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
+        this.filenameToClients.get(pixelUpdate.filename)?.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
     }
 }

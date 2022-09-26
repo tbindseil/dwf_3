@@ -7,7 +7,7 @@ export default class PictureSyncClient extends Client {
     private readonly pictureAccessor: PictureAccessor;
     private readonly raster: Raster;
 
-    constructor(filename: string, pictureAccessor: PictureAccessor, raster: Raster) {
+    constructor(pictureAccessor: PictureAccessor, raster: Raster) {
         super();
 
         this.pictureAccessor = pictureAccessor;
@@ -15,10 +15,14 @@ export default class PictureSyncClient extends Client {
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string): void {
-        // raster.
-        // then, in Handle update, update copy(s) of buffers
-        //
-        // which means we gotta implement the logic for updating buffer with an update in a library so we can
-        // reuse that ish!
+        sourceSocketId;
+
+        console.log('picture_sync_client.handlePixelUpdate');
+        this.raster.handlePixelUpdate(pixelUpdate);
+    }
+
+    public forcePictureWrite(): void {
+        console.log('forcePictureWrite: forcing write');
+        this.pictureAccessor.writeRaster(this.raster);
     }
 }
