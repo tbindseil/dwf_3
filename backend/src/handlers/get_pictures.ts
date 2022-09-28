@@ -5,8 +5,6 @@ import {
 import API from './api';
 import APIError from './api_error';
 import * as db from '../db';
-import Jimp from 'jimp';
-import path from 'path';
 
 export class GetPictures extends API {
     constructor() {
@@ -20,6 +18,9 @@ export class GetPictures extends API {
 
     public async process(input: GetPicturesInput): Promise<GetPicturesOutput> {
         input;
+
+        const query = 'select * from picture;'
+        const params: string[] = [];
 
         try {
             const result = await db.query(query, params);

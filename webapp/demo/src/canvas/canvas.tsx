@@ -108,6 +108,9 @@ function Canvas() {
             <button onClick={() => { unsubscribeFunction(blueFilename) }} >
                 unsubscribe
             </button>
+
+            <br/>
+
             <canvas id='canvas'
                     ref={canvasRef}
                     onClick={click}>

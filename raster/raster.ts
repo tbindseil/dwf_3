@@ -30,6 +30,8 @@ export class Raster {
         this.asArray[imageDataOffset] = red;
         this.asArray[imageDataOffset + 1] = green;
         this.asArray[imageDataOffset + 2] = blue;
+
+        // what if we did this as several blocks of arrays?
     }
 
     public getBuffer(): Uint8ClampedArray {
