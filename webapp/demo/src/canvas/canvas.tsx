@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 function Canvas() {
     const location = useLocation();
-    const picture = location?.state?.picture; // next two things, request picture explicitly, not just upon connection, and also new pictures
+    const picture = location?.state?.picture; // next thing, new pictures
 
     const socket = useContext(SocketContext);
 
@@ -19,20 +19,6 @@ function Canvas() {
     const [raster, setRaster] = useState(new Raster(0, 0, new ArrayBuffer(0)));
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    // TODO get all files and pick one, then leave and unsubscribe cleanly
-    const filename = 'picture_to_be_created_tj_Wed Sep 14 2022 09:26:44 GMT-0600 (Mountain Daylight Time).png';
-    const redFilename = 'red.png';
-    const greenFilename = 'green.png';
-    const blueFilename = 'blue.png';
-
-    const requestPictureFunction = (filename: string) => {
-        socket.emit('picture_request', {filename: filename});
-    };
-
-    const unsubscribeFunction = (filename: string) => {
-        socket.emit('unsubscribe', filename);
-    }
 
     const updateCanvas = useCallback((): void => {
         if (raster.width === 0 || raster.height === 0) {
@@ -68,8 +54,8 @@ function Canvas() {
         const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
         const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
         const pixelUpdate = {
-            filename: blueFilename, // TJTAG TODO this is hard coded
-            createdBy: 'tj',
+            filename: picture.filename,
+            createdBy: 'tj', // TODO usernames
             x: x,
             y: y,
             red: 255,
@@ -94,6 +80,12 @@ function Canvas() {
 
         socket.removeListener('server_to_client_update');
         socket.on('server_to_client_update', updateImageData);
+
+
+        socket.emit('picture_request', {filename: picture.filename});
+        return () => {
+            socket.emit('unsubscribe', picture.filename);
+        };
     }, [socket, picture_response_callback]);
 
     return (
@@ -105,22 +97,6 @@ function Canvas() {
 
             <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/pictures");}}>Pictures</button></p>
             <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/new-picture");}}>New Picture</button></p>
-
-            <button onClick={() => { requestPictureFunction(filename) }} >
-                request white picture
-            </button>
-            <button onClick={() => { requestPictureFunction(redFilename) }} >
-                request red picture
-            </button>
-            <button onClick={() => { requestPictureFunction(greenFilename) }} >
-                request green picture
-            </button>
-            <button onClick={() => { requestPictureFunction(blueFilename) }} >
-                request blue picture
-            </button>
-            <button onClick={() => { unsubscribeFunction(blueFilename) }} >
-                unsubscribe
-            </button>
 
             <br/>
 
