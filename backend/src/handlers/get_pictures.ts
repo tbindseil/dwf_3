@@ -28,11 +28,11 @@ export class GetPictures extends API {
                 pictures: result.rows.map((row: any) => { return {
                     id: row.id,
                     name: row.name,
-                    createdBy: row.createdBy,
+                    createdBy: row.createdby, // Heads up! createdby instead of createdBy
                     filename: row.filename,
                     filesystem: row.filesystem
                 }})
-            }
+            };
         } catch (error) {
             throw new APIError(500, 'database issue, pictures not fetched');
         }

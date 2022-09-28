@@ -29,7 +29,8 @@ export default class BroadcastMediator {
 
     public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
         console.log(`adding client, filename: ${filename} and socket id: ${socket.id}`);
-        if (!filename) {
+        if (!filename) { // TODO ....
+            console.log('heads up, returning early')
             return;
         }
 

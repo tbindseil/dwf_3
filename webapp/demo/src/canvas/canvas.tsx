@@ -80,13 +80,14 @@ function Canvas() {
 
         socket.removeListener('server_to_client_update');
         socket.on('server_to_client_update', updateImageData);
+    }, [socket, picture_response_callback]);
 
-
+    useEffect(() => {
         socket.emit('picture_request', {filename: picture.filename});
         return () => {
             socket.emit('unsubscribe', picture.filename);
         };
-    }, [socket, picture_response_callback]);
+    }, []);
 
     return (
         <div className="Canvas">

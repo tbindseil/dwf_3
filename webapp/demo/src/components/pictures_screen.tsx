@@ -39,7 +39,7 @@ export function PicturesScreen() {
                 pictures.map(picture => {
                     return (
                         <button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; goToPicture(picture)}}>
-                            {picture.name} by {picture.createdBy}
+                            {`${picture.name} by ${picture.createdBy}`}
                         </button>
                     );
                 })
