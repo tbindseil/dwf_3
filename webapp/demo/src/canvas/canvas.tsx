@@ -3,9 +3,18 @@ import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Canvas() {
+    const location = useLocation();
+    const picture = location?.state?.picture; // next two things, request picture explicitly, not just upon connection, and also new pictures
+
     const socket = useContext(SocketContext);
+
+    const navigate = useNavigate();
+    const go = (url: string) => {
+        navigate(url);
+    };
 
     const [raster, setRaster] = useState(new Raster(0, 0, new ArrayBuffer(0)));
 
@@ -93,6 +102,10 @@ function Canvas() {
             <p>
                 its time to show the raster
             </p>
+
+            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/pictures");}}>Pictures</button></p>
+            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/new-picture");}}>New Picture</button></p>
+
             <button onClick={() => { requestPictureFunction(filename) }} >
                 request white picture
             </button>

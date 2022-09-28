@@ -27,8 +27,11 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
+    public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
         console.log(`adding client, filename: ${filename} and socket id: ${socket.id}`);
+        if (!filename) {
+            return;
+        }
 
         if (!this.filenameToClients.has(filename)) {
             this.filenameToClients.set(filename, new Map());

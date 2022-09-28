@@ -1,30 +1,21 @@
-import { useCallback, useContext, useEffect, useState, useRef } from 'react';
-import { SocketContext } from '../context/socket';
+import { useEffect, useState} from 'react';
+import { useNavigate } from "react-router-dom";
 import { Picture } from 'dwf-3-models-tjb';
 
 
-
-
 export function PicturesScreen() {
-
-    // fetch pictures
-    // display each as a button
-
-    const socket = useContext(SocketContext);
+    const navigate = useNavigate();
 
     const [pictures, setPictures] = useState<Picture[]>([]);
 
     const fetchPictures = () => {
-        // const pictures = 
         fetch('http://localhost:8080/pictures', {
-                method: 'GET'
-                // mode: 'cors',
-                // headers: props.headers,
-                // body: props.body
+                method: 'GET',
+                mode: 'cors',
             })
                 .then(result => result.json())
                 .then(
-                    result => console.log(`result is: ${result}`),
+                    result => setPictures(result.pictures),
                     error => console.log(`first catch and error is: ${error}`)
                 )
                 .catch(error => console.log(`last catch and error is: ${error}`));
@@ -34,8 +25,8 @@ export function PicturesScreen() {
         fetchPictures();
     }, []);
 
-    const requestPictureFunction = (filename: string) => {
-        socket.emit('picture_request', {filename: filename});
+    const goToPicture = (picture: Picture) => {
+        navigate('/picture', {state: {picture: picture, replace: true}});
     };
 
     return (
@@ -44,34 +35,15 @@ export function PicturesScreen() {
             <h2>
                 Pic Your Pic
             </h2>
+            {
+                pictures.map(picture => {
+                    return (
+                        <button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; goToPicture(picture)}}>
+                            {picture.name} by {picture.createdBy}
+                        </button>
+                    );
+                })
+            }
         </div>
     );
 }
-
-/*
-
-            <button onClick={() => { requestPictureFunction(filename) }} >
-                request white picture
-            </button>
-            <button onClick={() => { requestPictureFunction(redFilename) }} >
-                request red picture
-            </button>
-            <button onClick={() => { requestPictureFunction(greenFilename) }} >
-                request green picture
-            </button>
-            <button onClick={() => { requestPictureFunction(blueFilename) }} >
-                request blue picture
-            </button>
-            <button onClick={() => { unsubscribeFunction(blueFilename) }} >
-                unsubscribe
-            </button>
-
-            <br/>
-
-            <canvas id='canvas'
-                    ref={canvasRef}
-                    onClick={click}>
-            </canvas>
-
-
- */

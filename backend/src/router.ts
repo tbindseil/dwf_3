@@ -44,8 +44,16 @@ export default class Router {
             // i think i might actually want a db of updates
             // this is because the client could disconnect and reconnect, and at that point, we either resync the photo or use the db to get the missed updates
             const output = await this.methods.get(key)!.call(body)
-            res.statusCode = 200;
-            res.setHeader('Content-Type', this.methods.get(key)!.getContentType());
+
+            const headers = {
+                'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
+                'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+                'Access-Control-Max-Age': 2592000, // 30 days
+                /** add other headers as per requirement */
+                'Content-Type': this.methods.get(key)!.getContentType()
+            };
+
+            res.writeHead(200, headers);
             res.write(output);
             res.end();
         } catch (error: any) {
