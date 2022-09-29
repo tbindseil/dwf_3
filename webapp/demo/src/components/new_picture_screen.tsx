@@ -68,5 +68,3 @@ export function NewPictureScreen() {
         </div>
     );
 }
-                // placeHolder={'Created By:'}/>
-                // for={'createdBy'}>

@@ -45,6 +45,7 @@ export default class Router {
             // this is because the client could disconnect and reconnect, and at that point, we either resync the photo or use the db to get the missed updates
             const output = await this.methods.get(key)!.call(body)
 
+            // TODO can i get rid of these?
             const headers = {
                 'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
                 'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
