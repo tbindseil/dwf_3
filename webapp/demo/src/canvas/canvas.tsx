@@ -51,8 +51,8 @@ function Canvas() {
 
     const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
         // for now just gonna do white pixels
-        const x = event.clientX - (canvasRef.current?.offsetLeft ?? 0);
-        const y = event.clientY - (canvasRef.current?.offsetTop ?? 0);
+        const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
+        const y = event.pageY - (canvasRef.current?.offsetTop ?? 0);
         const pixelUpdate = {
             filename: picture.filename,
             createdBy: 'tj', // TODO usernames
