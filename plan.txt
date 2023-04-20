@@ -9,6 +9,16 @@ TODO
 7. wrap " console.log(`blank is: ${blank}`); "
 
 
+ok, i think i would like to go a different direction
+I think the client should just stream (the differences), and the server should save
+
+so,
+canvas.click sends pixel update to server, but does not update the image
+the server then receives and broadcasts to all clients, including the sender
+this way, the server is ensuring a consistent order,
+this will likely involve an ack on the client end to ensure that the updates are received before sending the next
+
+
 
 color order
 // red: 0xff, 0x00, 0x00, 0xff

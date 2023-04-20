@@ -36,6 +36,7 @@ const server = http.createServer(function (req: any, res: any) {
     console.log(`${req.method} request received at ${req.url}`);
 
 
+
     const headers = {
         'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
         'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT',
