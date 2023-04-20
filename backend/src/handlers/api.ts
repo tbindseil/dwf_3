@@ -1,4 +1,10 @@
+import {Request, Response} from 'express';
+import APIError from './api_error';
+
 export default class API {
+    public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
+    public static readonly DEFAULT_ERROR_MSG = JSON.stringify({'msg': 'unknown error'});
+
     private method: string;
     private entity: string;
 
@@ -7,13 +13,29 @@ export default class API {
         this.entity = entity;
     }
 
-    public async call(body: any): Promise<string> {
-        const input = this.getInput(body);
-        const output = await this.process(input);
+    public async call(req: Request, res: Response) {
+        try {
+            const input = this.getInput(req.body);
+            const output = await this.process(input);
 
-        const serialized_output = this.serializeOutput(output);
+            const serialized_output = this.serializeOutput(output);
 
-        return serialized_output;
+            res.set('Content-Type', this.getContentType());
+            res.sendStatus(200);
+            res.send(serialized_output);
+        } catch (error: any) {
+            let body, statusCode;
+            if (error instanceof APIError) {
+                body = error.message;
+                statusCode = error.statusCode;
+            } else {
+                console.error(`error is: ${error}`);
+                statusCode = API.DEFAULT_ERROR_STATUS_CODE;
+                body = API.DEFAULT_ERROR_MSG;
+            }
+            res.sendStatus(statusCode);
+            res.send(body);
+        }
     }
 
     public getInput(body: any): any {
