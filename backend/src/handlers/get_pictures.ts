@@ -28,7 +28,7 @@ export class GetPictures extends API {
                 pictures: result.rows.map((row: any) => { return {
                     id: row.id,
                     name: row.name,
-                    createdBy: row.createdby, // Heads up! createdby instead of createdBy
+                    createdBy: row.createdby ? row.createdby : row.createdBy, // Heads up! createdby instead of createdBy - postgres is case insensitive
                     filename: row.filename,
                     filesystem: row.filesystem
                 }})
