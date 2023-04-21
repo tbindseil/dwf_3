@@ -1,7 +1,6 @@
 import {Request, Response} from 'express';
-import APIError from './api_error';
 
-export default class API {
+export default abstract class API {
     public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
     public static readonly DEFAULT_ERROR_MSG = JSON.stringify({'msg': 'unknown error'});
 
@@ -24,15 +23,9 @@ export default class API {
         res.send(serialized_output);
     }
 
-    public getInput(body: any): any {
-        body;
-        throw new Error('api.getInput not implemented');
-    }
+    public abstract getInput(body: any): any;
 
-    public async process(input: any): Promise<any> {
-        input;
-        throw new Error('api.process not implemented');
-    }
+    public abstract process(input: any): Promise<any>;
 
     public getMethod() {
         return this.method;

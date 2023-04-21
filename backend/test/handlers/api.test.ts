@@ -1,10 +1,6 @@
 import {Request, Response} from 'express';
 import API from '../../src/handlers/api';
 
-// jest.mock('express');
-// const MockRequest = jest.mocked(Request, true);
-// const MockResponse = jest.mocked(Response, true);
-
 const method = 'METHOD';
 const entity = 'ENTITY';
 
@@ -14,7 +10,7 @@ const serializedSpecialOutput = JSON.stringify({ test: 'SPECIAL_OUTPUT' });
 
 
 class TestAPI extends API {
-    constructor(entity: string, method: string) {
+    constructor(method: string, entity: string) {
         super(method, entity);
     }
 
@@ -36,7 +32,7 @@ class TestAPI extends API {
 describe('API Tests', () => {
     let api: API;
     beforeEach(() => {
-        api = new API(method, entity);
+        api = new TestAPI(method, entity);
     });
 
     it('calls', async () => {
@@ -52,14 +48,6 @@ describe('API Tests', () => {
         expect(res.set).toHaveBeenCalledWith('Content-Type', 'application/json');
         expect(res.sendStatus).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith(serializedSpecialOutput);
-    });
-
-    it('throws on getInput', () => {
-        expect(() => api.getInput({})).toThrow('api.getInput not implemented');
-    });
-
-    it('throws on process', async () => {
-        await expect(api.process({})).rejects.toThrow('api.process not implemented');
     });
 
     it('method getter', () => {
