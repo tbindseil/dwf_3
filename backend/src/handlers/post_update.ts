@@ -2,12 +2,13 @@ import {
     PostUpdateInput,
     PostUpdateOutput
 } from 'dwf-3-models-tjb';
+import IDB from '../db';
 import API from './api';
 
 
 export class PostUpdate extends API {
-    constructor() {
-        super('POST', 'update');
+    constructor(db: IDB) {
+        super(db, 'POST', 'update');
     }
 
     // public getInput(body: any): PostUpdateInput {
@@ -17,8 +18,9 @@ export class PostUpdate extends API {
         // return {body.};
     }
 
-    public async process(input: PostUpdateInput): Promise<PostUpdateOutput> {
+    public async process(db: IDB, input: PostUpdateInput): Promise<PostUpdateOutput> {
         console.log('PostUpdate.process');
+        db;
         input;
         return {
             msg: 'received udpate'

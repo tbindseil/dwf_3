@@ -1,10 +1,20 @@
 import { PostPicture } from '../../src/handlers/post_picture';
 import APIError from '../../src/handlers/api_error';
-import * as db from '../../src/db';
+import IDB from '../../src/db';
 import LocalPictureAccessor from '../../src/picture_accessor/local_picture_accessor';
 
-jest.mock('../../src/db');
-const mockQuery = jest.mocked(db.query, true);
+// jest.mock('../../src/db');
+// const mockQuery = jest.mocked(db.query, true);
+// jest.mock('../../src/db');
+// const mockQuery = jest.mocked(DB.query, true);
+// const mockDB = jest.genMockFromModule<DB>('db');
+// const mockDB = jest.mock<DB>('db');
+// mockDB.
+const mockQuery = jest.fn();
+const mockDB = {
+    query: mockQuery
+} as IDB;
+
 jest.mock('../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
@@ -29,7 +39,7 @@ describe('PostPicture Tests', () => {
         mockJimpAdapter.createJimp.mockClear();
         mockJimpAdapter.read.mockClear();
         mockLocalPictureAccessorInstance = new LocalPictureAccessor(mockJimpAdapter, prototypeFileName, baseDirectory);
-        postPicture = new PostPicture(mockLocalPictureAccessorInstance);
+        postPicture = new PostPicture(mockDB, mockLocalPictureAccessorInstance);
     });
 
     it('gets the name and createdBy from the input', () => {
@@ -48,7 +58,7 @@ describe('PostPicture Tests', () => {
     it('creates a new image with the expected createdBy', async () => {
         const mockCreateNewPicture = mockLocalPictureAccessorInstance.createNewPicture as jest.Mock;
 
-        await postPicture.process(body);
+        await postPicture.process(mockDB, body);
 
         expect(mockCreateNewPicture).toHaveBeenCalledTimes(1);
         expect(mockCreateNewPicture).toHaveBeenCalledWith(name, createdBy);
@@ -62,7 +72,7 @@ describe('PostPicture Tests', () => {
         const mockGetFileSystem = mockLocalPictureAccessorInstance.getFileSystem as jest.Mock;
         mockGetFileSystem.mockImplementation(() => { return filesystem; });
 
-        await postPicture.process(body);
+        await postPicture.process(mockDB, body);
 
         const expectedQuery = 'insert into picture (name, createdBy, filename, filesystem) values ($1, $2, $3, $4);'
         const expectedParams = [name, createdBy, filename, filesystem];
@@ -73,11 +83,11 @@ describe('PostPicture Tests', () => {
     it('throws an api error when the creation of the new picture fails', async () => {
         const mockCreateNewPicture = mockLocalPictureAccessorInstance.createNewPicture as jest.Mock;
         mockCreateNewPicture.mockImplementation((pictureName: string, createdBy: string) => { pictureName; createdBy; throw new Error(); });
-        await expect(postPicture.process(body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
+        await expect(postPicture.process(mockDB, body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
     });
 
     it('throws an api error when the database query fails', async () => {
         mockQuery.mockImplementation((query: string, params: any[]) => { query; params; throw new Error(); });
-        await expect(postPicture.process(body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
+        await expect(postPicture.process(mockDB, body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
     });
 });

@@ -4,15 +4,15 @@ import {
 } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
-import * as db from '../db';
+import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
 
 export class GetPicture extends API {
     private readonly pictureAccessor: PictureAccessor;
 
-    constructor(pictureAccessor: PictureAccessor) {
-        super('GET', 'picture');
+    constructor(db: IDB, pictureAccessor: PictureAccessor) {
+        super(db, 'GET', 'picture');
 
         this.pictureAccessor = pictureAccessor;
     }
@@ -27,7 +27,7 @@ export class GetPicture extends API {
         }
     }
 
-    public async process(input: GetPictureInput): Promise<GetPictureOutput> {
+    public async process(db: IDB, input: GetPictureInput): Promise<GetPictureOutput> {
         const query = 'select filename from picture where id = $1;'
         const params = [input.id];
 

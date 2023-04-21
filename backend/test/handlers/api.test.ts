@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import API from '../../src/handlers/api';
+import IDB from '../../src/db';
 
 const method = 'METHOD';
 const entity = 'ENTITY';
@@ -10,8 +11,8 @@ const serializedSpecialOutput = JSON.stringify({ test: 'SPECIAL_OUTPUT' });
 
 
 class TestAPI extends API {
-    constructor(method: string, entity: string) {
-        super(method, entity);
+    constructor(db: IDB, method: string, entity: string) {
+        super(db, method, entity);
     }
 
     public getInput(req: any): any {
@@ -19,7 +20,8 @@ class TestAPI extends API {
         return specialInput;
     }
 
-    public async process(input: any): Promise<any> {
+    public async process(db: IDB, input: any): Promise<any> {
+        db;
         if (input === specialInput) {
             return specialOutput;
         } else {
@@ -30,9 +32,10 @@ class TestAPI extends API {
 
 
 describe('API Tests', () => {
+    const mockDB = {} as IDB;
     let api: API;
     beforeEach(() => {
-        api = new TestAPI(method, entity);
+        api = new TestAPI(mockDB, method, entity);
     });
 
     it('calls', async () => {
@@ -44,7 +47,7 @@ describe('API Tests', () => {
             send: jest.fn()
         } as unknown as Response;
 
-        const api = new TestAPI(entity, method);
+        const api = new TestAPI(mockDB, entity, method);
         await api.call(req, res);
         expect(res.set).toHaveBeenCalledWith('Content-Type', 'application/json');
         expect(res.sendStatus).toHaveBeenCalledWith(200);

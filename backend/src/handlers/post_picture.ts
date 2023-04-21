@@ -4,15 +4,15 @@ import {
 } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
-import * as db from '../db';
+import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
 
 export class PostPicture extends API {
     private pictureAccessor: PictureAccessor;
 
-    constructor (pictureAccessor: PictureAccessor) {
-        super('POST', 'picture');
+    constructor (db: IDB, pictureAccessor: PictureAccessor) {
+        super(db, 'POST', 'picture');
 
         this.pictureAccessor = pictureAccessor;
     }
@@ -28,7 +28,7 @@ export class PostPicture extends API {
         }
     }
 
-    public async process(input: PostPictureInput): Promise<PostPictureOutput> {
+    public async process(db: IDB, input: PostPictureInput): Promise<PostPictureOutput> {
         const name = input.name;
         const createdBy = input.createdBy;
         const filesystem = this.pictureAccessor.getFileSystem();

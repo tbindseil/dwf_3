@@ -1,20 +1,23 @@
 import {Request, Response} from 'express';
+import IDB from '../db';
 
 export default abstract class API {
     public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
     public static readonly DEFAULT_ERROR_MSG = JSON.stringify({'msg': 'unknown error'});
 
-    private method: string;
-    private entity: string;
+    private readonly db: IDB;
+    private readonly method: string;
+    private readonly entity: string;
 
-    constructor(method: string, entity: string) {
+    constructor(db: IDB, method: string, entity: string) {
+        this.db = db;
         this.method = method;
         this.entity = entity;
     }
 
     public async call(req: Request, res: Response) {
         const input = this.getInput(req.body);
-        const output = await this.process(input);
+        const output = await this.process(this.db, input);
 
         const serialized_output = this.serializeOutput(output);
 
@@ -25,7 +28,7 @@ export default abstract class API {
 
     public abstract getInput(body: any): any;
 
-    public abstract process(input: any): Promise<any>;
+    public abstract process(db: IDB, input: any): Promise<any>;
 
     public getMethod() {
         return this.method;

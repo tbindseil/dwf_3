@@ -5,8 +5,8 @@ import {Server, Socket} from 'socket.io';
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
-import { pictureRequestHandler, updateHandler } from './socket_functions';
 
+import {DB} from './db';
 import {
     GetPictures,
     GetPicture,
@@ -14,8 +14,18 @@ import {
     PostUpdate,
 } from './handlers/index';
 
-import { PictureRequest, PixelUpdate } from 'dwf-3-models-tjb';
-import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from 'dwf-3-models-tjb';
+import { pictureRequestHandler, updateHandler } from './socket_functions';
+
+import {
+    PictureRequest,
+    PixelUpdate,
+    ServerToClientEvents,
+    ClientToServerEvents,
+    InterServerEvents,
+    SocketData
+} from 'dwf-3-models-tjb';
+
+import {Pool} from 'pg';
 
 // TODO handle api errors specifically
 const app: Express = express();
@@ -28,22 +38,21 @@ const pictureAccessor = new LocalPictureAccessor(jimpAdapter, prototypeFileName,
 
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
-// TODO db should be injected below
+// TODO inject db (and pictureArray?) via middleware
+const pool = new Pool();
+const db = new DB(pool);
 
 app.get('pictures', async (req: Request, res: Response) => {
-    new GetPictures().call(req, res);
+    new GetPictures(db).call(req, res);
 });
-
 app.get('picture', (req: Request, res: Response) => {
-    new GetPicture(pictureAccessor).call(req, res);
+    new GetPicture(db, pictureAccessor).call(req, res);
 });
-
 app.post('picture', (req: Request, res: Response) => {
-    new PostPicture(pictureAccessor).call(req, res);
+    new PostPicture(db, pictureAccessor).call(req, res);
 });
-
 app.get('update', (req: Request, res: Response) => {
-    new PostUpdate().call(req, res);
+    new PostUpdate(db).call(req, res);
 });
 
 
