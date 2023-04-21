@@ -1,4 +1,9 @@
+import {Request, Response} from 'express';
 import API from '../../src/handlers/api';
+
+// jest.mock('express');
+// const MockRequest = jest.mocked(Request, true);
+// const MockResponse = jest.mocked(Response, true);
 
 const method = 'METHOD';
 const entity = 'ENTITY';
@@ -15,7 +20,7 @@ class TestAPI extends API {
 
     public getInput(req: any): any {
         req;
-        return specialInput
+        return specialInput;
     }
 
     public async process(input: any): Promise<any> {
@@ -35,9 +40,18 @@ describe('API Tests', () => {
     });
 
     it('calls', async () => {
-//         const api = new TestAPI(entity, method);
-//         const result = await api.call({});
-//         expect(result).toEqual(serializedSpecialOutput);
+        const req = { body: specialInput } as Request;
+        const res = {
+            set: jest.fn(),
+            sendStatus: jest.fn(),
+            send: jest.fn()
+        } as unknown as Response;
+
+        const api = new TestAPI(entity, method);
+        await api.call(req, res);
+        expect(res.set).toHaveBeenCalledWith('Content-Type', 'application/json');
+        expect(res.sendStatus).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(serializedSpecialOutput);
     });
 
     it('throws on getInput', () => {

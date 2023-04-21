@@ -32,6 +32,10 @@ describe('GetPicture Tests', () => {
         expect(input).toEqual(body);
     });
 
+    it('throws an api error when the input is missing id field', () => {
+        expect(() => getPicture.getInput({})).toThrow(new APIError(400, 'id must be provided, picture not returned'));
+    });
+
     it('gets the filename from the database, requests picture contents, and returns them', async () => {
         const expectedFilename = 'filename';
         const filenameArray = [{filename: expectedFilename}];

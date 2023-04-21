@@ -14,28 +14,14 @@ export default class API {
     }
 
     public async call(req: Request, res: Response) {
-        try {
-            const input = this.getInput(req.body);
-            const output = await this.process(input);
+        const input = this.getInput(req.body);
+        const output = await this.process(input);
 
-            const serialized_output = this.serializeOutput(output);
+        const serialized_output = this.serializeOutput(output);
 
-            res.set('Content-Type', this.getContentType());
-            res.sendStatus(200);
-            res.send(serialized_output);
-        } catch (error: any) {
-            let body, statusCode;
-            if (error instanceof APIError) {
-                body = error.message;
-                statusCode = error.statusCode;
-            } else {
-                console.error(`error is: ${error}`);
-                statusCode = API.DEFAULT_ERROR_STATUS_CODE;
-                body = API.DEFAULT_ERROR_MSG;
-            }
-            res.sendStatus(statusCode);
-            res.send(body);
-        }
+        res.set('Content-Type', this.getContentType());
+        res.sendStatus(200);
+        res.send(serialized_output);
     }
 
     public getInput(body: any): any {
