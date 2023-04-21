@@ -13,10 +13,6 @@ export class DB implements IDB {
 
     // TODO this is not transactional, see https://node-postgres.com/api/pool#poolquery
     public async query(text: string, params: string[]): Promise<any> {
-        try {
-            return await this.pool.query(text, params);
-        } catch (error) {
-            throw error;
-        }
+        return await this.pool.query(text, params);
     }
 }

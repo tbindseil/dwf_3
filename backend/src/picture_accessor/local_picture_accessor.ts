@@ -82,7 +82,6 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
     public async writeRaster(raster: Raster): Promise<void> {
         const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
-        console.log(`jimp stringified is: ${JSON.stringify(jimg)}`);
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
