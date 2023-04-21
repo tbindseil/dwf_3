@@ -17,6 +17,7 @@ import {
 import { PictureRequest, PixelUpdate } from 'dwf-3-models-tjb';
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from 'dwf-3-models-tjb';
 
+// TODO handle api errors specifically
 const app: Express = express();
 
 

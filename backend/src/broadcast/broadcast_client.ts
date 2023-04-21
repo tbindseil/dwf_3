@@ -22,4 +22,8 @@ export default class BroadcastClient extends Client {
             this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }
+
+    public forcePictureWrite() {
+
+    }
 }
