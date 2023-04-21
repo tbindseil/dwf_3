@@ -14,6 +14,10 @@ describe('GetPicture Tests', () => {
 
     // TODO this picture accessor mock stuff is duplicated
     // also, its probably only necessary to mock a PictureAccessor, not a LocalPictureAccessor
+    const mockJimpAdapter = {
+        createJimp: jest.fn(),
+        read: jest.fn(),
+    };
     const prototypeFileName = 'prototypeFileName';
     const baseDirectory = 'baseDirectory';
     let mockLocalPictureAccessorInstance: LocalPictureAccessor;
@@ -23,7 +27,9 @@ describe('GetPicture Tests', () => {
     beforeEach(() => {
         mockQuery.mockClear();
         mockLocalPictureAccessor.mockClear();
-        mockLocalPictureAccessorInstance = new LocalPictureAccessor(prototypeFileName, baseDirectory);
+        mockJimpAdapter.createJimp.mockClear();
+        mockJimpAdapter.read.mockClear();
+        mockLocalPictureAccessorInstance = new LocalPictureAccessor(mockJimpAdapter, prototypeFileName, baseDirectory);
         getPicture = new GetPicture(mockLocalPictureAccessorInstance);
     });
 

@@ -4,6 +4,7 @@ import {Server, Socket} from 'socket.io';
 
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
+import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 import { pictureRequestHandler, updateHandler } from './socket_functions';
 
 import {
@@ -21,7 +22,8 @@ const app: Express = express();
 
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
-const pictureAccessor = new LocalPictureAccessor(prototypeFileName, baseDirectory);
+const jimpAdapter = new JimpAdapterImpl();
+const pictureAccessor = new LocalPictureAccessor(jimpAdapter, prototypeFileName, baseDirectory);
 
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
 

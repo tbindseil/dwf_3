@@ -1,19 +1,22 @@
 import PictureAccessor from './picture_accessor';
 import generatePictureFilename from './filename_generator';
+import JimpAdapter from './jimp_adapter';
 import * as fs from 'fs';
 import path from 'path';
-import Jimp from 'jimp';
 import { PictureResponse } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
+    private readonly jimpAdapter: JimpAdapter;
     private readonly prototypeFileName: string;
     private readonly baseDirectory: string;
 
     private readonly testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
 
-    constructor(prototypeFileName: string, baseDirectory: string) {
+    constructor(jimpAdapter: JimpAdapter, prototypeFileName: string, baseDirectory: string) {
         super();
+
+        this.jimpAdapter = jimpAdapter;
         this.prototypeFileName = prototypeFileName;
         this.baseDirectory = baseDirectory;
     }
@@ -45,7 +48,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
         const buffer = Buffer.from(asArray);
 
         // Jimp.write(buffer);
-        const jimg = new Jimp(width, height);
+        // const jimg = new Jimp(width, height);
+        const jimg = this.jimpAdapter.createJimp(width, height);
 
         jimg.bitmap.data = buffer;
         const filename = `sample_${width}_${height}.png`;
@@ -66,7 +70,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async getRaster(filename: string): Promise<PictureResponse> {
-        const contents = await Jimp.read(path.join(this.baseDirectory, filename))
+        const contents = await this.jimpAdapter.read(path.join(this.baseDirectory, filename));
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,
@@ -75,10 +79,10 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async writeRaster(raster: Raster): Promise<void> {
-        const jimg = new Jimp(raster.width, raster.height);
+        const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
-        //
+
         // TODO why isn't this blocking?
         jimg.write(path.join(this.testDirectory, 'writter_from_raster.png'));
     }

@@ -7,6 +7,12 @@ jest.mock('../../src/picture_accessor/filename_generator');
 const mockGeneratePictureFilename = jest.mocked(generatePictureFilename, true);
 
 describe('LocalPictureAccessor tests', () => {
+    // TODO, I wonder if I could write a more generatic basic mock factory? Maybe that is already done by jest
+    const mockJimpAdapter = {
+        createJimp: jest.fn(),
+        read: jest.fn(),
+    };
+
     const testBaseDirectory = '/Users/tj/Projects/dwf_3/test_pictures/user_created/';
     const testPrototype = '/Users/tj/Projects/dwf_3/test_pictures/default/solid_white.png';
 
@@ -17,7 +23,7 @@ describe('LocalPictureAccessor tests', () => {
 
     mockGeneratePictureFilename.mockImplementation((pictureName: string, createdBy: string) => { pictureName; createdBy; return filename; });
 
-    let localPictureAccessor = new LocalPictureAccessor(testPrototype, testBaseDirectory);
+    let localPictureAccessor = new LocalPictureAccessor(mockJimpAdapter, testPrototype, testBaseDirectory);
 
     afterEach(async () => {
         try {
@@ -44,5 +50,17 @@ describe('LocalPictureAccessor tests', () => {
     it('throws an exception when the requested filename already exists', async () => {
         await localPictureAccessor.createNewPicture(pictureName, createdBy);
         await expect(localPictureAccessor.createNewPicture(pictureName, createdBy)).rejects.toThrow();
+    });
+
+    it('gets the picture given the filename', async () => {
+
+    });
+
+    it('throws when there is an issue reading the file', async () => {
+
+    });
+
+    it('gets the raster given the filename', async () => {
+
     });
 });

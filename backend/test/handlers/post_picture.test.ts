@@ -13,6 +13,10 @@ describe('PostPicture Tests', () => {
     const createdBy = 'createdBy';
     const body = { name: name, createdBy: createdBy };
 
+    const mockJimpAdapter = {
+        createJimp: jest.fn(),
+        read: jest.fn(),
+    };
     const prototypeFileName = 'prototypeFileName';
     const baseDirectory = 'baseDirectory';
     let mockLocalPictureAccessorInstance: LocalPictureAccessor;
@@ -22,7 +26,9 @@ describe('PostPicture Tests', () => {
     beforeEach(() => {
         mockQuery.mockClear();
         mockLocalPictureAccessor.mockClear();
-        mockLocalPictureAccessorInstance = new LocalPictureAccessor(prototypeFileName, baseDirectory);
+        mockJimpAdapter.createJimp.mockClear();
+        mockJimpAdapter.read.mockClear();
+        mockLocalPictureAccessorInstance = new LocalPictureAccessor(mockJimpAdapter, prototypeFileName, baseDirectory);
         postPicture = new PostPicture(mockLocalPictureAccessorInstance);
     });
 

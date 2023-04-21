@@ -47,6 +47,8 @@ export default class BroadcastMediator {
     // first, remove the client that is disconnecting
     // then, if only one client left,
     // make sure its the broadcast client and remove that
+    //
+    // revisiting, this can be done much cleaner using the features of socket.io
     public removeClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): void {
         console.log(`remove client, filename: ${filename} and socket id: ${socket.id}`);
 
