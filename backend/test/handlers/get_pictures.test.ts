@@ -19,10 +19,14 @@ describe('GetPictures Tests', () => {
     });
 
     it('calls db query when procesing', async () => {
+        const dbQueryOutput = {
+            pictures: [{id: 1, name: 'name', createdby: 'createdBy', filename: 'filename', filesystem: 'filesystem'}]
+        };
+
         const pictureArray = {
             pictures: [{id: 1, name: 'name', createdBy: 'createdBy', filename: 'filename', filesystem: 'filesystem'}]
         };
-        mockQuery.mockImplementation((query: string, params: any[]) => { query; params; return new Promise((resolve, reject) => { reject; resolve({ rows: pictureArray.pictures })}); });
+        mockQuery.mockImplementation((query: string, params: any[]) => { query; params; return new Promise((resolve, reject) => { reject; resolve({ rows: dbQueryOutput.pictures })}); });
         const result = await getPictures.process({});
 
         expect(mockQuery).toHaveBeenCalledTimes(1);
