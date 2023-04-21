@@ -7,11 +7,13 @@ import { PictureResponse } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
+    public static testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
+    public static rasterWriteFileName = 'written_from_raster.png';
+
     private readonly jimpAdapter: JimpAdapter;
     private readonly prototypeFileName: string;
     private readonly baseDirectory: string;
 
-    private readonly testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
 
     constructor(jimpAdapter: JimpAdapter, prototypeFileName: string, baseDirectory: string) {
         super();
@@ -34,29 +36,29 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
 
     public createNewPicture_with_dimensions(width_supplied: number): string {
-        const phi = (1 + Math.sqrt(5)) / 2; // roughly 1.618033988749894
-        const width = 1000;
-        const height = Math.ceil(width * phi);
-
-        const asArray = new Uint8ClampedArray(4 * width * height);
-        for (let i = 0; i < asArray.length; ++i) {
-            if (i % 4 === 3) {
-                asArray[i] = 0xff;
-            }
-        }
-
-        const buffer = Buffer.from(asArray);
-
-        // Jimp.write(buffer);
-        // const jimg = new Jimp(width, height);
-        const jimg = this.jimpAdapter.createJimp(width, height);
-
-        jimg.bitmap.data = buffer;
-        const filename = `sample_${width}_${height}.png`;
-        const testDirectory = '/Users/tj/Projects/dwf_3/pictures/test';
-        jimg.write(path.join(testDirectory, filename));
-
-        return filename;
+//         const phi = (1 + Math.sqrt(5)) / 2; // roughly 1.618033988749894
+//         const width = 1000;
+//         const height = Math.ceil(width * phi);
+// 
+//         const asArray = new Uint8ClampedArray(4 * width * height);
+//         for (let i = 0; i < asArray.length; ++i) {
+//             if (i % 4 === 3) {
+//                 asArray[i] = 0xff;
+//             }
+//         }
+// 
+//         const buffer = Buffer.from(asArray);
+// 
+//         // Jimp.write(buffer);
+//         // const jimg = new Jimp(width, height);
+//         const jimg = this.jimpAdapter.createJimp(width, height);
+// 
+//         jimg.bitmap.data = buffer;
+//         const filename = `sample_${width}_${height}.png`;
+//         jimg.write(path.join(LocalPictureAccessor.testDirectory, filename));
+// 
+//         return filename;
+        return 'TODO';
     }
 
 
@@ -80,11 +82,11 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
     public async writeRaster(raster: Raster): Promise<void> {
         const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
+        console.log(`jimp stringified is: ${JSON.stringify(jimg)}`);
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
-        // TODO why isn't this blocking?
-        jimg.write(path.join(this.testDirectory, 'writter_from_raster.png'));
+        await jimg.writeAsync(path.join(LocalPictureAccessor.testDirectory, LocalPictureAccessor.rasterWriteFileName));
     }
 
     public getFileSystem(): string {

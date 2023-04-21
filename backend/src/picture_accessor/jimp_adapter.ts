@@ -6,16 +6,17 @@ type JimpReadResult = ReturnType<typeof jimp_read>;
 
 interface JimpAdapter {
     createJimp: (w: number, h: number) => Jimp,
-    read: (path: string) => JimpReadResult
+    read: (path: string) => Promise<JimpReadResult>
 }
 
 export default class JimpAdapterImpl implements JimpAdapter {
 
     public createJimp(w: number, h: number): Jimp {
+        console.log('creating jimp');
         return new Jimp(w, h);
     }
 
-    public read(path: string): JimpReadResult {
-        return Jimp.read(path);
+    public async read(path: string): Promise<JimpReadResult> {
+        return await Jimp.read(path);
     }
 }
