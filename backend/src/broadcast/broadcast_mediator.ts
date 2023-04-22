@@ -30,10 +30,6 @@ export default class BroadcastMediator {
     // TODO type alias for Socket<Cli....
     public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
         console.log(`adding client, filename: ${filename} and socket id: ${socket.id}`);
-        if (!filename) { // TODO ....
-            console.log('heads up, returning early')
-            return;
-        }
 
         if (!this.filenameToClients.has(filename)) {
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
@@ -57,13 +53,11 @@ export default class BroadcastMediator {
         console.log(`remove client, filename: ${filename} and socket id: ${socket.id}`);
 
         if (!this.filenameToClients.has(filename)) {
-            console.warn(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
-            return;
+            throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
         }
 
         if (!this.filenameToClients.get(filename)?.has(socket.id)) {
-            console.warn(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
-            return;
+            throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
         }
 
         // temporary to test saving of file
@@ -75,7 +69,7 @@ export default class BroadcastMediator {
                 this.filenameToClients.get(filename)?.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                 this.filenameToClients.delete(filename);
             } else {
-                console.log(`heads up, last client for filename: ${filename} is not the broadcast client`);
+                throw new Error(`heads up, last client for filename: ${filename} is not the broadcast client`);
             }
         }
     }
