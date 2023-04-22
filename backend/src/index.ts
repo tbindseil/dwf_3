@@ -61,11 +61,12 @@ const port = process.env.PORT || 8080;
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
     cors: {
-        origin: 'http://localhost:3000', // wtf, why is this the address of the web page?
+        origin: 'http://localhost:3000',
         methods: ["GET", "POST"]
     }
 });
 io.on('connection', (socket: Socket) => {
+    // TODO make event names constants and share accross frontend and backend
     socket.on('picture_request', async (pictureRequest: PictureRequest) => {
         pictureRequestHandler(pictureRequest, broadcastMediator, pictureAccessor, socket);
     });

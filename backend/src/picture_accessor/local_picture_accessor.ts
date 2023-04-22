@@ -72,7 +72,12 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async getRaster(filename: string): Promise<PictureResponse> {
-        const contents = await this.jimpAdapter.read(path.join(this.baseDirectory, filename));
+        const fullPath = path.join(this.baseDirectory, filename);
+
+        // throws when fullPath doesn't exist, but jimp doesn't for some reason
+        await fs.promises.stat(fullPath);
+
+        const contents = await this.jimpAdapter.read(fullPath);
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,

@@ -12,7 +12,6 @@ interface JimpAdapter {
 export default class JimpAdapterImpl implements JimpAdapter {
 
     public createJimp(w: number, h: number): Jimp {
-        console.log('creating jimp');
         return new Jimp(w, h);
     }
 

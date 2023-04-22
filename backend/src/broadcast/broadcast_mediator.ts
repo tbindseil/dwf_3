@@ -27,6 +27,7 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
+    // TODO type alias for Socket<Cli....
     public async addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>): Promise<void> {
         console.log(`adding client, filename: ${filename} and socket id: ${socket.id}`);
         if (!filename) { // TODO ....
@@ -35,10 +36,13 @@ export default class BroadcastMediator {
         }
 
         if (!this.filenameToClients.has(filename)) {
-            this.filenameToClients.set(filename, new Map());
+            // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
-            this.filenameToClients.get(filename)!.set(BroadcastMediator.PICTURE_SYNC_KEY, new PictureSyncClient(this.pictureAccessor, raster));
+            const m = new Map();
+            m.set(BroadcastMediator.PICTURE_SYNC_KEY, new PictureSyncClient(this.pictureAccessor, raster));
+
+            this.filenameToClients.set(filename, m);
         }
 
         this.filenameToClients.get(filename)!.set(socket.id, new BroadcastClient(socket));
@@ -53,12 +57,12 @@ export default class BroadcastMediator {
         console.log(`remove client, filename: ${filename} and socket id: ${socket.id}`);
 
         if (!this.filenameToClients.has(filename)) {
-            console.log(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            console.warn(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
             return;
         }
 
         if (!this.filenameToClients.get(filename)?.has(socket.id)) {
-            console.log(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+            console.warn(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
             return;
         }
 
