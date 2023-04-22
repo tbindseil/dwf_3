@@ -31,18 +31,26 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('throws when filename is not present in map', () => {
+        // give it a bad filename
     });
 
     it('throws when socket id is not present in map', () => {
+        // give it a bad socketid
     });
 
     it('throws when PictureSyncClient is not the last client', () => {
+        // EXPLICITLY REMOVE IT with remove client
     });
 
     it('removes the client when removeClient is called', () => {
         console.log('Sydney was here');
     });
 
+    // the last remaining question is how to mock new PictureSyncClient and new BroadcastClient?
+
     it('sends the update to all registered', () => {
+    });
+
+    it('lists all clients given a filename', () => {
     });
 });

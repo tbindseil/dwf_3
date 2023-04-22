@@ -1,6 +1,6 @@
 import Client from './client';
-import BroadcastClient from './broadcast_client';
-import PictureSyncClient from './picture_sync_client';
+import createBroadcastClient from './broadcast_client';
+import createPictureSyncClient from './picture_sync_client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
 import { Socket } from 'socket.io';
@@ -36,12 +36,12 @@ export default class BroadcastMediator {
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
             const m = new Map();
-            m.set(BroadcastMediator.PICTURE_SYNC_KEY, new PictureSyncClient(this.pictureAccessor, raster));
+            m.set(BroadcastMediator.PICTURE_SYNC_KEY, createPictureSyncClient(this.pictureAccessor, raster));
 
             this.filenameToClients.set(filename, m);
         }
 
-        this.filenameToClients.get(filename)!.set(socket.id, new BroadcastClient(socket));
+        this.filenameToClients.get(filename)!.set(socket.id, createBroadcastClient(socket));
     }
 
     // first, remove the client that is disconnecting
@@ -78,5 +78,13 @@ export default class BroadcastMediator {
         // i think this still gets fucked up with locking and stuff
 
         this.filenameToClients.get(pixelUpdate.filename)?.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
+    }
+
+    public listClients(filename: string): string[] {
+        const clientsMap = this.filenameToClients.get(filename);
+        if (!clientsMap) {
+            [];
+        }
+        return Array.from(clientsMap!.keys());
     }
 }
