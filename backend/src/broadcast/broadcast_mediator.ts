@@ -1,6 +1,6 @@
 import Client from './client';
-import createBroadcastClient from './broadcast_client';
-import createPictureSyncClient from './picture_sync_client';
+import BroadcastClientFactory from './broadcast_client';
+import PictureSyncClientFactory from './picture_sync_client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
 import { Socket } from 'socket.io';
@@ -18,13 +18,18 @@ export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
 
     private readonly pictureAccessor: PictureAccessor;
+    private readonly broadcastClientFactory: BroadcastClientFactory;
+    private readonly pictureSyncClientFactory: PictureSyncClientFactory;
 
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
     private readonly filenameToClients: Map<string, Map<string, Client>>;
 
-    constructor(pictureAccessor: PictureAccessor) {
+    constructor(pictureAccessor: PictureAccessor, broadcastClientFactory: BroadcastClientFactory, pictureSyncClientFactory: PictureSyncClientFactory) {
         this.filenameToClients = new Map();
+
         this.pictureAccessor = pictureAccessor;
+        this.broadcastClientFactory = broadcastClientFactory;
+        this.pictureSyncClientFactory = pictureSyncClientFactory;
     }
 
     // TODO type alias for Socket<Cli....
@@ -36,12 +41,12 @@ export default class BroadcastMediator {
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
             const m = new Map();
-            m.set(BroadcastMediator.PICTURE_SYNC_KEY, createPictureSyncClient(this.pictureAccessor, raster));
+            m.set(BroadcastMediator.PICTURE_SYNC_KEY, this.pictureSyncClientFactory.createPictureSyncClient(this.pictureAccessor, raster));
 
             this.filenameToClients.set(filename, m);
         }
 
-        this.filenameToClients.get(filename)!.set(socket.id, createBroadcastClient(socket));
+        this.filenameToClients.get(filename)!.set(socket.id, this.broadcastClientFactory.createBroadcastClient(socket));
     }
 
     // first, remove the client that is disconnecting
@@ -56,17 +61,18 @@ export default class BroadcastMediator {
             throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
         }
 
-        if (!this.filenameToClients.get(filename)?.has(socket.id)) {
+        if (!this.filenameToClients.get(filename)!.has(socket.id)) {
             throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
         }
 
+        // not sure what the below is for
         // temporary to test saving of file
-        this.filenameToClients.get(filename)?.get(BroadcastMediator.PICTURE_SYNC_KEY)?.forcePictureWrite();
+        // this.filenameToClients.get(filename)?.get(BroadcastMediator.PICTURE_SYNC_KEY)?.forcePictureWrite();
 
-        this.filenameToClients.get(filename)?.delete(socket.id);
-        if (this.filenameToClients.get(filename)?.keys.length === 1) {
-            if (this.filenameToClients.get(filename)?.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
-                this.filenameToClients.get(filename)?.delete(BroadcastMediator.PICTURE_SYNC_KEY);
+        this.filenameToClients.get(filename)!.delete(socket.id);
+        if (Array.from(this.filenameToClients.get(filename)!.keys()).length === 1) {
+            if (this.filenameToClients.get(filename)!.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
+                this.filenameToClients.get(filename)!.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                 this.filenameToClients.delete(filename);
             } else {
                 throw new Error(`heads up, last client for filename: ${filename} is not the broadcast client`);
@@ -76,14 +82,18 @@ export default class BroadcastMediator {
 
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
         // i think this still gets fucked up with locking and stuff
+        const filename = pixelUpdate.filename;   
 
-        this.filenameToClients.get(pixelUpdate.filename)?.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
+        const clientMap = this.filenameToClients.get(filename);
+        if (clientMap) {
+            clientMap.forEach(client => client.handleUpdate(pixelUpdate, sourceSocketId));
+        }
     }
 
     public listClients(filename: string): string[] {
         const clientsMap = this.filenameToClients.get(filename);
         if (!clientsMap) {
-            [];
+            return [];
         }
         return Array.from(clientsMap!.keys());
     }

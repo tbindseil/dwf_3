@@ -3,8 +3,10 @@ import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
-export default function createPictureSyncClient(pictureAccessor: PictureAccessor, raster: Raster): PictureSyncClient {
-    return new PictureSyncClient(pictureAccessor, raster);
+export default class PictureSyncClientFactory {
+    public createPictureSyncClient(pictureAccessor: PictureAccessor, raster: Raster): PictureSyncClient {
+        return new PictureSyncClient(pictureAccessor, raster);
+    }
 }
 
 export class PictureSyncClient extends Client {
