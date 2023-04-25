@@ -5,16 +5,68 @@ import {Socket} from "socket.io";
 import BroadcastClientFactory from "./broadcast_client";
 import PictureSyncClientFactory from "./picture_sync_client";
 
+function getMockKey(methodName: string): string {
+    return `mock_${methodName}`;
+}
+
+// utility and example
+function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
+    if (Object.keys(toMock).length !== 1) {
+        throw new Error(`getSingleFunctionMock must have toMock with only one key, Object.keys(toMock) is: ${Object.keys(toMock)}`);
+    }
+    const key = Object.keys(toMock)[0];
+
+    const [funcs, mocked] = mockObject<T>(toMock);
+    console.log(`getSingleFunctionMock: mocked is: ${JSON.stringify(mocked)}`);
+    const singleFunction = funcs.get(getMockKey(key));
+    if (!singleFunction) {
+        throw new Error('getSingleFunctionMock failure, singleFunction is unknown');
+    }
+
+    return [singleFunction, mocked];
+}
+
+function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
+    const funcs = new Map<string, jest.Mock<any, any>>();
+
+    const keys = Object.keys(toMock);
+    console.log(`mockObject: keys: ${keys}`);
+    let mocked: any = {};
+    keys.forEach((k: string) => {
+        console.log(`mockObject: keys forEach`);
+        const mockKey = getMockKey(k);
+        const mockFunc = jest.fn();
+        funcs.set(mockKey, mockFunc);
+//         Object.assign(mocked, { `${mockKey}`, mockFunc });
+//         mocked[mockKey] = mockFunc;
+//         mocked = {
+//             ...mocked,
+//             mockKey: mockFunc
+//         };
+//         toMock = {
+//             ...toMock,
+//             mockKey: funcs.get(mockKey)
+//         };
+    });
+
+    console.log(`mockObject: mocked: ${JSON.stringify(mocked)}`);
+
+    return [funcs, mocked as T];
+}
+
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
     const mockSocket = {
         id: 'mockSocketID'
     } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
-    const mockGetRaster = jest.fn();
-    const mockPictureAccessor = {
-        getRaster: mockGetRaster
-    } as unknown as PictureAccessor;
+    const [mockGetRaster, mockPictureAccessor] = getSingleFunctionMock<PictureAccessor>({
+        getRaster: 'none'
+    });
+//     const mockGetRaster = jest.fn();
+//     const mockPictureAccessor = {
+//         getRaster: mockGetRaster
+//     } as unknown as PictureAccessor;
 
     const mockCreateBroadcastClient = jest.fn();
     const mockBroadcastClientFactory = {
@@ -55,7 +107,7 @@ describe('BroadcastMediator Tests', () => {
         await expect(broadcastMediator.addClient('filename', mockSocket)).rejects.toThrow();
     });
 
-    it('adds a PictureSyncClient with the first client for a picture', async () => {
+    it.only('adds a PictureSyncClient with the first client for a picture', async () => {
         mockGetRaster.mockReturnValueOnce({
             width: 1,
             height: 1,

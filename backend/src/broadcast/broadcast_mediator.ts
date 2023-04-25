@@ -38,6 +38,7 @@ export default class BroadcastMediator {
 
         if (!this.filenameToClients.has(filename)) {
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
+            console.log(`JSON.stringify pictureAccessor: ${JSON.stringify(this.pictureAccessor)}`);
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(rasterObject.width, rasterObject.height, rasterObject.data);
             const m = new Map();
