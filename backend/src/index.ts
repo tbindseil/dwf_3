@@ -26,6 +26,8 @@ import {
 } from 'dwf-3-models-tjb';
 
 import {Pool} from 'pg';
+import BroadcastClientFactory from './broadcast/broadcast_client';
+import PictureSyncClientFactory from './broadcast/picture_sync_client';
 
 // TODO handle api errors specifically
 const app: Express = express();
@@ -35,8 +37,10 @@ const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
 const jimpAdapter = new JimpAdapterImpl();
 const pictureAccessor = new LocalPictureAccessor(jimpAdapter, prototypeFileName, baseDirectory);
+const pictureSyncClientFactory = new PictureSyncClientFactory();
+const broadcastClientFactory = new BroadcastClientFactory();
 
-const broadcastMediator = new BroadcastMediator(pictureAccessor);
+const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClientFactory, pictureSyncClientFactory);
 
 // TODO inject db (and pictureArray?) via middleware
 const pool = new Pool();
