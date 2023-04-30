@@ -6,6 +6,8 @@
     "rootDirs": ["./src", "./test"],
     "strict": true,
 
+    "downlevelIteration": true,
+
     "esModuleInterop": true,
 
     "skipLibCheck": true,

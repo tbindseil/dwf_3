@@ -5,10 +5,6 @@ import {Socket} from "socket.io";
 import BroadcastClientFactory from "./broadcast_client";
 import PictureSyncClientFactory from "./picture_sync_client";
 
-function getMockKey(methodName: string): string {
-    return `mock_${methodName}`;
-}
-
 const autoConvertMapToObject = (map: Map<string, jest.Mock<any, any>>) => {
     const obj: any = {};
     for (const item of [...map]) {
@@ -35,7 +31,7 @@ function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
 
     const [funcs, mocked] = mockObject<T>(toMock);
     console.log(`getSingleFunctionMock: mocked is: ${JSON.stringify(mocked)}`);
-    const singleFunction = funcs.get(getMockKey(key));
+    const singleFunction = funcs.get(key);
     if (!singleFunction) {
         throw new Error('getSingleFunctionMock failure, singleFunction is unknown');
     }
@@ -53,12 +49,11 @@ function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
 
     keys.forEach((k: string) => {
         console.log(`mockObject: keys forEach`);
-        const mockKey = getMockKey(k);
         const mockFunc = jest.fn();
-        funcs.set(mockKey, mockFunc);
-        console.log(`mockKey is: ${mockKey} and typeof mockKey is: ${typeof mockKey}`);
+        funcs.set(k, mockFunc);
+        // console.log(`k is: ${mockKey} and typeof mockKey is: ${typeof mockKey}`);
         console.log(`mockFunc is: ${mockFunc} and typeof mockFunc is: ${typeof mockFunc}`);
-        m.set(mockKey, mockFunc);
+        m.set(k, mockFunc);
 //         Object.assign(mocked, { mockKey, mockFunc }); // sets mockKey: mock_getRaster
 //         mocked[mockKey] = mockFunc; // results in an object indexible by mockKey to give function, but htats not how its used in source code
 //         mocked = {
