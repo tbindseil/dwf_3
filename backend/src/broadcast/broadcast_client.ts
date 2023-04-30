@@ -30,6 +30,6 @@ export class BroadcastClient extends Client {
     }
 
     public forcePictureWrite() {
-
+        // TODO who writes the picture?
     }
 }
