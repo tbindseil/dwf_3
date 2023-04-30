@@ -9,6 +9,23 @@ function getMockKey(methodName: string): string {
     return `mock_${methodName}`;
 }
 
+const autoConvertMapToObject = (map: Map<string, jest.Mock<any, any>>) => {
+    const obj: any = {};
+    for (const item of [...map]) {
+        const [
+            key,
+            value
+        ] = item;
+        console.log(`autoConvertMapToObject: key is: ${key} and value is: ${value}`);
+        obj[key] = value;
+    }
+
+    console.log(`autoConvertMapToObject: obj is: ${JSON.stringify(obj)}`);
+    console.log(`autoConvertMapToObject: obj.getRaster is: ${JSON.stringify(obj)}`);
+
+    return obj;
+}
+
 // utility and example
 function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
     if (Object.keys(toMock).length !== 1) {
@@ -31,14 +48,19 @@ function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
 
     const keys = Object.keys(toMock);
     console.log(`mockObject: keys: ${keys}`);
-    let mocked: any = {};
+
+    const m = new Map<string, jest.Mock<any, any>>();
+
     keys.forEach((k: string) => {
         console.log(`mockObject: keys forEach`);
         const mockKey = getMockKey(k);
         const mockFunc = jest.fn();
         funcs.set(mockKey, mockFunc);
-//         Object.assign(mocked, { `${mockKey}`, mockFunc });
-//         mocked[mockKey] = mockFunc;
+        console.log(`mockKey is: ${mockKey} and typeof mockKey is: ${typeof mockKey}`);
+        console.log(`mockFunc is: ${mockFunc} and typeof mockFunc is: ${typeof mockFunc}`);
+        m.set(mockKey, mockFunc);
+//         Object.assign(mocked, { mockKey, mockFunc }); // sets mockKey: mock_getRaster
+//         mocked[mockKey] = mockFunc; // results in an object indexible by mockKey to give function, but htats not how its used in source code
 //         mocked = {
 //             ...mocked,
 //             mockKey: mockFunc
@@ -47,8 +69,31 @@ function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
 //             ...toMock,
 //             mockKey: funcs.get(mockKey)
 //         };
+//
+//     const mockGetRaster = jest.fn();
+//     const mockPictureAccessor = {
+//         getRaster: mockGetRaster
+//     } as unknown as PictureAccessor;
+//
     });
 
+    //m.keys().forEach(k => console.log(`m[${k}] is: ${m[k]}`));
+
+    console.log(`m.len is ${m.size}`);
+    //m.entries()k
+    for (let entry of m.entries()) {
+        console.log('actually before');
+        const [key, value] = entry;
+        console.log(`key: ${key} and value: ${value}`);
+    }
+
+    for (const entry in m.entries()) {
+        console.log('before assignment');
+        const [key, value] = entry;
+        console.log(`key: ${key} and value: ${value}`);
+    }
+
+    const mocked = autoConvertMapToObject(m);
     console.log(`mockObject: mocked: ${JSON.stringify(mocked)}`);
 
     return [funcs, mocked as T];
