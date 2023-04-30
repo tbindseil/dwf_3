@@ -2,80 +2,44 @@ import PictureAccessor from "../picture_accessor/picture_accessor";
 import BroadcastMediator from "../../src/broadcast/broadcast_mediator";
 import {ClientToServerEvents, InterServerEvents, PixelUpdate, ServerToClientEvents, SocketData} from "dwf-3-models-tjb";
 import {Socket} from "socket.io";
-import BroadcastClientFactory from "./broadcast_client";
-import PictureSyncClientFactory from "./picture_sync_client";
-
-const autoConvertMapToObject = (map: Map<string, jest.Mock<any, any>>) => {
-    const obj: any = {};
-    for (const item of [...map]) {
-        const [
-            key,
-            value
-        ] = item;
-        obj[key] = value;
-    }
-    return obj;
-}
-
-// utility and example
-function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
-    if (Object.keys(toMock).length !== 1) {
-        throw new Error(`getSingleFunctionMock must have toMock with only one key, Object.keys(toMock) is: ${Object.keys(toMock)}`);
-    }
-    const key = Object.keys(toMock)[0];
-
-    const [funcs, mocked] = mockObject<T>(toMock);
-    const singleFunction = funcs.get(key);
-    if (!singleFunction) {
-        throw new Error('getSingleFunctionMock failure, singleFunction is unknown');
-    }
-
-    return [singleFunction, mocked];
-}
-
-function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
-    const funcs = new Map<string, jest.Mock<any, any>>();
-
-    Object.keys(toMock).forEach((k: string) => {
-        const mockFunc = jest.fn();
-        funcs.set(k, mockFunc);
-    });
-    const mocked = autoConvertMapToObject(funcs);
-
-    return [funcs, mocked as T];
-}
+import BroadcastClientFactory, {BroadcastClient} from "./broadcast_client";
+import PictureSyncClientFactory, {PictureSyncClient} from "./picture_sync_client";
+import {getSingleFunctionMock} from "../mock/mock_apapter";
 
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
     const mockSocket = {
         id: 'mockSocketID'
     } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
+    const mockSocket2 = {
+        id: 'mockSocket2'
+    } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
+    const dummyPixelUpdate = {
+        name: 'dummyPixelUpdate',
+        filename: defaultFilename
+    } as unknown as PixelUpdate;
 
     const [mockGetRaster, mockPictureAccessor] = getSingleFunctionMock<PictureAccessor>({
         getRaster: 'none'
     });
 
-    const mockCreateBroadcastClient = jest.fn();
-    const mockBroadcastClientFactory = {
-        createBroadcastClient: mockCreateBroadcastClient
-    } as unknown as BroadcastClientFactory;
+    const [mockCreateBroadcastClient, mockBroadcastClientFactory] = getSingleFunctionMock<BroadcastClientFactory>({
+        createBroadcastClient: 'none'
+    });
 
-    const mockCreatePictureSyncClient = jest.fn();
-    const mockPictureSyncClientFactory = {
-        createPictureSyncClient: mockCreatePictureSyncClient
-    } as unknown as PictureSyncClientFactory;
+    const [mockCreatePictureSyncClient, mockPictureSyncClientFactory] = getSingleFunctionMock<PictureSyncClientFactory>({
+        createPictureSyncClient: 'none'
+    });
 
-    const mockPictureSyncHandleUpdate = jest.fn();
-    const mockPictureSyncClient = {
-        name: 'mockPictureSyncClient',
-        handleUpdate: mockPictureSyncHandleUpdate
-    };
+    const [mockPictureSyncHandleUpdate, mockPictureSyncClient] = getSingleFunctionMock<PictureSyncClient>({
+        handleUpdate: 'none'
+    });
+
+    const [mockBroadcastHandleUpdate, mockBroadcastClient] = getSingleFunctionMock<BroadcastClient>({
+        handleUpdate: 'none'
+    });
+
     mockCreatePictureSyncClient.mockReturnValue(mockPictureSyncClient);
-    const mockBroadcastHandleUpdate = jest.fn();
-    const mockBroadcastClient = {
-        name: 'mockBroadcastClient',
-        handleUpdate: mockBroadcastHandleUpdate
-    };
     mockCreateBroadcastClient.mockReturnValue(mockBroadcastClient);
 
     let broadcastMediator: BroadcastMediator;
@@ -85,21 +49,23 @@ describe('BroadcastMediator Tests', () => {
         mockCreatePictureSyncClient.mockClear();
         mockCreateBroadcastClient.mockClear();
 
+        mockGetRaster.mockReturnValueOnce({
+            width: 1,
+            height: 1,
+            data: []
+        });
+
         broadcastMediator = new BroadcastMediator(mockPictureAccessor, mockBroadcastClientFactory, mockPictureSyncClientFactory);
     });
 
     it('throws when pictureAccessor.getRaster throws', async () => {
+        const throwAway = mockGetRaster(); throwAway;
         mockGetRaster.mockRejectedValue(new Error());
 
         await expect(broadcastMediator.addClient('filename', mockSocket)).rejects.toThrow();
     });
 
     it('adds a PictureSyncClient with the first client for a picture', async () => {
-        mockGetRaster.mockReturnValueOnce({
-            width: 1,
-            height: 1,
-            data: []
-        });
 
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
@@ -109,12 +75,6 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('adds the client when addClient is called', async () => {
-        mockGetRaster.mockReturnValueOnce({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
         const currClients = broadcastMediator.listClients(defaultFilename);
@@ -128,12 +88,6 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('throws when socket id is not present in map', async () => {
-        mockGetRaster.mockReturnValueOnce({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
         const mockSocketNotInMap = {
@@ -144,18 +98,9 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('throws when PictureSyncClient is not the last client', async () => {
-        // this is kinda tricky, I explicitly remove it with remove client
-        mockGetRaster.mockReturnValue({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
+        // this is kinda tricky, I explicitly remove pictureSyncClientSocket with remove client
         // I need to add two clients due to the, when one left remove it clause
         await broadcastMediator.addClient(defaultFilename, mockSocket);
-        const mockSocket2 = {
-            id: 'mockSocket2'
-        } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
         await broadcastMediator.addClient(defaultFilename, mockSocket2);
 
         const pictureSyncClientSocketFakeout = {
@@ -167,16 +112,7 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('removes the client when removeClient is called', async () => {
-        mockGetRaster.mockReturnValue({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
         await broadcastMediator.addClient(defaultFilename, mockSocket);
-        const mockSocket2 = {
-            id: 'mockSocket2'
-        } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
         await broadcastMediator.addClient(defaultFilename, mockSocket2);
 
         const clients = broadcastMediator.listClients(defaultFilename);
@@ -191,12 +127,6 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('removes the PictureSyncClient when the last client is removed', async () => {
-        mockGetRaster.mockReturnValue({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
         const clients = broadcastMediator.listClients(defaultFilename);
@@ -211,18 +141,8 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('sends the update to all registered', async () => {
-        mockGetRaster.mockReturnValue({
-            width: 1,
-            height: 1,
-            data: []
-        });
-
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
-        const dummyPixelUpdate = {
-            name: 'dummyPixelUpdate',
-            filename: defaultFilename
-        } as unknown as PixelUpdate;
         broadcastMediator.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
         expect(mockBroadcastHandleUpdate).toHaveBeenCalledWith(dummyPixelUpdate, mockSocket.id);
@@ -230,10 +150,6 @@ describe('BroadcastMediator Tests', () => {
     });
 
     it('silently handles missing client map for supplied filename in handleUpdate', () => {
-        const dummyPixelUpdate = {
-            name: 'dummyPixelUpdate',
-            filename: defaultFilename
-        } as unknown as PixelUpdate;
         broadcastMediator.handleUpdate(dummyPixelUpdate, mockSocket.id);
     });
 
