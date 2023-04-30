@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
 import http from 'http';
 import {Server, Socket} from 'socket.io';
 
@@ -32,6 +33,8 @@ import PictureSyncClientFactory from './broadcast/picture_sync_client';
 // TODO handle api errors specifically
 const app: Express = express();
 
+// use cors accross all routes
+app.use(cors());
 
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
@@ -46,16 +49,16 @@ const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClient
 const pool = new Pool();
 const db = new DB(pool);
 
-app.get('pictures', async (req: Request, res: Response) => {
+app.get('/pictures', async (req: Request, res: Response) => {
     new GetPictures(db).call(req, res);
 });
-app.get('picture', (req: Request, res: Response) => {
+app.get('/picture', (req: Request, res: Response) => {
     new GetPicture(db, pictureAccessor).call(req, res);
 });
-app.post('picture', (req: Request, res: Response) => {
+app.post('/picture', (req: Request, res: Response) => {
     new PostPicture(db, pictureAccessor).call(req, res);
 });
-app.get('update', (req: Request, res: Response) => {
+app.get('/update', (req: Request, res: Response) => {
     new PostUpdate(db).call(req, res);
 });
 

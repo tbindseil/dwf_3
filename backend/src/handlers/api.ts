@@ -22,7 +22,7 @@ export default abstract class API {
         const serialized_output = this.serializeOutput(output);
 
         res.set('Content-Type', this.getContentType());
-        res.sendStatus(200);
+        res.status(200);
         res.send(serialized_output);
     }
 

@@ -43,14 +43,14 @@ describe('API Tests', () => {
         // TODO, I wonder if I could write a more generatic basic mock factory? Maybe that is already done by jest
         const res = {
             set: jest.fn(),
-            sendStatus: jest.fn(),
+            status: jest.fn(),
             send: jest.fn()
         } as unknown as Response;
 
         const api = new TestAPI(mockDB, entity, method);
         await api.call(req, res);
         expect(res.set).toHaveBeenCalledWith('Content-Type', 'application/json');
-        expect(res.sendStatus).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith(serializedSpecialOutput);
     });
 
