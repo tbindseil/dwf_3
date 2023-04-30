@@ -12,13 +12,8 @@ const autoConvertMapToObject = (map: Map<string, jest.Mock<any, any>>) => {
             key,
             value
         ] = item;
-        console.log(`autoConvertMapToObject: key is: ${key} and value is: ${value}`);
         obj[key] = value;
     }
-
-    console.log(`autoConvertMapToObject: obj is: ${JSON.stringify(obj)}`);
-    console.log(`autoConvertMapToObject: obj.getRaster is: ${JSON.stringify(obj)}`);
-
     return obj;
 }
 
@@ -30,7 +25,6 @@ function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
     const key = Object.keys(toMock)[0];
 
     const [funcs, mocked] = mockObject<T>(toMock);
-    console.log(`getSingleFunctionMock: mocked is: ${JSON.stringify(mocked)}`);
     const singleFunction = funcs.get(key);
     if (!singleFunction) {
         throw new Error('getSingleFunctionMock failure, singleFunction is unknown');
@@ -42,54 +36,11 @@ function getSingleFunctionMock<T>(toMock: any): [jest.Mock<any, any>, T] {
 function mockObject<T>(toMock: any): [Map<string, jest.Mock<any, any>>, T] {
     const funcs = new Map<string, jest.Mock<any, any>>();
 
-    const keys = Object.keys(toMock);
-    console.log(`mockObject: keys: ${keys}`);
-
-    const m = new Map<string, jest.Mock<any, any>>();
-
-    keys.forEach((k: string) => {
-        console.log(`mockObject: keys forEach`);
+    Object.keys(toMock).forEach((k: string) => {
         const mockFunc = jest.fn();
         funcs.set(k, mockFunc);
-        // console.log(`k is: ${mockKey} and typeof mockKey is: ${typeof mockKey}`);
-        console.log(`mockFunc is: ${mockFunc} and typeof mockFunc is: ${typeof mockFunc}`);
-        m.set(k, mockFunc);
-//         Object.assign(mocked, { mockKey, mockFunc }); // sets mockKey: mock_getRaster
-//         mocked[mockKey] = mockFunc; // results in an object indexible by mockKey to give function, but htats not how its used in source code
-//         mocked = {
-//             ...mocked,
-//             mockKey: mockFunc
-//         };
-//         toMock = {
-//             ...toMock,
-//             mockKey: funcs.get(mockKey)
-//         };
-//
-//     const mockGetRaster = jest.fn();
-//     const mockPictureAccessor = {
-//         getRaster: mockGetRaster
-//     } as unknown as PictureAccessor;
-//
     });
-
-    //m.keys().forEach(k => console.log(`m[${k}] is: ${m[k]}`));
-
-    console.log(`m.len is ${m.size}`);
-    //m.entries()k
-    for (let entry of m.entries()) {
-        console.log('actually before');
-        const [key, value] = entry;
-        console.log(`key: ${key} and value: ${value}`);
-    }
-
-    for (const entry in m.entries()) {
-        console.log('before assignment');
-        const [key, value] = entry;
-        console.log(`key: ${key} and value: ${value}`);
-    }
-
-    const mocked = autoConvertMapToObject(m);
-    console.log(`mockObject: mocked: ${JSON.stringify(mocked)}`);
+    const mocked = autoConvertMapToObject(funcs);
 
     return [funcs, mocked as T];
 }
@@ -103,10 +54,6 @@ describe('BroadcastMediator Tests', () => {
     const [mockGetRaster, mockPictureAccessor] = getSingleFunctionMock<PictureAccessor>({
         getRaster: 'none'
     });
-//     const mockGetRaster = jest.fn();
-//     const mockPictureAccessor = {
-//         getRaster: mockGetRaster
-//     } as unknown as PictureAccessor;
 
     const mockCreateBroadcastClient = jest.fn();
     const mockBroadcastClientFactory = {
