@@ -19,7 +19,11 @@ describe('BroadcastClient Tests', () => {
 
     const broadcastClient = new BroadcastClientFactory().createBroadcastClient(mockSocket);
 
-    it.only('passes the update to the socket if the id does not match', () => {
+    beforeEach(() => {
+        mockEmit.mockClear();
+    });
+
+    it('passes the update to the socket if the id does not match', () => {
         broadcastClient.handleUpdate(dummyPixelUpdate, `${mockSocket.id}_NON_MATCHING_ID_ADD_ON`);
 
         expect(mockEmit).toHaveBeenCalledWith('server_to_client_update', dummyPixelUpdate);
