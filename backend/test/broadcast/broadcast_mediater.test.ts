@@ -51,9 +51,15 @@ describe('BroadcastMediator Tests', () => {
         id: 'mockSocketID'
     } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
+    // seems like the keys (ie methods to mock) are redundant here. it would be cool to pass an object
+    // and have it get hydrated with the mocks. something like mock everything. but i still need to access
+    // the functions. unless i have two copies, a casted and uncasted version
     const [mockGetRaster, mockPictureAccessor] = getSingleFunctionMock<PictureAccessor>({
         getRaster: 'none'
     });
+    // could be a mock object that extends this, and has some internal fields for the map and the mock object. well
+    // i guess it would just need to have the map there because it is the mock object. this is like dynamically writing code
+    // i think i need to just lay off these things for a bit haha.
 
     const mockCreateBroadcastClient = jest.fn();
     const mockBroadcastClientFactory = {
@@ -94,7 +100,7 @@ describe('BroadcastMediator Tests', () => {
         await expect(broadcastMediator.addClient('filename', mockSocket)).rejects.toThrow();
     });
 
-    it.only('adds a PictureSyncClient with the first client for a picture', async () => {
+    it('adds a PictureSyncClient with the first client for a picture', async () => {
         mockGetRaster.mockReturnValueOnce({
             width: 1,
             height: 1,
