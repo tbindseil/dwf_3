@@ -36,6 +36,9 @@ const app: Express = express();
 // use cors accross all routes
 app.use(cors());
 
+// decode json request bodies
+app.use(express.json());
+
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName = '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
 const jimpAdapter = new JimpAdapterImpl();

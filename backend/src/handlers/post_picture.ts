@@ -18,6 +18,7 @@ export class PostPicture extends API {
     }
 
     public getInput(body: any): PostPictureInput {
+        // TODO schema validation, automatically, probably requires processing models into list of fields and making sure they are present here
         if ('name' in body && 'createdBy' in body) {
             return {
                 name: body.name,
