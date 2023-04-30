@@ -13,8 +13,10 @@
   "devDependencies": {
     "@types/jest": "^28.1.8",
     "@types/pg": "^8.6.5",
+    "@types/sinon": "^10.0.14",
     "concurrently": "^8.0.1",
     "jest": "^28.0.1",
+    "sinon": "^15.0.4",
     "ts-jest": "^28.0.8"
   },
   "dependencies": {
