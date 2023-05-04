@@ -5,7 +5,7 @@ import {
 import IDB from '../db';
 import API from './api';
 
-
+// TODO what is this?
 export class PostUpdate extends API {
     constructor(db: IDB) {
         super(db, 'POST', 'update');

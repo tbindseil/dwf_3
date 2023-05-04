@@ -40,7 +40,7 @@ describe('API Tests', () => {
 
     it('calls', async () => {
         const req = { body: specialInput } as Request;
-        // TODO, I wonder if I could write a more generatic basic mock factory? Maybe that is already done by jest
+        // jest.autoMockOn TODO Whoaaa
         const res = {
             set: jest.fn(),
             status: jest.fn(),
