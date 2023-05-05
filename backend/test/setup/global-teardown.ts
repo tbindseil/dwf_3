@@ -1,3 +1,5 @@
+import { knex, database } from './'
+
 module.exports = async () => {
   try {
     await knex.raw(`DROP DATABASE IF EXISTS ${database}`)
