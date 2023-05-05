@@ -4,7 +4,7 @@ import {ClientToServerEvents, InterServerEvents, PixelUpdate, ServerToClientEven
 import {Socket} from "socket.io";
 import BroadcastClientFactory, {BroadcastClient} from "./broadcast_client";
 import PictureSyncClientFactory, {PictureSyncClient} from "./picture_sync_client";
-import {getSingleFunctionMock} from "../mock/mock_apapter";
+import {getSingleFunctionMock} from "../mock/mock_adapter";
 
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
