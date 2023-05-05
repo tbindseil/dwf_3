@@ -4,7 +4,7 @@
   "description": "Server for DrawWithFriends app",
   "main": "index.js",
   "scripts": {
-    "test": "jest unit --coverage",
+    "test": "jest unit --config jest.unit.config.js --coverage",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
     "start": "ts-node src/index.ts"
   },
