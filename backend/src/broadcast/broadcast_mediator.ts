@@ -58,11 +58,15 @@ export default class BroadcastMediator {
         console.log(`remove client, filename: ${filename} and socket id: ${socket.id}`);
 
         if (!this.filenameToClients.has(filename)) {
-            throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            // throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            console.log(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            return;
         }
 
         if (!this.filenameToClients.get(filename)!.has(socket.id)) {
-            throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+            // throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+            console.log(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+            return;
         }
 
         // not sure what the below is for

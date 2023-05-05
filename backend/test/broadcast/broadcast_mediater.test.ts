@@ -82,19 +82,23 @@ describe('BroadcastMediator Tests', () => {
         expect(currClients.includes(mockSocket.id)).toBeTruthy();
     });
 
-    it('throws when filename is not present in map', () => {
+    // it('throws when filename is not present in map', () => {
+    it('does not throw when filename is not present in map', () => {
         // defaultFilename hasn't been added yet
-        expect(() => broadcastMediator.removeClient(defaultFilename, mockSocket)).toThrow(new Error(`unable to remove socket id ${mockSocket.id} because client map for filename ${defaultFilename} doesn't exist`));
+        // expect(() => broadcastMediator.removeClient(defaultFilename, mockSocket)).toThrow(new Error(`unable to remove socket id ${mockSocket.id} because client map for filename ${defaultFilename} doesn't exist`));
+        broadcastMediator.removeClient(defaultFilename, mockSocket);
     });
 
-    it('throws when socket id is not present in map', async () => {
+    // it('throws when socket id is not present in map', async () => {
+    it('does not throw when socket id is not present in map', async () => {
         await broadcastMediator.addClient(defaultFilename, mockSocket);
 
         const mockSocketNotInMap = {
             id: 'NOT_IN_MAP'
         } as unknown as Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
-        expect(() => broadcastMediator.removeClient(defaultFilename, mockSocketNotInMap)).toThrow(new Error(`unable to remove socket id ${mockSocketNotInMap.id} because it doesn't exist in client map for filename ${defaultFilename}`));
+        // expect(() => broadcastMediator.removeClient(defaultFilename, mockSocketNotInMap)).toThrow(new Error(`unable to remove socket id ${mockSocketNotInMap.id} because it doesn't exist in client map for filename ${defaultFilename}`));
+        broadcastMediator.removeClient(defaultFilename, mockSocketNotInMap);
     });
 
     it('throws when PictureSyncClient is not the last client', async () => {
