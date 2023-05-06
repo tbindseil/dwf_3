@@ -4,6 +4,7 @@ export async function seed(knex: Knex): Promise<void> {
     // Deletes ALL existing entries
     await knex("table_name").del();
 
+    // TODO why seed here and not in the actual integ tests?
     // Inserts seed entries
     await knex("picture").insert([
         { id: 1, name: "name1", createdby: "createdb1", filename: "filenam1", filesystem: "filesyste1" },

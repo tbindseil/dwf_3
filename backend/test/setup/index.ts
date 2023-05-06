@@ -7,6 +7,5 @@ export const knex = Knex({
     connection: {
         host: 'localhost',
         port: 5432,
-        database: database
     },
 })
