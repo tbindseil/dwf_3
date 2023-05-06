@@ -42,6 +42,7 @@ export class PostPicture extends API {
 
             await db.query(query, params);
         } catch (error) {
+            console.error('post_picture and error is: ', error);
             throw new APIError(500, 'database issue, picture not created');
         }
 

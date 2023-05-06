@@ -7,5 +7,7 @@ export const knex = Knex({
     connection: {
         host: 'localhost',
         port: 5432,
+        user: 'tj'
     },
+    searchPath: ['knex', 'public'],
 })

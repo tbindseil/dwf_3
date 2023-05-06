@@ -26,7 +26,7 @@ import {
     SocketData
 } from 'dwf-3-models-tjb';
 
-import {Pool} from 'pg';
+import {Pool, PoolConfig} from 'pg';
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 
@@ -49,7 +49,14 @@ const broadcastClientFactory = new BroadcastClientFactory();
 const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClientFactory, pictureSyncClientFactory);
 
 // TODO inject db (and pictureArray?) via middleware
-const pool = new Pool();
+// TJTAG somehow this pool object without config will work but with config it wont
+// const pc: PoolConfig;
+const pool = new Pool({
+    host: 'localhost',
+    port: 5432,
+    user: 'tj'
+});
+// const pool = new Pool();
 const db = new DB(pool);
 
 app.get('/pictures', async (req: Request, res: Response) => {

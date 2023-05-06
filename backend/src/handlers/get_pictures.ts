@@ -34,6 +34,7 @@ export class GetPictures extends API {
                 }})
             };
         } catch (error) {
+            console.error('get_pictures and error is: ', error);
             throw new APIError(500, 'database issue, pictures not fetched');
         }
     }

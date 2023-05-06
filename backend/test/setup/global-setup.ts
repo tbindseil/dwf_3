@@ -22,8 +22,11 @@ async function createTestDatabase() {
 async function seedTestDatabase() {
     console.log('seedTestDatabase');
     try {
+        console.log('seedTestDatabase before migrate');
         await knex.migrate.latest();
+        console.log('seedTestDatabase after migrate');
         await knex.seed.run();
+        console.log('seedTestDatabase after run');
     } catch (error: any) {
         console.log('seedTestDatabase throw');
         throw new Error(error);

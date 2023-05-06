@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 
+/*
 // TODO might be able to remove
 const pg = require('knex')({
     client: 'pg',
@@ -18,6 +19,7 @@ const pg = require('knex')({
         min: 0, max: 10
     }
 });
+*/
 
 export default interface IDB {
   query: (text: string, params: string[]) => Promise<any>
