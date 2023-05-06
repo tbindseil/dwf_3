@@ -5,6 +5,6 @@ module.exports = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     coverageProvider: 'v8',
 
-    globalSetup: '<rootDir>/test/global-setup.ts',
-    globalTeardown: '<rootDir>/test/global-teardown.ts',
+    globalSetup: '<rootDir>/test/setup/global-setup.ts',
+    globalTeardown: '<rootDir>/test/setup/global-teardown.ts',
 };
