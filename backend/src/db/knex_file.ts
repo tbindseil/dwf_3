@@ -28,7 +28,12 @@ const knexBaseConfig = {
     client: 'pg',
     searchPath: ['knex', 'public'],
     pool: { min: 0, max: 7 },
-    // idleTimeoutMillis: 50, // TODO this should be different for dev, this is for testing to end quickly
+    migrations: {
+        directory: './build/src/db/migrations',
+    },
+    seeds: {
+        directory: './build/src/db/seeds',
+    },
     debug: true
 };
 

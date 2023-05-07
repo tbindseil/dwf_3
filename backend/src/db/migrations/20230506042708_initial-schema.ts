@@ -1,8 +1,7 @@
-// TODO put any types for knex input and table, can I find those types?
+// TODO probably right after api integ testing, setup simple migrations docs while its fresh
+import {Knex} from 'knex';
 
-// TODO knex: any , this is typescript, compile to js, and point the knex file to the compiled
-exports.up = async function (knex) {
-    console.log('@@@@ TJTAG @@@@ migration');
+exports.up = async function (knex: Knex) {
     await knex.schema.createTable('picture', function (table) {
         table.increments('id').primary().unique()
         table.string('name').notNullable()
@@ -12,7 +11,6 @@ exports.up = async function (knex) {
     })
 }
 
-exports.down = async function (knex) {
-    console.log('@@@@ TJTAG @@@@ down migration');
+exports.down = async function (knex: Knex) {
     await knex.schema.dropTable('picture')
 }
