@@ -1,31 +1,27 @@
 import request from 'supertest';
-import Knex from 'knex'
 import { Model } from 'objection'
 
 import { knex } from '../../src/db/knex_file';
 
-import { io, server } from '../../src/app'
+import { server } from '../../src/app'
+import {GetPicturesOutput} from 'dwf-3-models-tjb';
 
 describe('get_pictures', () => {
-    let seededBooks: any;
-
     beforeAll(async () => {
         Model.knex(knex)
-
-        // Seed anything
-//         seededBooks = await knex('book')
-//             .insert([{ name: 'A Game of Thrones', author: 'George R. R. Martin' }])
-//             .returning('*')
     })
 
     afterAll(() => {
-        knex.destroy()
+        console.log('before');
+        knex.destroy();
+        console.log('after');
     })
 
     describe('GET /pictures', () => {
         it('should return pictures', async () => {
             // used to be request(app), maybe need to export app even if it is server that is started? so expoert server, app, and io
             const { body: pictures } = await request(server).get('/pictures').expect(200)
+            const getPicturesResponse = pictures as GetPicturesOutput;
 
             // TODO can cast pictures to getPicturesResponse
 
@@ -40,7 +36,7 @@ describe('get_pictures', () => {
             // TODO right now, the app is using the pool, so it is calling in to the real database, not the test database. Thats the next step, gonna be an awseom morning of coding
 
             // expect(book).toBeObject()
-            expect(pictures.pictures.length).toBe(expectedPictures.length);
+            expect(getPicturesResponse.pictures.length).toBe(expectedPictures.length);
             expect(pictures.pictures).toEqual(expectedPictures);
         })
     })
