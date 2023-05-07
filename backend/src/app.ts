@@ -26,9 +26,9 @@ import {
     SocketData
 } from 'dwf-3-models-tjb';
 
-import {Pool, PoolConfig} from 'pg';
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
+import Knex from 'knex';
 
 // TODO handle api errors specifically
 const app: Express = express();
@@ -49,15 +49,18 @@ const broadcastClientFactory = new BroadcastClientFactory();
 const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClientFactory, pictureSyncClientFactory);
 
 // TODO inject db (and pictureArray?) via middleware
-// TJTAG somehow this pool object without config will work but with config it wont
-// const pc: PoolConfig;
-const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    user: 'tj'
+const knex = Knex({
+    client: 'pg',
+    connection: {
+        host: 'localhost',
+        port: 5432,
+        database: 'tj',
+        user: 'tj'
+    },
+    searchPath: ['knex', 'public'],
+    debug: true
 });
-// const pool = new Pool();
-const db = new DB(pool);
+const db = new DB(knex);
 
 app.get('/pictures', async (req: Request, res: Response) => {
     new GetPictures(db).call(req, res);

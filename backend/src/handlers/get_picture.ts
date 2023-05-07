@@ -28,7 +28,7 @@ export class GetPicture extends API {
     }
 
     public async process(db: IDB, input: GetPictureInput): Promise<GetPictureOutput> {
-        const query = 'select filename from picture where id = $1;'
+        const query = 'select filename from picture where id = ?;'
         const params = [input.id];
 
         try {

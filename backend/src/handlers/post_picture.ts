@@ -37,7 +37,7 @@ export class PostPicture extends API {
         try {
             const filename = await this.pictureAccessor.createNewPicture(name, createdBy);
 
-            const query = 'insert into picture (name, createdBy, filename, filesystem) values ($1, $2, $3, $4);'
+            const query = 'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);'
             const params = [name, createdBy, filename, filesystem];
 
             await db.query(query, params);
