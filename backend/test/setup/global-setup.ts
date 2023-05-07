@@ -9,7 +9,9 @@ async function createTestDatabase() {
     } catch (error: any) {
         throw new Error(error);
     } finally {
-        await knexWithoutDatabase.destroy();
+        // console.log('@@@@ TJTAG @@@@');
+        // console.log('destroying knexWithoutDatabase');
+        // await knexWithoutDatabase.destroy();
     }
 }
 
@@ -21,7 +23,9 @@ async function seedTestDatabase() {
     } catch (error: any) {
         throw new Error(error);
     } finally {
-        await knex.destroy();
+        // console.log('@@@@ TJTAG @@@@');
+        // console.log('destroying knex');
+        // await knex.destroy();
     }
 }
 

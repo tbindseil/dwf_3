@@ -11,12 +11,14 @@ describe('get_pictures', () => {
         Model.knex(knex)
     })
 
-    afterAll(() => {
-        console.log('before');
-        knex.destroy();
-        console.log('after');
-    })
-
+//     afterAll(() => {
+//         console.log('before');
+//         console.log('@@@@ TJTAG @@@@');
+//         console.log('destroying knex');
+//         knex.destroy();
+//         console.log('after');
+//     })
+// 
     describe('GET /pictures', () => {
         it('should return pictures', async () => {
             // used to be request(app), maybe need to export app even if it is server that is started? so expoert server, app, and io
