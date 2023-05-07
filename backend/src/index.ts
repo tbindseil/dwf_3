@@ -3,9 +3,7 @@ import { Model } from 'objection';
 
 import { io, server } from './app';
 
-// Connect database to Objection
 Model.knex(makeKnex())
-// Model.knex().destroy();
 
 io.listen(6543);
 

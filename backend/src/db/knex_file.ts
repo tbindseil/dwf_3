@@ -28,7 +28,7 @@ const knexBaseConfig = {
     client: 'pg',
     searchPath: ['knex', 'public'],
     pool: { min: 0, max: 7 },
-    idleTimeoutMillis: 50, // TODO this should be different for dev, this is for testing to end quickly
+    // idleTimeoutMillis: 50, // TODO this should be different for dev, this is for testing to end quickly
     debug: true
 };
 
@@ -41,6 +41,3 @@ export const makeKnexWithoutDatabase = () => Knex({
     ...knexBaseConfig,
     connection: connectionConfigWithoutDatabase
 });
-
-
-// TODO might need to vend the factory and have users close after usage?

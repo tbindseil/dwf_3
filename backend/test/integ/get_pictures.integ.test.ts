@@ -8,10 +8,7 @@ import {GetPicturesOutput} from 'dwf-3-models-tjb';
 
 describe('get_pictures', () => {
     beforeAll(async () => {
-        // might be the problem
-        const scopedKnex = makeKnex();
-        Model.knex(scopedKnex);
-        scopedKnex.destroy();
+        Model.knex(makeKnex());
     })
 
     describe('GET /pictures', () => {
