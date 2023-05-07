@@ -1,14 +1,17 @@
 import request from 'supertest';
 import { Model } from 'objection'
 
-import { knex } from '../../src/db/knex_file';
+import { makeKnex } from '../../src/db/knex_file';
 
 import { server } from '../../src/app'
 import {GetPicturesOutput} from 'dwf-3-models-tjb';
 
 describe('get_pictures', () => {
     beforeAll(async () => {
-        Model.knex(knex)
+        // might be the problem
+        const scopedKnex = makeKnex();
+        Model.knex(scopedKnex);
+        // scopedKnex.destroy();
     })
 
     describe('GET /pictures', () => {

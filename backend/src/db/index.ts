@@ -5,13 +5,16 @@ export default interface IDB {
 }
 
 export class DB implements IDB {
-    private readonly knex: Knex;
+    private readonly makeKnex: (() => Knex);
 
-    constructor(knex: Knex) {
-        this.knex = knex;
+    constructor(knex: (() => Knex)) {
+        this.makeKnex = knex;
     }
 
     public async query(text: string, params: string[]): Promise<any> {
-        return await this.knex.raw(text, params);
+        const scopedKnex = this.makeKnex();
+        const ret = await scopedKnex.raw(text, params);
+        scopedKnex.destroy();
+        return ret;
     }
 }
