@@ -1,4 +1,4 @@
-import { makeKnex, makeKnexWithoutDatabase, testDatabase } from '../../src/db/knex_file';
+import { makeKnex, makeKnexWithoutDatabase, testDatabase } from '../../../src/db/knex_file';
 
 // Create the database
 async function createTestDatabase() {

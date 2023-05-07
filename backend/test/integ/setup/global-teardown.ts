@@ -1,4 +1,4 @@
-import { makeKnexWithoutDatabase, testDatabase } from '../../src/db/knex_file'
+import { makeKnexWithoutDatabase, testDatabase } from '../../../src/db/knex_file'
 
 module.exports = async () => {
     try {
