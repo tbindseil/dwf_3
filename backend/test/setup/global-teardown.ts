@@ -2,11 +2,12 @@ import { knex, knexWithoutDatabase, testDatabase } from '../../src/db/knex_file'
 
 module.exports = async () => {
     try {
-        await knexWithoutDatabase.raw(`DROP DATABASE IF EXISTS ${testDatabase}`)
+        await knex.destroy();
+        await knexWithoutDatabase.raw(`DROP DATABASE IF EXISTS ${testDatabase}`);
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        process.exit(1);
     } finally {
-        knexWithoutDatabase.destroy();
-        knex.destroy();
+        await knexWithoutDatabase.destroy();
     }
 }
