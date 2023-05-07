@@ -11,7 +11,7 @@ describe('get_pictures', () => {
         // might be the problem
         const scopedKnex = makeKnex();
         Model.knex(scopedKnex);
-        // scopedKnex.destroy();
+        scopedKnex.destroy();
     })
 
     describe('GET /pictures', () => {
