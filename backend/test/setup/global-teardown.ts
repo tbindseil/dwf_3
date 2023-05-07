@@ -11,9 +11,9 @@ module.exports = async () => {
 
         // spin 30 sec
         const waitTime = 30;
-        console.log(`waiting ${waitTime} sec`);
-        await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-        console.log(`done waiting ${waitTime} sec`);
+//         console.log(`waiting ${waitTime} sec`);
+//         await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+//         console.log(`done waiting ${waitTime} sec`);
 
         await knexWithoutDatabase.raw(`DROP DATABASE IF EXISTS ${testDatabase}`);
     } catch (error) {

@@ -1,10 +1,11 @@
-import {knex} from './db/knex_file';
+import {makeKnex} from './db/knex_file';
 import { Model } from 'objection';
 
 import { io, server } from './app';
 
 // Connect database to Objection
-Model.knex(knex)
+Model.knex(makeKnex())
+Model.knex().destroy();
 
 io.listen(6543);
 

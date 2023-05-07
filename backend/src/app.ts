@@ -7,7 +7,7 @@ import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
-import {knex} from './db/knex_file';
+import {makeKnex} from './db/knex_file';
 import {DB} from './db';
 import {
     GetPictures,
@@ -49,7 +49,7 @@ const broadcastClientFactory = new BroadcastClientFactory();
 const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClientFactory, pictureSyncClientFactory);
 
 // TODO inject db (and pictureArray?) via middleware
-const db = new DB(knex);
+const db = new DB(makeKnex);
 
 app.get('/pictures', async (req: Request, res: Response) => {
     new GetPictures(db).call(req, res);

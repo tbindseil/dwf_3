@@ -28,15 +28,16 @@ const knexBaseConfig = {
     client: 'pg',
     searchPath: ['knex', 'public'],
     pool: { min: 0, max: 7 },
+    idleTimeoutMillis: 50, // TODO this should be different for dev, this is for testing to end quickly
     debug: true
 };
 
-export const knex = Knex({
+export const makeKnex = () => Knex({
     ...knexBaseConfig,
     connection: connectionConfig
 });
 
-export const knexWithoutDatabase = Knex({
+export const makeKnexWithoutDatabase = () => Knex({
     ...knexBaseConfig,
     connection: connectionConfigWithoutDatabase
 });
