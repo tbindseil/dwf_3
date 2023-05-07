@@ -7,7 +7,7 @@ import { // TODO linter
 } from "dwf-3-models-tjb";
 import {Raster} from "dwf-3-raster-tjb";
 import {Socket} from "socket.io";
-import {getSingleFunctionMock} from "../../mock/mock_adapter";
+import {getSingleFunctionMock} from "../mock/mock_adapter";
 import PictureAccessor from "../../../src/picture_accessor/picture_accessor";
 import PictureSyncClientFactory from "../../../src/broadcast/picture_sync_client";
 
