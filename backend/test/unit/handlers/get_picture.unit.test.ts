@@ -1,7 +1,7 @@
-import { GetPicture } from '../../src/handlers/get_picture';
-import APIError from '../../src/handlers/api_error';
-import IDB from '../../src/db';
-import LocalPictureAccessor from '../../src/picture_accessor/local_picture_accessor';
+import { GetPicture } from '../../../src/handlers/get_picture';
+import APIError from '../../../src/handlers/api_error';
+import IDB from '../../../src/db';
+import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(DB.query, true);
@@ -13,7 +13,7 @@ const mockDB = {
     query: mockQuery
 } as IDB;
 
-jest.mock('../../src/picture_accessor/local_picture_accessor');
+jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
 describe('GetPicture Tests', () => {

@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import {DB} from '../../src/db';
+import {DB} from '../../../src/db';
 
 describe('DB Tests', () => {
     it('queries', async () => {

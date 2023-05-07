@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
-import API from '../../src/handlers/api';
-import IDB from '../../src/db';
+import API from '../../../src/handlers/api';
+import IDB from '../../../src/db';
 
 const method = 'METHOD';
 const entity = 'ENTITY';

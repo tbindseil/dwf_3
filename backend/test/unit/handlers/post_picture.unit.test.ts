@@ -1,7 +1,7 @@
-import { PostPicture } from '../../src/handlers/post_picture';
-import APIError from '../../src/handlers/api_error';
-import IDB from '../../src/db';
-import LocalPictureAccessor from '../../src/picture_accessor/local_picture_accessor';
+import { PostPicture } from '../../../src/handlers/post_picture';
+import APIError from '../../../src/handlers/api_error';
+import IDB from '../../../src/db';
+import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -15,7 +15,8 @@ const mockDB = {
     query: mockQuery
 } as IDB;
 
-jest.mock('../../src/picture_accessor/local_picture_accessor');
+// TODO what is better, this or ts-mockito
+jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
 describe('PostPicture Tests', () => {

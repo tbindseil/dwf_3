@@ -1,7 +1,7 @@
 import {
     PixelUpdate
 } from "dwf-3-models-tjb";
-import BroadcastClientFactory from "../../src/broadcast/broadcast_client";
+import BroadcastClientFactory from "../../../src/broadcast/broadcast_client";
 import {Socket} from "socket.io";
 
 describe('BroadcastClient Tests', () => {

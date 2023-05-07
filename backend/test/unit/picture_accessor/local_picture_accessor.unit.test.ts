@@ -1,11 +1,11 @@
-import LocalPictureAccessor from '../../src/picture_accessor/local_picture_accessor';
-import generatePictureFilename from '../../src/picture_accessor/filename_generator';
+import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
+import generatePictureFilename from '../../../src/picture_accessor/filename_generator';
 import {Raster} from 'dwf-3-raster-tjb';
 import * as fs from 'fs';
 import path from 'path';
 import Jimp from 'jimp';
 
-jest.mock('../../src/picture_accessor/filename_generator');
+jest.mock('../../../src/picture_accessor/filename_generator');
 const mockGeneratePictureFilename = jest.mocked(generatePictureFilename, true);
 
 describe('LocalPictureAccessor tests', () => {

@@ -1,4 +1,4 @@
-import { stream_request } from '../src/stream_request';
+import { stream_request } from '../../src/stream_request';
 import * as stream from 'stream';
 
 
