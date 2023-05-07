@@ -1,4 +1,3 @@
-// TODO probably right after api integ testing, setup simple migrations docs while its fresh
 import {Knex} from 'knex';
 
 exports.up = async function (knex: Knex) {
