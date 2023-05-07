@@ -88,7 +88,7 @@ describe('PostPicture Tests', () => {
     });
 
     it('throws an api error when the database query fails', async () => {
-        mockQuery.mockImplementation((query: string, params: any[]) => { query; params; throw new Error(); });
+        mockQuery.mockImplementation((query: string, params: string[]) => { query; params; throw new Error(); });
         await expect(postPicture.process(mockDB, body)).rejects.toThrow(new APIError(500, 'database issue, picture not created'));
     });
 });
