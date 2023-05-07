@@ -1,8 +1,8 @@
-import { knex_with_database, database } from './'
+import { knex, testDatabase } from '../../src/db/knex_file'
 
 module.exports = async () => {
   try {
-    await knex_with_database.raw(`DROP DATABASE IF EXISTS ${database}`)
+    await knex.raw(`DROP DATABASE IF EXISTS ${testDatabase}`)
   } catch (error) {
     console.log(error)
     process.exit(1)

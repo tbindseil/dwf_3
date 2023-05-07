@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest unit --config jest.unit.config.js --coverage",
-    "integ-test": "jest integ --config jest.integ.config.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
-    "start": "ts-node src/index.ts"
+    "integ-test": "export ENV='TEST' && jest integ --config jest.integ.config.js",
+    "dev": "export ENV='DEV' && concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
+    "start": "export ENV='DEV' && ts-node src/index.ts"
   },
   "author": "TJ",
   "license": "ISC",

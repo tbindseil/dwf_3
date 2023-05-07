@@ -1,19 +1,19 @@
-import { knex, database, knex_with_database } from './'
+import { knex, knexWithoutDatabase, testDatabase } from '../../src/db/knex_file';
 
 // Create the database
 async function createTestDatabase() {
     // TODO logging utilities
     console.log('createTestDatabase');
     try {
-        await knex.raw(`DROP DATABASE IF EXISTS ${database}`);
-        await knex.raw(`CREATE DATABASE ${database}`);
+        await knexWithoutDatabase.raw(`DROP DATABASE IF EXISTS ${testDatabase}`);
+        await knexWithoutDatabase.raw(`CREATE DATABASE ${testDatabase}`);
     } catch (error: any) {
         console.log('createTestDatabase throw');
         console.log(`and error is: ${error}`);
         throw new Error(error);
     } finally {
         console.log('createTestDatabase finally');
-        await knex.destroy();
+        await knexWithoutDatabase.destroy();
     }
     console.log('createTestDatabase done');
 }
@@ -23,16 +23,16 @@ async function seedTestDatabase() {
     console.log('seedTestDatabase');
     try {
         console.log('seedTestDatabase before migrate');
-        await knex_with_database.migrate.latest();
+        await knex.migrate.latest();
         console.log('seedTestDatabase after migrate');
-        await knex_with_database.seed.run();
+        await knex.seed.run();
         console.log('seedTestDatabase after run');
     } catch (error: any) {
         console.log('seedTestDatabase throw');
         throw new Error(error);
     } finally {
         console.log('seedTestDatabase finally');
-        await knex_with_database.destroy();
+        await knex.destroy();
     }
     console.log('done seedTestDatabase');
 }
@@ -47,6 +47,3 @@ module.exports = async () => {
         process.exit(1);
     }
 }
-
-
-// TJTAG, time to write the actual integ tests and see how rough this is

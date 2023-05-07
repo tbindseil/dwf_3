@@ -7,6 +7,7 @@ import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
+import {knex} from './db/knex_file';
 import {DB} from './db';
 import {
     GetPictures,
@@ -28,7 +29,6 @@ import {
 
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
-import Knex from 'knex';
 
 // TODO handle api errors specifically
 const app: Express = express();
@@ -49,17 +49,6 @@ const broadcastClientFactory = new BroadcastClientFactory();
 const broadcastMediator = new BroadcastMediator(pictureAccessor, broadcastClientFactory, pictureSyncClientFactory);
 
 // TODO inject db (and pictureArray?) via middleware
-const knex = Knex({
-    client: 'pg',
-    connection: {
-        host: 'localhost',
-        port: 5432,
-        database: 'tj',
-        user: 'tj'
-    },
-    searchPath: ['knex', 'public'],
-    debug: true
-});
 const db = new DB(knex);
 
 app.get('/pictures', async (req: Request, res: Response) => {

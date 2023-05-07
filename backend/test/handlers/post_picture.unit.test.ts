@@ -74,7 +74,7 @@ describe('PostPicture Tests', () => {
 
         await postPicture.process(mockDB, body);
 
-        const expectedQuery = 'insert into picture (name, createdBy, filename, filesystem) values ($1, $2, $3, $4);'
+        const expectedQuery = 'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);'
         const expectedParams = [name, createdBy, filename, filesystem];
         expect(mockQuery).toHaveBeenCalledTimes(1);
         expect(mockQuery).toHaveBeenCalledWith(expectedQuery, expectedParams);

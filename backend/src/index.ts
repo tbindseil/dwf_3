@@ -1,18 +1,7 @@
-import Knex from 'knex';
+import {knex} from './db/knex_file';
 import { Model } from 'objection';
 
 import { io, server } from './app';
-
-const knex = Knex({
-    client: 'pg',
-    connection: {
-        host: 'localhost',
-        database: 'tj',
-        port: 5432,
-        password: 'your_password', // TODO what are these? might need to recreate database..
-        user: 'your_username',
-    },
-})
 
 // Connect database to Objection
 Model.knex(knex)
