@@ -40,7 +40,6 @@ describe('API Tests', () => {
 
     it('calls', async () => {
         const req = { body: specialInput } as Request;
-        // jest.autoMockOn TODO Whoaaa
         const res = {
             set: jest.fn(),
             status: jest.fn(),
