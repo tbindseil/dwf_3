@@ -27,6 +27,7 @@ const connectionConfig = {
 const knexBaseConfig = {
     client: 'pg',
     searchPath: ['knex', 'public'],
+    pool: { min: 0, max: 7 },
     debug: true
 };
 
@@ -39,3 +40,6 @@ export const knexWithoutDatabase = Knex({
     ...knexBaseConfig,
     connection: connectionConfigWithoutDatabase
 });
+
+
+// TODO might need to vend the factory and have users close after usage?
