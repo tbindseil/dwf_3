@@ -1,4 +1,4 @@
-import { knex, database } from './'
+import { knex, database, knex_with_database } from './'
 
 // Create the database
 async function createTestDatabase() {
@@ -23,16 +23,16 @@ async function seedTestDatabase() {
     console.log('seedTestDatabase');
     try {
         console.log('seedTestDatabase before migrate');
-        await knex.migrate.latest();
+        await knex_with_database.migrate.latest();
         console.log('seedTestDatabase after migrate');
-        await knex.seed.run();
+        await knex_with_database.seed.run();
         console.log('seedTestDatabase after run');
     } catch (error: any) {
         console.log('seedTestDatabase throw');
         throw new Error(error);
     } finally {
         console.log('seedTestDatabase finally');
-        await knex.destroy();
+        await knex_with_database.destroy();
     }
     console.log('done seedTestDatabase');
 }
