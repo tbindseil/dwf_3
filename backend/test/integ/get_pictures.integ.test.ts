@@ -22,19 +22,13 @@ describe('get_pictures', () => {
         knex.destroy()
     })
 
-    describe('GET /books/:id', () => {
-        // Tests will go here
-        it('does a test...', () => {
-            console.log('TESTING BITCH');
-        });
-
-        it('should return a book', async () => {
+    describe('GET /pictures', () => {
+        it('should return pictures', async () => {
             // used to be request(app), maybe need to export app even if it is server that is started? so expoert server, app, and io
             const { body: pictures } = await request(server).get('/pictures').expect(200)
 
             // TODO can cast pictures to getPicturesResponse
 
-            console.log(`picture is: ${JSON.stringify(pictures)}`);
             // TODO dry out here and seed
             // TODO more importantly, and deal with createdby vs createdBy ....
             const expectedPictures = [

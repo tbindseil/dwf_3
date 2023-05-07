@@ -5,7 +5,6 @@ export const testDatabase = 'test_picture_database'
 
 
 const env = process.env.ENV || 'DEV';
-console.log(`env is: ${env} and process.env.ENV is ${process.env.ENV}`);
 
 const databaseMap: any = {
     'DEV': developmentDatabase,
