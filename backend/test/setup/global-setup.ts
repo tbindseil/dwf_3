@@ -8,10 +8,6 @@ async function createTestDatabase() {
         await knexWithoutDatabase.raw(`CREATE DATABASE ${testDatabase}`);
     } catch (error: any) {
         throw new Error(error);
-    } finally {
-        // console.log('@@@@ TJTAG @@@@');
-        // console.log('destroying knexWithoutDatabase');
-        // await knexWithoutDatabase.destroy();
     }
 }
 
@@ -22,10 +18,6 @@ async function seedTestDatabase() {
         await knex.seed.run();
     } catch (error: any) {
         throw new Error(error);
-    } finally {
-        // console.log('@@@@ TJTAG @@@@');
-        // console.log('destroying knex');
-        // await knex.destroy();
     }
 }
 
@@ -34,6 +26,9 @@ module.exports = async () => {
         await createTestDatabase();
         await seedTestDatabase();
     } catch (error) {
+        await knexWithoutDatabase.destroy();
+        await knex.destroy();
+
         console.log(error);
         process.exit(1);
     }
