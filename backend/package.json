@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest unit --config jest.unit.config.js --coverage",
-    "integ-test": "jest unit --config jest.integ.config.js",
+    "integ-test": "jest integ --config jest.integ.config.js",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
     "start": "ts-node src/index.ts"
   },
