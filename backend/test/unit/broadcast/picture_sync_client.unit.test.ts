@@ -8,7 +8,6 @@ import {
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { Socket } from 'socket.io';
-import { getSingleFunctionMock } from '../mock/mock_adapter';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import PictureSyncClientFactory from '../../../src/broadcast/picture_sync_client';
 
@@ -27,14 +26,15 @@ describe('PictureSyncClient Tests', () => {
         filename: defaultFilename,
     } as unknown as PixelUpdate;
 
-    const [mockWriteRaster, mockPictureAccessor] =
-        getSingleFunctionMock<PictureAccessor>({
-            writeRaster: 'none',
-        });
+    const mockWriteRaster = jest.fn();
+    const mockPictureAccessor = {
+        writeRaster: mockWriteRaster,
+    } as unknown as PictureAccessor;
 
-    const [mockHandlePixelUpdate, mockRaster] = getSingleFunctionMock<Raster>({
-        handlePixelUpdate: 'none',
-    });
+    const mockHandlePixelUpdate = jest.fn();
+    const mockRaster = {
+        handlePixelUpdate: mockHandlePixelUpdate,
+    } as unknown as Raster;
 
     const pictureSyncClient =
         new PictureSyncClientFactory().createPictureSyncClient(

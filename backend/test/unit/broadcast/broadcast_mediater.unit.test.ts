@@ -14,7 +14,6 @@ import BroadcastClientFactory, {
 import PictureSyncClientFactory, {
     PictureSyncClient,
 } from '../../../src/broadcast/picture_sync_client';
-import { getSingleFunctionMock } from '../mock/mock_adapter';
 
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
@@ -39,30 +38,30 @@ describe('BroadcastMediator Tests', () => {
         filename: defaultFilename,
     } as unknown as PixelUpdate;
 
-    const [mockGetRaster, mockPictureAccessor] =
-        getSingleFunctionMock<PictureAccessor>({
-            getRaster: 'none',
-        });
+    const mockGetRaster = jest.fn();
+    const mockPictureAccessor = {
+        getRaster: mockGetRaster,
+    } as unknown as PictureAccessor;
 
-    const [mockCreateBroadcastClient, mockBroadcastClientFactory] =
-        getSingleFunctionMock<BroadcastClientFactory>({
-            createBroadcastClient: 'none',
-        });
+    const mockCreateBroadcastClient = jest.fn();
+    const mockBroadcastClientFactory = {
+        createBroadcastClient: mockCreateBroadcastClient,
+    } as unknown as BroadcastClientFactory;
 
-    const [mockCreatePictureSyncClient, mockPictureSyncClientFactory] =
-        getSingleFunctionMock<PictureSyncClientFactory>({
-            createPictureSyncClient: 'none',
-        });
+    const mockCreatePictureSyncClient = jest.fn();
+    const mockPictureSyncClientFactory = {
+        createPictureSyncClient: mockCreatePictureSyncClient,
+    } as unknown as PictureSyncClientFactory;
 
-    const [mockPictureSyncHandleUpdate, mockPictureSyncClient] =
-        getSingleFunctionMock<PictureSyncClient>({
-            handleUpdate: 'none',
-        });
+    const mockPictureSyncHandleUpdate = jest.fn();
+    const mockPictureSyncClient = {
+        handleUpdate: mockPictureSyncHandleUpdate,
+    } as unknown as PictureSyncClient;
 
-    const [mockBroadcastHandleUpdate, mockBroadcastClient] =
-        getSingleFunctionMock<BroadcastClient>({
-            handleUpdate: 'none',
-        });
+    const mockBroadcastHandleUpdate = jest.fn();
+    const mockBroadcastClient = {
+        handleUpdate: mockBroadcastHandleUpdate,
+    } as unknown as BroadcastClient;
 
     mockCreatePictureSyncClient.mockReturnValue(mockPictureSyncClient);
     mockCreateBroadcastClient.mockReturnValue(mockBroadcastClient);
