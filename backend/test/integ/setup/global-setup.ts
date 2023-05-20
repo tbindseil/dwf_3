@@ -13,8 +13,10 @@ async function createTestDatabase() {
             `DROP DATABASE IF EXISTS ${testDatabase}`
         );
         await knexWithoutDatabase.raw(`CREATE DATABASE ${testDatabase}`);
-    } catch (error: any) {
-        throw new Error(error);
+    } catch (error: unknown) {
+        throw new Error(
+            `issue with createTestDatabase, error is: ${JSON.stringify(error)}`
+        );
     } finally {
         knexWithoutDatabase.destroy();
     }
@@ -26,8 +28,10 @@ async function seedTestDatabase() {
     try {
         await knex.migrate.latest();
         await knex.seed.run();
-    } catch (error: any) {
-        throw new Error(error);
+    } catch (error: unknown) {
+        throw new Error(
+            `issue with seedTestDatabase, error is: ${JSON.stringify(error)}`
+        );
     } finally {
         knex.destroy();
     }

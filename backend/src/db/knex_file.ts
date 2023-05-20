@@ -5,7 +5,7 @@ export const testDatabase = 'test_picture_database';
 
 const env = process.env.ENV || 'DEV';
 
-const databaseMap: any = {
+const databaseMap: { [key: string]: string } = {
     DEV: developmentDatabase,
     TEST: testDatabase,
 };

@@ -34,7 +34,7 @@ describe('LocalPictureAccessor tests', () => {
         }
     );
 
-    let localPictureAccessor = new LocalPictureAccessor(
+    const localPictureAccessor = new LocalPictureAccessor(
         mockJimpAdapter,
         testPrototype,
         testBaseDirectory
@@ -43,7 +43,7 @@ describe('LocalPictureAccessor tests', () => {
     afterEach(async () => {
         try {
             await fs.promises.unlink(fullPathFilename);
-        } catch (error: any) {
+        } catch (error: unknown) {
             error;
         }
     });
@@ -102,7 +102,7 @@ describe('LocalPictureAccessor tests', () => {
     it('writes the raster', async () => {
         const arrayBuffer = new ArrayBuffer(8);
         const view = new Uint8ClampedArray(arrayBuffer);
-        for (let i: number = 0; i < 8; ++i) {
+        for (let i = 0; i < 8; ++i) {
             view[i] = i;
         }
         const rasterToWrite = new Raster(1, 8, arrayBuffer);

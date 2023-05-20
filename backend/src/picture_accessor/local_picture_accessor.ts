@@ -37,7 +37,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
                 path.join(this.baseDirectory, filename),
                 fs.constants.COPYFILE_EXCL
             );
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.log(`issue creating new picture: ${JSON.stringify(error)}`);
             throw error;
         }
@@ -67,6 +67,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
         //         jimg.write(path.join(LocalPictureAccessor.testDirectory, filename));
         //
         //         return filename;
+        width_supplied;
         return 'TODO';
     }
 
@@ -75,7 +76,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
             return await fs.promises.readFile(
                 path.join(this.baseDirectory, filename)
             );
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.log(
                 `issue reading picture contents, ${JSON.stringify(error)}`
             );
