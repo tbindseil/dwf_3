@@ -70,8 +70,8 @@ export default class BroadcastMediator {
         }
 
         this.filenameToClients
-            .get(filename)!
-            .set(
+            .get(filename)
+            ?.set(
                 socket.id,
                 this.broadcastClientFactory.createBroadcastClient(socket)
             );
@@ -96,6 +96,7 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
+            // TODO why did this (or the next one) get hit when using web page?
             // throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
             console.log(
                 `unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
@@ -103,7 +104,11 @@ export default class BroadcastMediator {
             return;
         }
 
-        if (!this.filenameToClients.get(filename)!.has(socket.id)) {
+        const clientMap: Map<string, Client> = this.filenameToClients.get(
+            filename
+        ) as Map<string, Client>;
+
+        if (!clientMap.has(socket.id)) {
             // throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
             console.log(
                 `unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
@@ -115,19 +120,10 @@ export default class BroadcastMediator {
         // temporary to test saving of file
         // this.filenameToClients.get(filename)?.get(BroadcastMediator.PICTURE_SYNC_KEY)?.forcePictureWrite();
 
-        this.filenameToClients.get(filename)!.delete(socket.id);
-        if (
-            Array.from(this.filenameToClients.get(filename)!.keys()).length ===
-            1
-        ) {
-            if (
-                this.filenameToClients
-                    .get(filename)!
-                    .has(BroadcastMediator.PICTURE_SYNC_KEY)
-            ) {
-                this.filenameToClients
-                    .get(filename)!
-                    .delete(BroadcastMediator.PICTURE_SYNC_KEY);
+        clientMap.delete(socket.id);
+        if (Array.from(clientMap.keys()).length === 1) {
+            if (clientMap.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
+                clientMap.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                 this.filenameToClients.delete(filename);
             } else {
                 throw new Error(
@@ -150,10 +146,13 @@ export default class BroadcastMediator {
     }
 
     public listClients(filename: string): string[] {
-        const clientsMap = this.filenameToClients.get(filename);
-        if (!clientsMap) {
+        if (!this.filenameToClients.has(filename)) {
             return [];
         }
-        return Array.from(clientsMap!.keys());
+        const clientsMap = this.filenameToClients.get(filename) as Map<
+            string,
+            Client
+        >;
+        return Array.from(clientsMap.keys());
     }
 }
