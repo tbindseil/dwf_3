@@ -4,28 +4,13 @@ import APIError from './api_error';
 import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
-export class PostPicture extends API {
+export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
 
     constructor(db: IDB, pictureAccessor: PictureAccessor) {
         super(db, 'POST', 'picture');
 
         this.pictureAccessor = pictureAccessor;
-    }
-
-    public getInput(body: any): PostPictureInput {
-        // TODO schema validation, automatically, probably requires processing models into list of fields and making sure they are present here
-        if ('name' in body && 'createdBy' in body) {
-            return {
-                name: body.name,
-                createdBy: body.createdBy,
-            };
-        } else {
-            throw new APIError(
-                400,
-                'name and created by must be provided, picture not created'
-            );
-        }
     }
 
     public async process(

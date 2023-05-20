@@ -1,5 +1,6 @@
 import { Knex } from 'knex';
 
+// TODO how to handle 'any' here?
 export default interface IDB {
     query: (text: string, params: string[]) => Promise<any>;
 }

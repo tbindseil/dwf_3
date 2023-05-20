@@ -3,14 +3,9 @@ import API from './api';
 import APIError from './api_error';
 import IDB from '../db';
 
-export class GetPictures extends API {
+export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
     constructor(db: IDB) {
         super(db, 'GET', 'pictures');
-    }
-
-    public getInput(body: any): GetPicturesInput {
-        body;
-        return {};
     }
 
     public async process(

@@ -3,16 +3,9 @@ import IDB from '../db';
 import API from './api';
 
 // TODO what is this?
-export class PostUpdate extends API {
+export class PostUpdate extends API<PostUpdateInput, PostUpdateOutput> {
     constructor(db: IDB) {
         super(db, 'POST', 'update');
-    }
-
-    // public getInput(body: any): PostUpdateInput {
-    public getInput(body: any): any {
-        console.log('PostUpdate.getInput');
-        body;
-        // return {body.};
     }
 
     public async process(

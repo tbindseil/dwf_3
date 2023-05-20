@@ -4,26 +4,13 @@ import APIError from './api_error';
 import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
-export class GetPicture extends API {
+export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
     private readonly pictureAccessor: PictureAccessor;
 
     constructor(db: IDB, pictureAccessor: PictureAccessor) {
         super(db, 'GET', 'picture');
 
         this.pictureAccessor = pictureAccessor;
-    }
-
-    public getInput(body: any): GetPictureInput {
-        if ('id' in body) {
-            return {
-                id: body.id,
-            };
-        } else {
-            throw new APIError(
-                400,
-                'id must be provided, picture not returned'
-            );
-        }
     }
 
     public async process(
@@ -46,7 +33,8 @@ export class GetPicture extends API {
         return 'image/png';
     }
 
-    public serializeOutput(output: any): any {
-        return output;
-    }
+    // how did this ever work? - TODO
+    //     public serializeOutput(output: any): any {
+    //         return output;
+    //     }
 }
