@@ -1,6 +1,6 @@
-import { GetPictures } from '../../../src/handlers/get_pictures'
-import APIError from '../../../src/handlers/api_error'
-import IDB from '../../../src/db'
+import { GetPictures } from '../../../src/handlers/get_pictures';
+import APIError from '../../../src/handlers/api_error';
+import IDB from '../../../src/db';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -9,23 +9,23 @@ import IDB from '../../../src/db'
 // const mockDB = jest.genMockFromModule<DB>('db');
 // const mockDB = jest.mock<DB>('db');
 // mockDB.
-const mockQuery = jest.fn()
+const mockQuery = jest.fn();
 const mockDB = {
     query: mockQuery,
-} as IDB
+} as IDB;
 
 describe('GetPictures Tests', () => {
-    let getPictures: GetPictures
+    let getPictures: GetPictures;
 
     beforeEach(() => {
-        getPictures = new GetPictures(mockDB)
-        mockQuery.mockClear()
-    })
+        getPictures = new GetPictures(mockDB);
+        mockQuery.mockClear();
+    });
 
     it('returns empty object on getInput', () => {
-        const input = getPictures.getInput({})
-        expect(input).toEqual({})
-    })
+        const input = getPictures.getInput({});
+        expect(input).toEqual({});
+    });
 
     it('calls db query when procesing', async () => {
         const dbQueryOutput = {
@@ -38,7 +38,7 @@ describe('GetPictures Tests', () => {
                     filesystem: 'filesystem',
                 },
             ],
-        }
+        };
 
         const pictureArray = {
             pictures: [
@@ -50,30 +50,30 @@ describe('GetPictures Tests', () => {
                     filesystem: 'filesystem',
                 },
             ],
-        }
+        };
         mockQuery.mockImplementation((query: string, params: any[]) => {
-            query
-            params
+            query;
+            params;
             return new Promise((resolve, reject) => {
-                reject
-                resolve({ rows: dbQueryOutput.pictures })
-            })
-        })
-        const result = await getPictures.process(mockDB, {})
+                reject;
+                resolve({ rows: dbQueryOutput.pictures });
+            });
+        });
+        const result = await getPictures.process(mockDB, {});
 
-        expect(mockQuery).toHaveBeenCalledTimes(1)
-        expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, [])
-        expect(result).toEqual(pictureArray)
-    })
+        expect(mockQuery).toHaveBeenCalledTimes(1);
+        expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, []);
+        expect(result).toEqual(pictureArray);
+    });
 
     it('throws an api error when the database query fails', async () => {
         mockQuery.mockImplementation((query: string, params: any[]) => {
-            query
-            params
-            throw new Error()
-        })
+            query;
+            params;
+            throw new Error();
+        });
         await expect(getPictures.process(mockDB, {})).rejects.toThrow(
             new APIError(500, 'database issue, pictures not fetched')
-        )
-    })
-})
+        );
+    });
+});

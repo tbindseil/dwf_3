@@ -1,4 +1,4 @@
-import { Socket } from 'socket.io'
+import { Socket } from 'socket.io';
 import {
     ServerToClientEvents,
     ClientToServerEvents,
@@ -6,9 +6,9 @@ import {
     SocketData,
     PictureRequest,
     PixelUpdate,
-} from 'dwf-3-models-tjb'
-import BroadcastMediator from './broadcast/broadcast_mediator'
-import PictureAccessor from './picture_accessor/picture_accessor'
+} from 'dwf-3-models-tjb';
+import BroadcastMediator from './broadcast/broadcast_mediator';
+import PictureAccessor from './picture_accessor/picture_accessor';
 
 export async function pictureRequestHandler(
     pictureRequest: PictureRequest,
@@ -21,11 +21,11 @@ export async function pictureRequestHandler(
         SocketData
     >
 ): Promise<void> {
-    await broadcastMediator.addClient(pictureRequest.filename, socket)
+    await broadcastMediator.addClient(pictureRequest.filename, socket);
     const pictureResponse = await pictureAccessor.getRaster(
         pictureRequest.filename
-    ) // TODO this is happening way too much..
-    socket.emit('picture_response', pictureResponse)
+    ); // TODO this is happening way too much..
+    socket.emit('picture_response', pictureResponse);
 }
 
 export function updateHandler(
@@ -33,5 +33,5 @@ export function updateHandler(
     broadcastMediator: BroadcastMediator,
     sourceSocketId: string
 ): void {
-    broadcastMediator.handleUpdate(pixelUpdate, sourceSocketId)
+    broadcastMediator.handleUpdate(pixelUpdate, sourceSocketId);
 }

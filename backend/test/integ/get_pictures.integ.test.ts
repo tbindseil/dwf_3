@@ -1,10 +1,10 @@
-import request from 'supertest'
-import { Model } from 'objection'
+import request from 'supertest';
+import { Model } from 'objection';
 
-import { makeKnex } from '../../src/db/knex_file'
+import { makeKnex } from '../../src/db/knex_file';
 
-import { server } from '../../src/app'
-import { GetPicturesOutput } from 'dwf-3-models-tjb'
+import { server } from '../../src/app';
+import { GetPicturesOutput } from 'dwf-3-models-tjb';
 
 describe('get_pictures', () => {
     // TODO deal rename createdby to created_by and introduce a camel to snake decoder
@@ -31,11 +31,11 @@ describe('get_pictures', () => {
             filename: 'filenam3',
             filesystem: 'filesyste3',
         },
-    ]
+    ];
 
     beforeAll(async () => {
-        const scopedKnex = makeKnex()
-        Model.knex(scopedKnex)
+        const scopedKnex = makeKnex();
+        Model.knex(scopedKnex);
 
         await scopedKnex('picture').insert(
             expectedPictures.map((pic) => {
@@ -45,24 +45,24 @@ describe('get_pictures', () => {
                     createdby: pic.createdBy,
                     filename: pic.filename,
                     filesystem: pic.filesystem,
-                }
+                };
             })
-        )
+        );
 
-        scopedKnex.destroy()
-    })
+        scopedKnex.destroy();
+    });
 
     describe('GET /pictures', () => {
         it('should return pictures', async () => {
             const { body: pictures } = await request(server)
                 .get('/pictures')
-                .expect(200)
-            const getPicturesResponse = pictures as GetPicturesOutput
+                .expect(200);
+            const getPicturesResponse = pictures as GetPicturesOutput;
 
             expect(getPicturesResponse.pictures.length).toBe(
                 expectedPictures.length
-            )
-            expect(pictures.pictures).toEqual(expectedPictures)
-        })
-    })
-})
+            );
+            expect(pictures.pictures).toEqual(expectedPictures);
+        });
+    });
+});

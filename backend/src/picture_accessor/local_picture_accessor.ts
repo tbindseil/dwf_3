@@ -1,47 +1,47 @@
-import PictureAccessor from './picture_accessor'
-import generatePictureFilename from './filename_generator'
-import JimpAdapter from './jimp_adapter'
-import * as fs from 'fs'
-import path from 'path'
-import { PictureResponse } from 'dwf-3-models-tjb'
-import { Raster } from 'dwf-3-raster-tjb'
+import PictureAccessor from './picture_accessor';
+import generatePictureFilename from './filename_generator';
+import JimpAdapter from './jimp_adapter';
+import * as fs from 'fs';
+import path from 'path';
+import { PictureResponse } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
-    public static testDirectory = '/Users/tj/Projects/dwf_3/pictures/test' // TODO remove this
-    public static rasterWriteFileName = 'written_from_raster.png'
+    public static testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
+    public static rasterWriteFileName = 'written_from_raster.png';
 
-    private readonly jimpAdapter: JimpAdapter
-    private readonly prototypeFileName: string
-    private readonly baseDirectory: string
+    private readonly jimpAdapter: JimpAdapter;
+    private readonly prototypeFileName: string;
+    private readonly baseDirectory: string;
 
     constructor(
         jimpAdapter: JimpAdapter,
         prototypeFileName: string,
         baseDirectory: string
     ) {
-        super()
+        super();
 
-        this.jimpAdapter = jimpAdapter
-        this.prototypeFileName = prototypeFileName
-        this.baseDirectory = baseDirectory
+        this.jimpAdapter = jimpAdapter;
+        this.prototypeFileName = prototypeFileName;
+        this.baseDirectory = baseDirectory;
     }
 
     public async createNewPicture(
         pictureName: string,
         createdBy: string
     ): Promise<string> {
-        const filename = generatePictureFilename(pictureName, createdBy)
+        const filename = generatePictureFilename(pictureName, createdBy);
         try {
             await fs.promises.copyFile(
                 this.prototypeFileName,
                 path.join(this.baseDirectory, filename),
                 fs.constants.COPYFILE_EXCL
-            )
+            );
         } catch (error: any) {
-            console.log(`issue creating new picture: ${JSON.stringify(error)}`)
-            throw error
+            console.log(`issue creating new picture: ${JSON.stringify(error)}`);
+            throw error;
         }
-        return filename
+        return filename;
     }
 
     public createNewPicture_with_dimensions(width_supplied: number): string {
@@ -67,50 +67,50 @@ export default class LocalPictureAccessor extends PictureAccessor {
         //         jimg.write(path.join(LocalPictureAccessor.testDirectory, filename));
         //
         //         return filename;
-        return 'TODO'
+        return 'TODO';
     }
 
     public async getPicture(filename: string): Promise<Buffer> {
         try {
             return await fs.promises.readFile(
                 path.join(this.baseDirectory, filename)
-            )
+            );
         } catch (error: any) {
             console.log(
                 `issue reading picture contents, ${JSON.stringify(error)}`
-            )
-            throw error
+            );
+            throw error;
         }
     }
 
     public async getRaster(filename: string): Promise<PictureResponse> {
-        const fullPath = path.join(this.baseDirectory, filename)
+        const fullPath = path.join(this.baseDirectory, filename);
 
         // throws when fullPath doesn't exist, but jimp doesn't for some reason
-        await fs.promises.stat(fullPath)
+        await fs.promises.stat(fullPath);
 
-        const contents = await this.jimpAdapter.read(fullPath)
+        const contents = await this.jimpAdapter.read(fullPath);
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,
             data: contents.bitmap.data,
-        }
+        };
     }
 
     public async writeRaster(raster: Raster): Promise<void> {
-        const jimg = this.jimpAdapter.createJimp(raster.width, raster.height)
+        const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
 
-        jimg.bitmap.data = Buffer.from(raster.getBuffer())
+        jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
         await jimg.writeAsync(
             path.join(
                 LocalPictureAccessor.testDirectory,
                 LocalPictureAccessor.rasterWriteFileName
             )
-        )
+        );
     }
 
     public getFileSystem(): string {
-        return 'LOCAL'
+        return 'LOCAL';
     }
 }

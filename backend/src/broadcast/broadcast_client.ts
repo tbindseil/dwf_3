@@ -1,12 +1,12 @@
-import Client from './client'
-import { Socket } from 'socket.io'
+import Client from './client';
+import { Socket } from 'socket.io';
 import {
     PixelUpdate,
     ServerToClientEvents,
     ClientToServerEvents,
     InterServerEvents,
     SocketData,
-} from 'dwf-3-models-tjb'
+} from 'dwf-3-models-tjb';
 
 export default class BroadcastClientFactory {
     public createBroadcastClient(
@@ -17,7 +17,7 @@ export default class BroadcastClientFactory {
             SocketData
         >
     ): BroadcastClient {
-        return new BroadcastClient(socket)
+        return new BroadcastClient(socket);
     }
 }
 
@@ -27,7 +27,7 @@ export class BroadcastClient extends Client {
         ServerToClientEvents,
         InterServerEvents,
         SocketData
-    >
+    >;
 
     constructor(
         socket: Socket<
@@ -37,9 +37,9 @@ export class BroadcastClient extends Client {
             SocketData
         >
     ) {
-        super()
+        super();
 
-        this.socket = socket
+        this.socket = socket;
     }
 
     public handleUpdate(
@@ -47,7 +47,7 @@ export class BroadcastClient extends Client {
         sourceSocketId: string
     ): void {
         if (sourceSocketId !== this.socket.id) {
-            this.socket.emit('server_to_client_update', pixelUpdate)
+            this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }
 
