@@ -1,61 +1,61 @@
 import {
-  // TODO linter
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData,
-  PixelUpdate,
-} from "dwf-3-models-tjb";
-import { Raster } from "dwf-3-raster-tjb";
-import { Socket } from "socket.io";
-import { getSingleFunctionMock } from "../mock/mock_adapter";
-import PictureAccessor from "../../../src/picture_accessor/picture_accessor";
-import PictureSyncClientFactory from "../../../src/broadcast/picture_sync_client";
-
-describe("PictureSyncClient Tests", () => {
-  const defaultFilename = "filename";
-  const mockSocket = {
-    id: "mockSocketID",
-  } as unknown as Socket<
+    // TODO linter
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
-    SocketData
-  >;
-  const dummyPixelUpdate = {
-    name: "dummyPixelUpdate",
-    filename: defaultFilename,
-  } as unknown as PixelUpdate;
+    SocketData,
+    PixelUpdate,
+} from 'dwf-3-models-tjb'
+import { Raster } from 'dwf-3-raster-tjb'
+import { Socket } from 'socket.io'
+import { getSingleFunctionMock } from '../mock/mock_adapter'
+import PictureAccessor from '../../../src/picture_accessor/picture_accessor'
+import PictureSyncClientFactory from '../../../src/broadcast/picture_sync_client'
 
-  const [mockWriteRaster, mockPictureAccessor] =
-    getSingleFunctionMock<PictureAccessor>({
-      writeRaster: "none",
-    });
+describe('PictureSyncClient Tests', () => {
+    const defaultFilename = 'filename'
+    const mockSocket = {
+        id: 'mockSocketID',
+    } as unknown as Socket<
+        ClientToServerEvents,
+        ServerToClientEvents,
+        InterServerEvents,
+        SocketData
+    >
+    const dummyPixelUpdate = {
+        name: 'dummyPixelUpdate',
+        filename: defaultFilename,
+    } as unknown as PixelUpdate
 
-  const [mockHandlePixelUpdate, mockRaster] = getSingleFunctionMock<Raster>({
-    handlePixelUpdate: "none",
-  });
+    const [mockWriteRaster, mockPictureAccessor] =
+        getSingleFunctionMock<PictureAccessor>({
+            writeRaster: 'none',
+        })
 
-  const pictureSyncClient =
-    new PictureSyncClientFactory().createPictureSyncClient(
-      mockPictureAccessor,
-      mockRaster
-    );
+    const [mockHandlePixelUpdate, mockRaster] = getSingleFunctionMock<Raster>({
+        handlePixelUpdate: 'none',
+    })
 
-  beforeEach(() => {
-    mockWriteRaster.mockClear();
-    mockHandlePixelUpdate.mockClear();
-  });
+    const pictureSyncClient =
+        new PictureSyncClientFactory().createPictureSyncClient(
+            mockPictureAccessor,
+            mockRaster
+        )
 
-  it("passes the update to the raster", () => {
-    pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
+    beforeEach(() => {
+        mockWriteRaster.mockClear()
+        mockHandlePixelUpdate.mockClear()
+    })
 
-    expect(mockHandlePixelUpdate).toHaveBeenCalledWith(dummyPixelUpdate);
-  });
+    it('passes the update to the raster', () => {
+        pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id)
 
-  it("writes on forcePictureWrite", () => {
-    pictureSyncClient.forcePictureWrite();
+        expect(mockHandlePixelUpdate).toHaveBeenCalledWith(dummyPixelUpdate)
+    })
 
-    expect(mockWriteRaster).toHaveBeenCalledWith(mockRaster);
-  });
-});
+    it('writes on forcePictureWrite', () => {
+        pictureSyncClient.forcePictureWrite()
+
+        expect(mockWriteRaster).toHaveBeenCalledWith(mockRaster)
+    })
+})
