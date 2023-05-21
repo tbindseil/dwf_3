@@ -18,7 +18,7 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         input: GetPictureInput
     ): Promise<GetPictureOutput> {
         const query = 'select filename from picture where id = ?;';
-        const params = [input.id];
+        const params = [input.id.toString()];
 
         try {
             const result = await db.query(query, params);

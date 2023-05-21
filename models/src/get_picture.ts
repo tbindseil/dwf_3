@@ -1,5 +1,5 @@
 export interface GetPictureInput {
-    id: string
+    id: number;
 }
 
 export type GetPictureOutput = Buffer;

@@ -2,6 +2,7 @@ import { GetPicture } from '../../../src/handlers/get_picture';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
+import { GetPictureInput } from 'dwf-3-models-tjb';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(DB.query, true);
@@ -17,8 +18,8 @@ jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
 describe('GetPicture Tests', () => {
-    const id = 'id';
-    const body = { id: id };
+    const id = 42;
+    const body: GetPictureInput = { id: id };
 
     // TODO this picture accessor mock stuff is duplicated
     // also, its probably only necessary to mock a PictureAccessor, not a LocalPictureAccessor
