@@ -46,7 +46,7 @@ export default abstract class API<I, O> {
         return 'application/json';
     }
 
-    public serializeOutput(output: O): string {
+    public serializeOutput(output: O): string | Buffer {
         return JSON.stringify(output);
     }
 }

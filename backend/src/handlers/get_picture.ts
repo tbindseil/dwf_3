@@ -33,8 +33,7 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         return 'image/png';
     }
 
-    // how did this ever work? - TODO
-    //     public serializeOutput(output: any): any {
-    //         return output;
-    //     }
+    public serializeOutput(output: GetPictureOutput): Buffer {
+        return output;
+    }
 }

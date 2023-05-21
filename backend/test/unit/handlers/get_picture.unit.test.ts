@@ -101,4 +101,17 @@ describe('GetPicture Tests', () => {
         const contentType = getPicture.getContentType();
         expect(contentType).toEqual('image/png');
     });
+
+    it('uses passthrough output serialization by default', () => {
+        const superCrazyOutput = { thing1: 'thing1key', thing2: 'thing2key' };
+        const superCrazyOutputBuffer = Buffer.from(
+            JSON.stringify(superCrazyOutput),
+            'utf-8'
+        );
+
+        const resultingSerializedOutput = getPicture.serializeOutput(
+            superCrazyOutputBuffer
+        );
+        expect(resultingSerializedOutput).toEqual(superCrazyOutputBuffer);
+    });
 });
