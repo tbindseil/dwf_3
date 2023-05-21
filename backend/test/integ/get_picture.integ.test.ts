@@ -63,6 +63,18 @@ describe('get_picture', () => {
             );
             expect(getPictureResponse).toEqual(expectedBuffer);
         });
+
+        it('should return 4XX when input is unfitting', async () => {
+            const payload = {
+                not_id: expectedPicture.id,
+            };
+            await request(server)
+                .get('/picture')
+                .send(payload)
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(400);
+        });
     });
 
     afterAll(async () => {
