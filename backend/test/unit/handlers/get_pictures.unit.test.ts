@@ -22,11 +22,6 @@ describe('GetPictures Tests', () => {
         mockQuery.mockClear();
     });
 
-    it('returns empty object on getInput', () => {
-        const input = getPictures.getInput({});
-        expect(input).toEqual({});
-    });
-
     it('calls db query when procesing', async () => {
         const dbQueryOutput = {
             pictures: [

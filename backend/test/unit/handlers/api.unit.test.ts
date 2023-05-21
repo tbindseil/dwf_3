@@ -9,14 +9,12 @@ const specialInput = { test: 'SPECIAL_INPUT' };
 const specialOutput = { test: 'SPECIAL_OUTPUT' };
 const serializedSpecialOutput = JSON.stringify({ test: 'SPECIAL_OUTPUT' });
 
-class TestAPI extends API {
+class TestAPI extends API<
+    { [key: string]: string },
+    { [key: string]: string }
+> {
     constructor(db: IDB, method: string, entity: string) {
         super(db, method, entity);
-    }
-
-    public getInput(req: any): any {
-        req;
-        return specialInput;
     }
 
     public async process(db: IDB, input: any): Promise<any> {
@@ -31,7 +29,7 @@ class TestAPI extends API {
 
 describe('API Tests', () => {
     const mockDB = {} as IDB;
-    let api: API;
+    let api: TestAPI;
     beforeEach(() => {
         api = new TestAPI(mockDB, method, entity);
     });

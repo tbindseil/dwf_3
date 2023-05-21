@@ -45,17 +45,6 @@ describe('GetPicture Tests', () => {
         getPicture = new GetPicture(mockDB, mockLocalPictureAccessorInstance);
     });
 
-    it('returns id extracted from input on getInput', () => {
-        const input = getPicture.getInput(body);
-        expect(input).toEqual(body);
-    });
-
-    it('throws an api error when the input is missing id field', () => {
-        expect(() => getPicture.getInput({})).toThrow(
-            new APIError(400, 'id must be provided, picture not returned')
-        );
-    });
-
     it('gets the filename from the database, requests picture contents, and returns them', async () => {
         const expectedFilename = 'filename';
         const filenameArray = [{ filename: expectedFilename }];
@@ -112,25 +101,4 @@ describe('GetPicture Tests', () => {
         const contentType = getPicture.getContentType();
         expect(contentType).toEqual('image/png');
     });
-
-    it('uses passthrough output serialization by default', () => {
-        const superCrazyOutput = { thing1: 'thing1key', thing2: 'thing2key' };
-        const resultingSerializedOutput =
-            getPicture.serializeOutput(superCrazyOutput);
-        expect(resultingSerializedOutput).toEqual(superCrazyOutput);
-    });
 });
-
-/*
-    it('calls db query when procesing', async () => {
-        const pictureArray = {
-            picture: [{id: 1, name: 'name', createdBy: 'createdBy', filename: 'filename', filesystem: 'filesystem'}]
-        };
-        mockQuery.mockImplementation((query: string, params: any[]) => { query; params; return new Promise((resolve, reject) => { reject; resolve({ rows: pictureArray.picture })}); });
-        const result = await getPicture.process({});
-
-        expect(mockQuery).toHaveBeenCalledTimes(1);
-        expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, []);
-        expect(result).toEqual(pictureArray);
-    });
-    */

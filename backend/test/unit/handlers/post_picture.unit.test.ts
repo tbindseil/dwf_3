@@ -47,29 +47,6 @@ describe('PostPicture Tests', () => {
         postPicture = new PostPicture(mockDB, mockLocalPictureAccessorInstance);
     });
 
-    it('gets the name and createdBy from the input', () => {
-        const returned = postPicture.getInput(body);
-        expect(returned).toEqual(body);
-    });
-
-    it("throws when input doesn't have a name field", async () => {
-        expect(() => postPicture.getInput({})).toThrow(
-            new APIError(
-                400,
-                'name and created by must be provided, picture not created'
-            )
-        );
-    });
-
-    it("throws when input doesn't have a createdBy field", async () => {
-        expect(() => postPicture.getInput({})).toThrow(
-            new APIError(
-                400,
-                'name and created by must be provided, picture not created'
-            )
-        );
-    });
-
     it('creates a new image with the expected createdBy', async () => {
         const mockCreateNewPicture =
             mockLocalPictureAccessorInstance.createNewPicture as jest.Mock;

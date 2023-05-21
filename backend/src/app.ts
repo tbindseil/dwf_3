@@ -1,3 +1,5 @@
+// TODO save vim compiler configs in this repo since they are somewhat repo specific (at this point)
+// maybe point to them from dotfiles
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';

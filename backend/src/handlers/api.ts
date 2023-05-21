@@ -30,6 +30,7 @@ export default abstract class API<I, O> {
 
     // TODO got ride of getInput
     // 1. does a bad input throw? - can check with integ tests. but can I check in unit tests too?
+    // 2. routing! based on input type
 
     public abstract process(db: IDB, input: I): Promise<O>;
 
