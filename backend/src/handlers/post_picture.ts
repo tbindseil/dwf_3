@@ -3,6 +3,7 @@ import API from './api';
 import APIError from './api_error';
 import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
+import { NextFunction } from 'express';
 
 export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
@@ -15,8 +16,11 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
 
     public async process(
         db: IDB,
-        input: PostPictureInput
+        input: PostPictureInput,
+        next: NextFunction
     ): Promise<PostPictureOutput> {
+        next;
+
         const name = input.name;
         const createdBy = input.createdBy;
         const filesystem = this.pictureAccessor.getFileSystem();

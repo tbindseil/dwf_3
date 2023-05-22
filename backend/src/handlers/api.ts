@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import IDB from '../db';
 
 export default abstract class API<I, O> {
@@ -18,8 +18,12 @@ export default abstract class API<I, O> {
     }
 
     // TODO can i also do this with the response, do i even need to?
-    public async call(req: Request<{}, {}, I>, res: Response) {
-        const output = await this.process(this.db, req.body);
+    public async call(
+        req: Request<{}, {}, I>,
+        res: Response,
+        next: NextFunction
+    ) {
+        const output = await this.process(this.db, req.body, next);
 
         const serialized_output = this.serializeOutput(output);
 
@@ -32,7 +36,7 @@ export default abstract class API<I, O> {
     // 1. does a bad input throw? - can check with integ tests. but can I check in unit tests too?
     // 2. routing! based on input type
 
-    public abstract process(db: IDB, input: I): Promise<O>;
+    public abstract process(db: IDB, input: I, next: NextFunction): Promise<O>;
 
     public getMethod() {
         return this.method;

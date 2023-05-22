@@ -2,6 +2,7 @@ import { GetPicturesInput, GetPicturesOutput } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
 import IDB from '../db';
+import { NextFunction } from 'express';
 
 export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
     constructor(db: IDB) {
@@ -10,8 +11,10 @@ export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
 
     public async process(
         db: IDB,
-        input: GetPicturesInput
+        input: GetPicturesInput,
+        next: NextFunction
     ): Promise<GetPicturesOutput> {
+        next;
         input;
 
         const query = 'select * from picture;';

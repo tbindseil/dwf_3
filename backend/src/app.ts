@@ -1,6 +1,6 @@
 // TODO save vim compiler configs in this repo since they are somewhat repo specific (at this point)
 // maybe point to them from dotfiles
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
@@ -31,6 +31,7 @@ import {
 
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
+import { myErrorHandler } from './middleware/error_handler';
 
 // TODO handle api errors specifically
 const app: Express = express();
@@ -40,6 +41,14 @@ app.use(cors());
 
 // decode json request bodies
 app.use(express.json());
+
+const myLogger = (req: Request, res: Response, next: NextFunction) => {
+    req;
+    res;
+    console.log('@@@@ TJTAG @@@@ LOGGED');
+    next();
+};
+app.use(myLogger);
 
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName =
@@ -62,18 +71,23 @@ const broadcastMediator = new BroadcastMediator(
 // TODO inject db (and pictureArray?) via middleware
 const db = new DB(makeKnex);
 
-app.get('/pictures', async (req: Request, res: Response) => {
-    new GetPictures(db).call(req, res);
+app.get(
+    '/pictures',
+    async (req: Request, res: Response, next: NextFunction) => {
+        new GetPictures(db).call(req, res, next);
+    }
+);
+app.get('/picture', (req: Request, res: Response, next: NextFunction) => {
+    new GetPicture(db, pictureAccessor).call(req, res, next);
 });
-app.get('/picture', (req: Request, res: Response) => {
-    new GetPicture(db, pictureAccessor).call(req, res);
+app.post('/picture', (req: Request, res: Response, next: NextFunction) => {
+    new PostPicture(db, pictureAccessor).call(req, res, next);
 });
-app.post('/picture', (req: Request, res: Response) => {
-    new PostPicture(db, pictureAccessor).call(req, res);
+app.get('/update', (req: Request, res: Response, next: NextFunction) => {
+    new PostUpdate(db).call(req, res, next);
 });
-app.get('/update', (req: Request, res: Response) => {
-    new PostUpdate(db).call(req, res);
-});
+
+app.use(myErrorHandler);
 
 export const server: http.Server = http.createServer(app);
 
