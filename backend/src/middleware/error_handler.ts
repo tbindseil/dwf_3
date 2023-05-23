@@ -21,7 +21,7 @@ export const myErrorHandler = (
     console.log('@@@@ TJTAG @@@@ returning 500');
     console.log('@@@@ TJTAG @@@@ returning 500');
     res.status(500);
-    res.send({ error: JSON.stringify(err) });
+    res.send({ error_message: err.message });
     // res.set('Content-Type', 'application/json');
     //     res.status(
     //         err.status && (err.status >= 400 || err.status <= 599)

@@ -25,6 +25,7 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         let params: string[] = [];
         try {
             params = [input.id.toString()];
+            throw new Error('new error');
         } catch (error: any) {
             // TODO TJTAG instead of doing this, setup a middleware that goes
             // before the apis and returns 404 on bad stuff
@@ -43,8 +44,9 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
             // this stuff is weird in typescript
             // I guess this needs to be a function that returns Promise<GetPictureOutput>
             // and ...
-            console.log(`@@@@ TJTAG @@@@ error is: ${JSON.stringify(error)}`);
             error.message = 'Hellow worle';
+            console.log(`@@@@ TJTAG @@@@ error is: ${JSON.stringify(error)}`);
+            console.log(`@@@@ TJTAG @@@@ error.message is: ${error.message}`);
             next(error);
             throw error;
         }

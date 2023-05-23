@@ -25,9 +25,6 @@ export default abstract class API<I, O> {
     ) {
         try {
             const output = await this.process(this.db, req.body, next);
-
-            //console.log(`@@@@ TJTAG @@@@ output is: ${JSON.stringify(output)}`);
-
             const serialized_output = this.serializeOutput(output);
 
             res.set('Content-Type', this.getContentType());
