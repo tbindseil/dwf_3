@@ -43,7 +43,10 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
             // this stuff is weird in typescript
             // I guess this needs to be a function that returns Promise<GetPictureOutput>
             // and ...
+            console.log(`@@@@ TJTAG @@@@ error is: ${JSON.stringify(error)}`);
+            error.message = 'Hellow worle';
             next(error);
+            throw error;
         }
 
         try {

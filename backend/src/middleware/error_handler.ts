@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 
-// export interface Error {
-//     status?: number;
-//     message?: string;
-// }
+export interface Error {
+    status?: number;
+    message?: string;
+}
 
 export const myErrorHandler = (
     err: Error,
@@ -11,7 +11,6 @@ export const myErrorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    err;
     req;
     next;
     console.log('@@@@ TJTAG @@@@ returning 500');
@@ -22,7 +21,7 @@ export const myErrorHandler = (
     console.log('@@@@ TJTAG @@@@ returning 500');
     console.log('@@@@ TJTAG @@@@ returning 500');
     res.status(500);
-    res.render('error', { error: err });
+    res.send({ error: JSON.stringify(err) });
     // res.set('Content-Type', 'application/json');
     //     res.status(
     //         err.status && (err.status >= 400 || err.status <= 599)

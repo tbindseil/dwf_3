@@ -23,13 +23,19 @@ export default abstract class API<I, O> {
         res: Response,
         next: NextFunction
     ) {
-        const output = await this.process(this.db, req.body, next);
+        try {
+            const output = await this.process(this.db, req.body, next);
 
-        const serialized_output = this.serializeOutput(output);
+            //console.log(`@@@@ TJTAG @@@@ output is: ${JSON.stringify(output)}`);
 
-        res.set('Content-Type', this.getContentType());
-        res.status(200);
-        res.send(serialized_output);
+            const serialized_output = this.serializeOutput(output);
+
+            res.set('Content-Type', this.getContentType());
+            res.status(200);
+            res.send(serialized_output);
+        } catch (error: unknown) {
+            // do nothing, error handling middleware takes care of this
+        }
     }
 
     // TODO got ride of getInput
