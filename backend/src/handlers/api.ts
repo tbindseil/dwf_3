@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import IDB from '../db';
+import APIError from './api_error';
 
 export default abstract class API<I, O> {
     public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
@@ -55,5 +56,14 @@ export default abstract class API<I, O> {
 
     public serializeOutput(output: O): string | Buffer {
         return JSON.stringify(output);
+    }
+
+    // for some reason, when I throw an error, it doesn't get handled, but when I
+    // call the next(error) function it is. So, I have to call next() and then
+    // exit the method. I was throwing after next, and that was working, but wanted
+    // to encapsulate this (below), so this had to be made..
+    protected handleError(apiError: APIError, next: NextFunction): Promise<O> {
+        next(apiError);
+        throw apiError;
     }
 }

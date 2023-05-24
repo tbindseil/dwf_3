@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import APIError from '../handlers/api_error';
 
 export interface Error {
     status?: number;
@@ -13,22 +14,16 @@ export const myErrorHandler = (
 ) => {
     req;
     next;
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
-    console.log('@@@@ TJTAG @@@@ returning 500');
+
+    console.error('@@@@ TJTAG @@@@ error_handler');
+
     res.set('Content-Type', 'application/json');
-    res.status(500);
-    res.send({ error_message: err.message });
-    //     res.status(
-    //         err.status && (err.status >= 400 || err.status <= 599)
-    //             ? err.status
-    //             : 500
-    //     ).send({
-    //         error: err.message ? err.message : 'Issue ...',
-    //     });
-    // next(err);
+    if (err instanceof APIError) {
+        const apiError = err as APIError;
+        res.status(apiError.statusCode);
+        res.send({ message: apiError.message });
+    } else {
+        res.status(500);
+        res.send({ message: 'unknown error' });
+    }
 };

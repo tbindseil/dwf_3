@@ -25,30 +25,8 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         let params: string[] = [];
         try {
             params = [input.id.toString()];
-            throw new Error('new error');
-        } catch (error: any) {
-            // TODO TJTAG instead of doing this, setup a middleware that goes
-            // before the apis and returns 404 on bad stuff
-            // also, maybe learn how to do error handling cause this aint working
-            // throw new APIError(400, 'database issue, picture not fetched');
-            //             const notATypeError = new Error('notATypeError') as any;
-            //             notATypeError.status = 400;
-            //             throw notATypeError;
-            // error.status = 400;
-            // const notANAPIError = new Error('notANAPIError');
-            // notATypeError.status = 400;
-            // next(notANAPIError);
-            // return next(error);
-
-            // ok, seems like ...
-            // this stuff is weird in typescript
-            // I guess this needs to be a function that returns Promise<GetPictureOutput>
-            // and ...
-            error.message = 'Hellow worle';
-            console.log(`@@@@ TJTAG @@@@ error is: ${JSON.stringify(error)}`);
-            console.log(`@@@@ TJTAG @@@@ error.message is: ${error.message}`);
-            next(error);
-            throw error;
+        } catch (error) {
+            return this.handleError(new APIError(400, 'invalid input'), next);
         }
 
         try {
@@ -56,7 +34,10 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
             const filename = result.rows[0].filename;
             return await this.pictureAccessor.getPicture(filename);
         } catch (error) {
-            throw new APIError(500, 'database issue, picture not fetched');
+            return this.handleError(
+                new APIError(500, 'database issue, picture not fetched'),
+                next
+            );
         }
     }
 
