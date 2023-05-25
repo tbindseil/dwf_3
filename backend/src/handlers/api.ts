@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import IDB from '../db';
 import APIError from './api_error';
+import Ajv, { ValidateFunction } from 'ajv';
 
 export default abstract class API<I, O> {
     public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
@@ -11,11 +12,13 @@ export default abstract class API<I, O> {
     private readonly db: IDB;
     private readonly method: string;
     private readonly entity: string;
+    protected readonly ajv: Ajv;
 
     constructor(db: IDB, method: string, entity: string) {
         this.db = db;
         this.method = method;
         this.entity = entity;
+        this.ajv = new Ajv();
     }
 
     // TODO can i also do this with the response, do i even need to?
@@ -24,6 +27,15 @@ export default abstract class API<I, O> {
         res: Response,
         next: NextFunction
     ) {
+        try {
+            const validator = this.provideInputValidationSchema();
+            if (!validator(req.body)) {
+                this.handleError(new APIError(400, 'invalid input'), next);
+            }
+        } catch (error: unknown) {
+            return; // need to bail
+        }
+
         try {
             const output = await this.process(this.db, req.body, next);
             const serialized_output = this.serializeOutput(output);
@@ -40,6 +52,7 @@ export default abstract class API<I, O> {
     // 1. does a bad input throw? - can check with integ tests. but can I check in unit tests too?
     // 2. routing! based on input type
 
+    public abstract provideInputValidationSchema(): ValidateFunction;
     public abstract process(db: IDB, input: I, next: NextFunction): Promise<O>;
 
     public getMethod() {

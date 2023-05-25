@@ -1,9 +1,10 @@
-import { GetPictureInput, GetPictureOutput } from 'dwf-3-models-tjb';
+import { GetPictureInput, GetPictureOutput, _schema } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
 import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { NextFunction } from 'express';
+import { ValidateFunction } from 'ajv';
 
 export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
     private readonly pictureAccessor: PictureAccessor;
@@ -12,6 +13,10 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         super(db, 'GET', 'picture');
 
         this.pictureAccessor = pictureAccessor;
+    }
+
+    public provideInputValidationSchema(): ValidateFunction {
+        return this.ajv.compile(_schema.GetPictureInput);
     }
 
     public async process(
