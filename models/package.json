@@ -5,8 +5,13 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
+    "schema": "node src/schema_validation/schemaGenerator.js",
+    "build": "npm run schema && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript-json-schema": "^0.56.0"
+  }
 }
