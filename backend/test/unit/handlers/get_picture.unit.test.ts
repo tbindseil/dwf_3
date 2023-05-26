@@ -2,8 +2,8 @@ import { GetPicture } from '../../../src/handlers/get_picture';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
-import { GetPictureInput } from 'dwf-3-models-tjb';
-import { mockNext } from '../mock/utils';
+import { GetPictureInput, _schema } from 'dwf-3-models-tjb';
+import { Ajv, mockNext } from '../mock/utils';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(DB.query, true);
@@ -106,6 +106,13 @@ describe('GetPicture Tests', () => {
     it('gives png content type by default', () => {
         const contentType = getPicture.getContentType();
         expect(contentType).toEqual('image/png');
+    });
+
+    it('provides input validator', () => {
+        const validator = getPicture.provideInputValidationSchema();
+        const expectedValidator = Ajv.compile(_schema.GetPictureInput);
+
+        expect(validator.schema).toEqual(expectedValidator.schema);
     });
 
     it('uses passthrough output serialization by default', () => {

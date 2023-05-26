@@ -2,7 +2,8 @@ import { PostPicture } from '../../../src/handlers/post_picture';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
-import { mockNext } from '../mock/utils';
+import { Ajv, mockNext } from '../mock/utils';
+import { _schema } from 'dwf-3-models-tjb';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -113,5 +114,12 @@ describe('PostPicture Tests', () => {
         ).rejects.toThrow(
             new APIError(500, 'database issue, picture not created')
         );
+    });
+
+    it('provides input validator', () => {
+        const validator = postPicture.provideInputValidationSchema();
+        const expectedValidator = Ajv.compile(_schema.GetPictureInput);
+
+        expect(validator.schema).toEqual(expectedValidator.schema);
     });
 });

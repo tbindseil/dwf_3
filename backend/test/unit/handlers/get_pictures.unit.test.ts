@@ -1,7 +1,8 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
-import { mockNext } from '../mock/utils';
+import { Ajv, mockNext } from '../mock/utils';
+import { _schema } from 'dwf-3-models-tjb';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -71,5 +72,12 @@ describe('GetPictures Tests', () => {
         await expect(getPictures.process(mockDB, {}, mockNext)).rejects.toThrow(
             new APIError(500, 'database issue, pictures not fetched')
         );
+    });
+
+    it('provides input validator', () => {
+        const validator = getPictures.provideInputValidationSchema();
+        const expectedValidator = Ajv.compile(_schema.GetPictureInput);
+
+        expect(validator.schema).toEqual(expectedValidator.schema);
     });
 });

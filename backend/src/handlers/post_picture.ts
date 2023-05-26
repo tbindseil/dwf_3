@@ -19,16 +19,6 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
         this.pictureAccessor = pictureAccessor;
     }
 
-    // dont need to validate upon extraction if i can garauntee that they will be there
-    // so add a middleware
-    // this is where i have to do the thing from work
-    // i think the way its done is that
-    // before compilation, all models (maybe annotate or something)
-    // go through processor that outputs necessary keys and types mapped  to (maybe from) a path
-    // then, save that and reference with a custom middleware prior to routing.
-    // if things arent right, throw 400, 'invalid input') there
-    // public function(keys: string[], input: PostPictureInput):
-
     public async process(
         db: IDB,
         input: PostPictureInput,

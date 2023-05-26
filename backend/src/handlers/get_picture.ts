@@ -25,14 +25,7 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         next: NextFunction
     ): Promise<GetPictureOutput> {
         const query = 'select filename from picture where id = ?;';
-
-        // so this will throw TypeError
-        let params: string[] = [];
-        try {
-            params = [input.id.toString()];
-        } catch (error) {
-            return this.handleError(new APIError(400, 'invalid input'), next);
-        }
+        const params = [input.id.toString()];
 
         try {
             const result = await db.query(query, params);
