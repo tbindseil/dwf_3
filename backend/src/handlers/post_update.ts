@@ -1,12 +1,17 @@
-import { PostUpdateInput, PostUpdateOutput } from 'dwf-3-models-tjb';
+import { PostUpdateInput, PostUpdateOutput, _schema } from 'dwf-3-models-tjb';
 import IDB from '../db';
 import API from './api';
 import { NextFunction } from 'express';
+import { ValidateFunction } from 'ajv';
 
 // TODO what is this?
 export class PostUpdate extends API<PostUpdateInput, PostUpdateOutput> {
     constructor(db: IDB) {
         super(db, 'POST', 'update');
+    }
+
+    public provideInputValidationSchema(): ValidateFunction {
+        return this.ajv.compile(_schema.GetPictureInput);
     }
 
     public async process(

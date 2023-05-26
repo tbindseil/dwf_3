@@ -3,6 +3,7 @@ import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput } from 'dwf-3-models-tjb';
+import { mockNext } from '../mock/utils';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(DB.query, true);
@@ -70,7 +71,7 @@ describe('GetPicture Tests', () => {
             }
         });
 
-        const results = await getPicture.process(mockDB, body);
+        const results = await getPicture.process(mockDB, body, mockNext);
 
         expect(results).toEqual(expectedContents);
     });
@@ -81,7 +82,9 @@ describe('GetPicture Tests', () => {
             params;
             throw new Error();
         });
-        await expect(getPicture.process(mockDB, body)).rejects.toThrow(
+        await expect(
+            getPicture.process(mockDB, body, mockNext)
+        ).rejects.toThrow(
             new APIError(500, 'database issue, picture not fetched')
         );
     });
@@ -93,7 +96,9 @@ describe('GetPicture Tests', () => {
             filename;
             throw new Error();
         });
-        await expect(getPicture.process(mockDB, body)).rejects.toThrow(
+        await expect(
+            getPicture.process(mockDB, body, mockNext)
+        ).rejects.toThrow(
             new APIError(500, 'database issue, picture not fetched')
         );
     });

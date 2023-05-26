@@ -1,6 +1,7 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
+import { mockNext } from '../mock/utils';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -54,7 +55,7 @@ describe('GetPictures Tests', () => {
                 resolve({ rows: dbQueryOutput.pictures });
             });
         });
-        const result = await getPictures.process(mockDB, {});
+        const result = await getPictures.process(mockDB, {}, mockNext);
 
         expect(mockQuery).toHaveBeenCalledTimes(1);
         expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, []);
@@ -67,7 +68,7 @@ describe('GetPictures Tests', () => {
             params;
             throw new Error();
         });
-        await expect(getPictures.process(mockDB, {})).rejects.toThrow(
+        await expect(getPictures.process(mockDB, {}, mockNext)).rejects.toThrow(
             new APIError(500, 'database issue, pictures not fetched')
         );
     });

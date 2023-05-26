@@ -1,12 +1,17 @@
-import { PostPictureInput, PostPictureOutput } from 'dwf-3-models-tjb';
+import { PostPictureInput, PostPictureOutput, _schema } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
 import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { NextFunction } from 'express';
+import { ValidateFunction } from 'ajv';
 
 export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
+
+    public provideInputValidationSchema(): ValidateFunction {
+        return this.ajv.compile(_schema.GetPictureInput);
+    }
 
     constructor(db: IDB, pictureAccessor: PictureAccessor) {
         super(db, 'POST', 'picture');
@@ -31,14 +36,8 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     ): Promise<PostPictureOutput> {
         next;
 
-        // hmm either let or pass in fields ot extract from input
-
-        try {
-            const name = input.name;
-            const createdBy = input.createdBy;
-        } catch (err: unknown) {
-            this.handleError(new APIError(400, 'invalid input'), next);
-        }
+        const name = input.name;
+        const createdBy = input.createdBy;
 
         try {
             const filesystem = this.pictureAccessor.getFileSystem();

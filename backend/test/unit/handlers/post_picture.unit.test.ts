@@ -2,6 +2,7 @@ import { PostPicture } from '../../../src/handlers/post_picture';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
+import { mockNext } from '../mock/utils';
 
 // jest.mock('../../src/db');
 // const mockQuery = jest.mocked(db.query, true);
@@ -51,7 +52,7 @@ describe('PostPicture Tests', () => {
         const mockCreateNewPicture =
             mockLocalPictureAccessorInstance.createNewPicture as jest.Mock;
 
-        await postPicture.process(mockDB, body);
+        await postPicture.process(mockDB, body, mockNext);
 
         expect(mockCreateNewPicture).toHaveBeenCalledTimes(1);
         expect(mockCreateNewPicture).toHaveBeenCalledWith(name, createdBy);
@@ -75,7 +76,7 @@ describe('PostPicture Tests', () => {
             return filesystem;
         });
 
-        await postPicture.process(mockDB, body);
+        await postPicture.process(mockDB, body, mockNext);
 
         const expectedQuery =
             'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);';
@@ -94,7 +95,9 @@ describe('PostPicture Tests', () => {
                 throw new Error();
             }
         );
-        await expect(postPicture.process(mockDB, body)).rejects.toThrow(
+        await expect(
+            postPicture.process(mockDB, body, mockNext)
+        ).rejects.toThrow(
             new APIError(500, 'database issue, picture not created')
         );
     });
@@ -105,7 +108,9 @@ describe('PostPicture Tests', () => {
             params;
             throw new Error();
         });
-        await expect(postPicture.process(mockDB, body)).rejects.toThrow(
+        await expect(
+            postPicture.process(mockDB, body, mockNext)
+        ).rejects.toThrow(
             new APIError(500, 'database issue, picture not created')
         );
     });

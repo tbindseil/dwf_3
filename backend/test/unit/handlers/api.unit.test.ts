@@ -1,6 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import API from '../../../src/handlers/api';
 import IDB from '../../../src/db';
+import { ValidateFunction } from 'ajv';
+import { mockNext } from '../mock/utils';
 
 const method = 'METHOD';
 const entity = 'ENTITY';
@@ -17,8 +19,17 @@ class TestAPI extends API<
         super(db, method, entity);
     }
 
-    public async process(db: IDB, input: any): Promise<any> {
+    public provideInputValidationSchema(): ValidateFunction<unknown> {
+        return jest.fn() as unknown as ValidateFunction<unknown>;
+    }
+
+    public async process(
+        db: IDB,
+        input: any,
+        next: NextFunction
+    ): Promise<any> {
         db;
+        next;
         if (input === specialInput) {
             return specialOutput;
         } else {
@@ -43,7 +54,7 @@ describe('API Tests', () => {
         } as unknown as Response;
 
         const api = new TestAPI(mockDB, entity, method);
-        await api.call(req, res);
+        await api.call(req, res, mockNext);
         expect(res.set).toHaveBeenCalledWith(
             'Content-Type',
             'application/json'
