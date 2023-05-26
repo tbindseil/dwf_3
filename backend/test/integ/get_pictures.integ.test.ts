@@ -1,10 +1,5 @@
-import request from 'supertest';
 import { Model } from 'objection';
-
 import { makeKnex } from '../../src/db/knex_file';
-
-import { server } from '../../src/app';
-import { GetPicturesOutput } from 'dwf-3-models-tjb';
 
 describe('get_pictures', () => {
     // TODO deal rename createdby to created_by and introduce a camel to snake decoder

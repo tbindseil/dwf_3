@@ -36,9 +36,9 @@ class TestAPI extends API<
 
     public async process(
         db: IDB,
-        input: any,
+        input: { [key: string]: string },
         next: NextFunction
-    ): Promise<any> {
+    ): Promise<{ [key: string]: string }> {
         db;
         next;
         if (input === specialInput) {

@@ -1,11 +1,9 @@
-import fs from 'fs';
 import { Model } from 'objection';
 import request from 'supertest';
 
 import { makeKnex } from '../../src/db/knex_file';
 
 import { GetPictureInput, GetPictureOutput } from 'dwf-3-models-tjb';
-import path from 'path';
 import { server } from '../../src/app';
 import {
     generateSamplePng,
