@@ -2,17 +2,26 @@ import Knex from 'knex';
 import { DB } from '../../../src/db';
 
 describe('DB Tests', () => {
-    const knexReturnValue = {
-        out_put: {
+    // the snake to camel mechanism does it in place...
+    const makeKnexReturnValue = () => {
+        return {
             out_put: {
-                out_put: 'out_put',
+                out_put: {
+                    out_put: 'out_put',
+                    outPut: 'out put',
+                },
             },
-        },
+        };
     };
+    const query = 'query';
+    const params = ['list', 'of', 'params'];
+
     const mockKnexRaw = jest.fn();
+    const mockKnexDestroy = jest.fn();
+
     const mockKnex = {
         raw: mockKnexRaw,
-        destroy: jest.fn(),
+        destroy: mockKnexDestroy,
     } as unknown as ReturnType<typeof Knex>;
 
     const mockMakeKnex = jest.fn();
@@ -20,29 +29,26 @@ describe('DB Tests', () => {
 
     const db = new DB(mockMakeKnex);
 
-    const query = 'query';
-    const params = ['list', 'of', 'params'];
-
     beforeEach(() => {
         mockKnexRaw.mockClear();
-        mockKnexRaw.mockReturnValue(knexReturnValue);
+        mockKnexRaw.mockReturnValue(makeKnexReturnValue());
     });
 
     it('queries', async () => {
         await db.query(query, params);
 
-        expect(mockKnex.raw).toHaveBeenCalledWith(query, params);
-        expect(mockKnex.destroy).toHaveBeenCalled();
+        expect(mockKnexRaw).toHaveBeenCalledWith(query, params);
+        expect(mockKnexDestroy).toHaveBeenCalled();
     });
 
-    it('converts camel to snake on the way in', async () => {
-        await db.query(query, params);
+    // still having the handlers pass free strings and params (ie not type magic),
+    // so no need to do this conversion (yet)
+    //     it('converts camel to snake on the way in', async () => {
+    //         await db.query(query, params);
+    //
+    //     });
 
-        expect(mockKnex.raw).toHaveBeenCalledWith(query, params);
-        expect(mockKnex.destroy).toHaveBeenCalled();
-    });
-
-    it.only('converts snake to camel on the way out', async () => {
+    it('converts snake to camel on the way out', async () => {
         const expectedReturnValue = {
             outPut: {
                 outPut: {

@@ -4,6 +4,11 @@ import { Knex } from 'knex';
 const snakeToCamelKeys = (value: { [key: string]: any }) => {
     Object.keys(value).forEach((key: string) => {
         const camelKey = snakeToCamel(key);
+
+        if (camelKey === key) {
+            return;
+        }
+
         value[camelKey] = value[key];
         delete value[key];
 
