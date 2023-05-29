@@ -15,8 +15,6 @@ export const myErrorHandler = (
     req;
     next;
 
-    console.error('@@@@ TJTAG @@@@ error_handler');
-
     res.set('Content-Type', 'application/json');
     if (err instanceof APIError) {
         const apiError = err as APIError;

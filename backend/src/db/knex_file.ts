@@ -3,6 +3,7 @@ import Knex from 'knex';
 const developmentDatabase = 'tj';
 export const testDatabase = 'test_picture_database';
 
+// package.json exports the env var for integ test
 const env = process.env.ENV || 'DEV';
 
 const databaseMap: { [key: string]: string } = {
@@ -28,19 +29,20 @@ const knexBaseConfig = {
     searchPath: ['knex', 'public'],
     pool: { min: 0, max: 7 },
     migrations: {
-        directory: './build/src/db/migrations',
+        directory: '/Users/tj/Projects/dwf_3/backend/build/src/db/migrations',
     },
     seeds: {
-        directory: './build/src/db/seeds',
+        directory: '/Users/tj/Projects/dwf_3/backend/build/src/db/seeds',
     },
     debug: true,
 };
 
-export const makeKnex = () =>
-    Knex({
-        ...knexBaseConfig,
-        connection: connectionConfig,
-    });
+export const knexConfig = {
+    ...knexBaseConfig,
+    connection: connectionConfig,
+};
+
+export const makeKnex = () => Knex(knexConfig);
 
 export const makeKnexWithoutDatabase = () =>
     Knex({

@@ -2,8 +2,6 @@ import { Model } from 'objection';
 import { makeKnex } from '../../src/db/knex_file';
 
 describe('get_pictures', () => {
-    // TODO deal rename createdby to created_by and introduce a camel to snake decoder
-    // if this is a big deal, i gotta tack on a linter
     const expectedPictures = [
         {
             id: 1,

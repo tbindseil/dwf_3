@@ -42,14 +42,6 @@ app.use(cors());
 // decode json request bodies
 app.use(express.json());
 
-const myLogger = (req: Request, res: Response, next: NextFunction) => {
-    req;
-    res;
-    console.log('@@@@ TJTAG @@@@ LOGGED');
-    next();
-};
-app.use(myLogger);
-
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
 const prototypeFileName =
     '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
@@ -70,47 +62,6 @@ const broadcastMediator = new BroadcastMediator(
 
 // TODO inject db (and pictureArray?) via middleware
 const db = new DB(makeKnex);
-
-// option 1, list things explicitly like routes below
-// pros: fast and easy
-// cons: still have to list models twice
-// option 2, have a pure virtual in api.
-// pros: pretty fast and pretty easy and still fails when not implemented
-// cons: duplicated, but obvious when its missing (fails to compile) and a simple implementation to copy paste
-
-// enum Verb {
-//     GET,
-//     POST,
-// }
-// interface Route {
-//     path: string;
-//     verb: Verb;
-// }
-// const routes: Route[] = [
-//     { path: '/pictures', verb: Verb.GET },
-//     { path: '/picture', verb: Verb.GET },
-//     { path: '/picture', verb: Verb.POST },
-//     { path: '/path2', verb: Verb.POST },
-// ];
-//
-// routes.forEach((r: Route) => {
-//     switch (r.verb) {
-//         case Verb.GET: {
-//             app.get(
-//                 r.path,
-//                 async (req: Request, res: Response, next: NextFunction) => {
-//                     // ahhhh how do i know its a get picture?
-//                     // do i need a third package? that seems bad
-//                     new GetPictures(db).call(req, res, next);
-//                 }
-//             );
-//             break;
-//         }
-//         case Verb.POST: {
-//             break;
-//         }
-//     }
-// });
 
 app.get(
     '/pictures',
