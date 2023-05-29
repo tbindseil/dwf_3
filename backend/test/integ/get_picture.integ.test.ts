@@ -12,10 +12,6 @@ import {
 } from './setup/utils';
 
 describe('get_picture', () => {
-    // TODO deal rename createdby to created_by and introduce a camel to snake decoder
-    // probably overkill, but could be cool:
-    // https://stackoverflow.com/questions/42549842/modify-column-datatype-in-knex-migration-script
-    // if this is a big deal, i gotta tack on a linter
     const expectedPicture = [
         {
             id: 4, // TODO need a concerted effort on seeding, maybe a registration system, returning the id of the inserted pictures

@@ -1,5 +1,4 @@
 import {
-    // TODO linter
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,

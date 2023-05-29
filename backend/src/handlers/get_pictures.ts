@@ -32,8 +32,7 @@ export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
                     return {
                         id: row.id,
                         name: row.name,
-                        // TODO
-                        createdBy: row.createdby, // Heads up! createdby instead of createdBy - postgres is case insensitive
+                        createdBy: row.createdBy,
                         filename: row.filename,
                         filesystem: row.filesystem,
                     };

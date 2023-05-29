@@ -1,5 +1,9 @@
 // TODO save vim compiler configs in this repo since they are somewhat repo specific (at this point)
 // maybe point to them from dotfiles
+//
+// or better yet, get my own commands to match those, they are probably ubiquitous
+// tsc - done
+// jest - not done
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -33,7 +37,6 @@ import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
 
-// TODO handle api errors specifically
 const app: Express = express();
 
 // use cors accross all routes

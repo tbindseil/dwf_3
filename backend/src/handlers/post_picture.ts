@@ -48,6 +48,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
             //     all columns and all columns are all fields in the interface and all fields in the interface are camel to snake ified
             //
             // ,so what is a query builder in knex?
+            // //TJTAG
             //
             //
             //

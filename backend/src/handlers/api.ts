@@ -51,7 +51,7 @@ export default abstract class API<I, O> {
     // TODO got ride of getInput
     // 1. does a bad input throw? - can check with integ tests. but can I check in unit tests too?
     //  a: no, it doesn't, implemented type safety verification via provideInputValidationSchema
-    // 2. routing! based on input type
+    // 2. routing! based on input type - dont want this, then it is impossible to share types for different apis
 
     public abstract provideInputValidationSchema(): ValidateFunction;
     public abstract process(db: IDB, input: I, next: NextFunction): Promise<O>;

@@ -1,3 +1,4 @@
+// TODO can i remove the *.unit.* and *.integ.* now that I have folders?
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import APIError from '../../../src/handlers/api_error';
 import IDB from '../../../src/db';
@@ -24,20 +25,8 @@ describe('GetPictures Tests', () => {
         mockQuery.mockClear();
     });
 
-    it('calls db query when procesing', async () => {
+    it.only('calls db query when procesing', async () => {
         const dbQueryOutput = {
-            pictures: [
-                {
-                    id: 1,
-                    name: 'name',
-                    createdby: 'createdBy',
-                    filename: 'filename',
-                    filesystem: 'filesystem',
-                },
-            ],
-        };
-
-        const pictureArray = {
             pictures: [
                 {
                     id: 1,
@@ -48,6 +37,7 @@ describe('GetPictures Tests', () => {
                 },
             ],
         };
+
         mockQuery.mockImplementation((query: string, params: any[]) => {
             query;
             params;
@@ -60,7 +50,7 @@ describe('GetPictures Tests', () => {
 
         expect(mockQuery).toHaveBeenCalledTimes(1);
         expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, []);
-        expect(result).toEqual(pictureArray);
+        expect(result).toEqual(dbQueryOutput);
     });
 
     it('throws an api error when the database query fails', async () => {
