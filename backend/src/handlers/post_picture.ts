@@ -36,6 +36,23 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
                 createdBy
             );
 
+            // TODO could probably exercise thiw with an integ test
+            //
+            //
+            //
+            //
+            // ok, i seem to be bumping into the issue of using `any` in certain places
+            // like here
+            // i would think its a good time to use the query builder thing, maybe
+            // wrap it in a generic decorator, that will know how to select (everything (where everthing is
+            //     all columns and all columns are all fields in the interface and all fields in the interface are camel to snake ified
+            //
+            // ,so what is a query builder in knex?
+            //
+            //
+            //
+            //
+            //
             const query =
                 'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);';
             const params = [name, createdBy, filename, filesystem];
