@@ -54,6 +54,38 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
             //
             //
             //
+
+            //
+            // whats actually going on?
+            // transport types (GetPictureInput, PostPictureOutput, etc)
+            // db types (Picture, Update (for example))
+            //
+            // does it need to be so generic?
+            //
+            // can i just do:
+            // db.insertPicture(picture: Picture);
+            // db.getPictures()
+            // db.getfilename()
+            //
+            // that seems annoying
+            // like, getpictures and getfilename are doing similar things
+            // I think this actually adds code to test
+            //
+            // hmmm
+            //
+            // well maybe it could just be:
+            // db.insertPicture(picture: Picture): void
+            // db.getPictures(ids: string[]): (Picture[] | Picture) {
+            //  returns individual picture if one id, or array if multiple
+            // }
+            //
+            // ok, now anymore generic?
+            //
+            // db.insert<T>(t: T): void
+            // db.get<T>(ids: string[]): (T[] | T)
+            //
+            // this sounds like objection
+
             const query =
                 'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);';
             const params = [name, createdBy, filename, filesystem];

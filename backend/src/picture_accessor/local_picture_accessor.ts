@@ -72,16 +72,9 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async getPicture(filename: string): Promise<Buffer> {
-        try {
-            return await fs.promises.readFile(
-                path.join(this.baseDirectory, filename)
-            );
-        } catch (error: unknown) {
-            console.log(
-                `issue reading picture contents, ${JSON.stringify(error)}`
-            );
-            throw error;
-        }
+        return await fs.promises.readFile(
+            path.join(this.baseDirectory, filename)
+        );
     }
 
     public async getRaster(filename: string): Promise<PictureResponse> {

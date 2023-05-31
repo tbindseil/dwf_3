@@ -36,6 +36,7 @@ import {
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
+import { GetPictureObjection } from './handlers/get_picture_objection';
 
 const app: Express = express();
 
@@ -71,6 +72,13 @@ app.get(
     // TODO does this need to be async?
     async (req: Request, res: Response, next: NextFunction) => {
         new GetPictures(db).call(req, res, next);
+    }
+);
+app.get(
+    '/picture_objection',
+    // TODO does this need to be async?
+    async (req: Request, res: Response, next: NextFunction) => {
+        new GetPictureObjection(db, pictureAccessor).call(req, res, next);
     }
 );
 app.get('/picture', (req: Request, res: Response, next: NextFunction) => {
