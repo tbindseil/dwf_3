@@ -12,6 +12,7 @@ describe('GetPictures Tests', () => {
 
     beforeEach(() => {
         getPictures = new GetPictures();
+        mockPictureObjectionModel.mockClear();
     });
 
     it('calls db query when procesing', async () => {

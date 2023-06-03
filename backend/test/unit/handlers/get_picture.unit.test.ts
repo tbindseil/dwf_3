@@ -2,9 +2,9 @@ import { GetPictureObjection } from '../../../src/handlers/get_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, _schema } from 'dwf-3-models-tjb';
 import { Ajv } from '../mock/utils';
-
 import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
 import { QueryBuilder } from 'objection';
+import APIError from '../../../src/handlers/api_error';
 
 jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
@@ -72,6 +72,18 @@ describe('GetPictureObjection Tests', () => {
         const results = await getPictureObjection.process(body);
 
         expect(results).toEqual(expectedContents);
+    });
+
+    it('throws when the picture is not found', async () => {
+        const mockFindById = jest.fn().mockReturnValue(null);
+        const mockQueryBuilder = {
+            findById: mockFindById,
+        } as unknown as QueryBuilder<PictureObjectionModel>;
+        mockPictureObjectionModel.query.mockReturnValue(mockQueryBuilder);
+
+        await expect(getPictureObjection.process(body)).rejects.toThrow(
+            new APIError(400, 'picture not found')
+        );
     });
 
     it('gives png content type by default', () => {

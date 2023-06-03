@@ -23,12 +23,12 @@ export class GetPictureObjection extends API<
 
     public async process(input: GetPictureInput): Promise<GetPictureOutput> {
         const query = PictureObjectionModel.query().findById(input.id);
-        const filename = (await query)?.filename;
+        const picture = await query;
 
-        if (!filename) {
+        if (!picture || !picture.filename) {
             throw new APIError(400, 'picture not found');
         } else {
-            return await this.pictureAccessor.getPicture(filename);
+            return await this.pictureAccessor.getPicture(picture.filename);
         }
     }
 
