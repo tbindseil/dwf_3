@@ -13,14 +13,13 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
         return this.ajv.compile(_schema.GetPictureInput);
     }
 
-    constructor(db: IDB, pictureAccessor: PictureAccessor) {
-        super(db, 'POST', 'picture');
+    constructor(pictureAccessor: PictureAccessor) {
+        super();
 
         this.pictureAccessor = pictureAccessor;
     }
 
     public async process(
-        db: IDB,
         input: PostPictureInput,
         next: NextFunction
     ): Promise<PostPictureOutput> {
@@ -90,7 +89,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
                 'insert into picture (name, createdBy, filename, filesystem) values (?, ?, ?, ?);';
             const params = [name, createdBy, filename, filesystem];
 
-            await db.query(query, params);
+            // await db.query(query, params);
         } catch (error) {
             console.error('post_picture and error is: ', error);
             throw new APIError(500, 'database issue, picture not created');

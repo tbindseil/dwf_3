@@ -64,31 +64,30 @@ const broadcastMediator = new BroadcastMediator(
     pictureSyncClientFactory
 );
 
-// TODO inject db (and pictureArray?) via middleware
-const db = new DB(makeKnex);
+// TODO inject -db- (and pictureArray?) via middleware
 
 app.get(
     '/pictures',
     // TODO does this need to be async?
     async (req: Request, res: Response, next: NextFunction) => {
-        new GetPictures(db).call(req, res, next);
+        new GetPictures().call(req, res, next);
     }
 );
 app.get(
     '/picture_objection',
     // TODO does this need to be async?
     async (req: Request, res: Response, next: NextFunction) => {
-        new GetPictureObjection(db, pictureAccessor).call(req, res, next);
+        new GetPictureObjection(pictureAccessor).call(req, res, next);
     }
 );
 app.get('/picture', (req: Request, res: Response, next: NextFunction) => {
-    new GetPicture(db, pictureAccessor).call(req, res, next);
+    new GetPicture(pictureAccessor).call(req, res, next);
 });
 app.post('/picture', (req: Request, res: Response, next: NextFunction) => {
-    new PostPicture(db, pictureAccessor).call(req, res, next);
+    new PostPicture(pictureAccessor).call(req, res, next);
 });
 app.post('/update', (req: Request, res: Response, next: NextFunction) => {
-    new PostUpdate(db).call(req, res, next);
+    new PostUpdate().call(req, res, next);
 });
 
 app.use(myErrorHandler);

@@ -7,7 +7,7 @@ import { ValidateFunction } from 'ajv';
 // TODO what is this?
 export class PostUpdate extends API<PostUpdateInput, PostUpdateOutput> {
     constructor(db: IDB) {
-        super(db, 'POST', 'update');
+        super(db, 'POST');
     }
 
     public provideInputValidationSchema(): ValidateFunction {

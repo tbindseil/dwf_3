@@ -9,8 +9,8 @@ import { ValidateFunction } from 'ajv';
 export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
     private readonly pictureAccessor: PictureAccessor;
 
-    constructor(db: IDB, pictureAccessor: PictureAccessor) {
-        super(db, 'GET', 'picture');
+    constructor(pictureAccessor: PictureAccessor) {
+        super();
 
         this.pictureAccessor = pictureAccessor;
     }

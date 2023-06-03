@@ -1,12 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import API from '../../../src/handlers/api';
-import IDB from '../../../src/db';
 import { ValidateFunction } from 'ajv';
 import { mockNext } from '../mock/utils';
 import APIError from '../../../src/handlers/api_error';
-
-const method = 'METHOD';
-const entity = 'ENTITY';
 
 const specialInput = { test: 'SPECIAL_INPUT' };
 const specialOutput = { test: 'SPECIAL_OUTPUT' };
@@ -18,13 +14,8 @@ class TestAPI extends API<
 > {
     validatorReturnValue: boolean;
 
-    constructor(
-        db: IDB,
-        method: string,
-        entity: string,
-        validatorReturnValue: boolean
-    ) {
-        super(db, method, entity);
+    constructor(validatorReturnValue: boolean) {
+        super();
         this.validatorReturnValue = validatorReturnValue;
     }
 
@@ -35,11 +26,9 @@ class TestAPI extends API<
     }
 
     public async process(
-        db: IDB,
         input: { [key: string]: string },
         next: NextFunction
     ): Promise<{ [key: string]: string }> {
-        db;
         next;
         if (input === specialInput) {
             return specialOutput;
@@ -50,10 +39,9 @@ class TestAPI extends API<
 }
 
 describe('API Tests', () => {
-    const mockDB = {} as IDB;
     let api: TestAPI;
     beforeEach(() => {
-        api = new TestAPI(mockDB, method, entity, true);
+        api = new TestAPI(true);
     });
 
     it('calls', async () => {
@@ -81,12 +69,7 @@ describe('API Tests', () => {
             send: jest.fn(),
         } as unknown as Response;
 
-        const apiProgrammedToFailValidation = new TestAPI(
-            mockDB,
-            method,
-            entity,
-            false
-        );
+        const apiProgrammedToFailValidation = new TestAPI(false);
         await apiProgrammedToFailValidation.call(req, res, mockNext);
 
         expect(mockNext).toHaveBeenCalledWith(
@@ -95,16 +78,6 @@ describe('API Tests', () => {
         expect(res.set).toHaveBeenCalledTimes(0);
         expect(res.status).toHaveBeenCalledTimes(0);
         expect(res.send).toHaveBeenCalledTimes(0);
-    });
-
-    it('method getter', () => {
-        const returnedMethod = api.getMethod();
-        expect(returnedMethod).toEqual(method);
-    });
-
-    it('entity getter', () => {
-        const returnedEntity = api.getEntity();
-        expect(returnedEntity).toEqual(entity);
     });
 
     it('gives json content type by default', () => {

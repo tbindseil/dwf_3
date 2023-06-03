@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import IDB from '../db';
 import APIError from './api_error';
 import Ajv, { ValidateFunction } from 'ajv';
 
@@ -9,15 +8,10 @@ export default abstract class API<I, O> {
         msg: 'unknown error',
     });
 
-    private readonly db: IDB;
-    private readonly method: string;
-    private readonly entity: string;
     protected readonly ajv: Ajv;
 
-    constructor(db: IDB, method: string, entity: string) {
-        this.db = db;
-        this.method = method;
-        this.entity = entity;
+    constructor() {
+        // TODO inject this
         this.ajv = new Ajv();
     }
 
@@ -37,7 +31,7 @@ export default abstract class API<I, O> {
         }
 
         try {
-            const output = await this.process(this.db, req.body, next);
+            const output = await this.process(req.body, next);
             const serialized_output = this.serializeOutput(output);
 
             res.set('Content-Type', this.getContentType());
@@ -48,21 +42,8 @@ export default abstract class API<I, O> {
         }
     }
 
-    // TODO got ride of getInput
-    // 1. does a bad input throw? - can check with integ tests. but can I check in unit tests too?
-    //  a: no, it doesn't, implemented type safety verification via provideInputValidationSchema
-    // 2. routing! based on input type - dont want this, then it is impossible to share types for different apis
-
     public abstract provideInputValidationSchema(): ValidateFunction;
-    public abstract process(db: IDB, input: I, next: NextFunction): Promise<O>;
-
-    public getMethod() {
-        return this.method;
-    }
-
-    public getEntity() {
-        return this.entity;
-    }
+    public abstract process(input: I, next: NextFunction): Promise<O>;
 
     public getContentType(): string {
         return 'application/json';
