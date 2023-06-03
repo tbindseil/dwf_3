@@ -1,12 +1,14 @@
 import { GetPictureInput, GetPictureOutput, _schema } from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
-import IDB from '../db';
 import PictureAccessor from '../picture_accessor/picture_accessor';
-import { NextFunction } from 'express';
 import { ValidateFunction } from 'ajv';
+import PictureObjectionModel from './picture_objection_model';
 
-export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
+export class GetPictureObjection extends API<
+    GetPictureInput,
+    GetPictureOutput
+> {
     private readonly pictureAccessor: PictureAccessor;
 
     constructor(pictureAccessor: PictureAccessor) {
@@ -19,23 +21,14 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         return this.ajv.compile(_schema.GetPictureInput);
     }
 
-    public async process(
-        db: IDB,
-        input: GetPictureInput,
-        next: NextFunction
-    ): Promise<GetPictureOutput> {
-        const query = 'select filename from picture where id = ?;';
-        const params = [input.id.toString()];
+    public async process(input: GetPictureInput): Promise<GetPictureOutput> {
+        const query = PictureObjectionModel.query().findById(input.id);
+        const filename = (await query)?.filename;
 
-        try {
-            const result = await db.query(query, params);
-            const filename = result.rows[0].filename;
+        if (!filename) {
+            throw new APIError(400, 'picture not found');
+        } else {
             return await this.pictureAccessor.getPicture(filename);
-        } catch (error) {
-            return this.handleError(
-                new APIError(500, 'database issue, picture not fetched'),
-                next
-            );
         }
     }
 

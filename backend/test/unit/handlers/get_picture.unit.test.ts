@@ -1,24 +1,18 @@
-import { GetPicture } from '../../../src/handlers/get_picture';
-import APIError from '../../../src/handlers/api_error';
-import IDB from '../../../src/db';
+import { GetPictureObjection } from '../../../src/handlers/get_picture_objection';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, _schema } from 'dwf-3-models-tjb';
-import { Ajv, mockNext } from '../mock/utils';
+import { Ajv } from '../mock/utils';
 
-// jest.mock('../../src/db');
-// const mockQuery = jest.mocked(DB.query, true);
-// const mockDB = jest.genMockFromModule<DB>('db');
-// const mockDB = jest.mock<DB>('db');
-// mockDB.
-const mockQuery = jest.fn();
-const mockDB = {
-    query: mockQuery,
-} as IDB;
+import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
+import { QueryBuilder } from 'objection';
 
 jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
-describe('GetPicture Tests', () => {
+jest.mock('../../../src/handlers/picture_objection_model');
+const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
+
+describe('GetPictureObjection Tests TJTAG', () => {
     const id = 42;
     const body: GetPictureInput = { id: id };
 
@@ -32,10 +26,9 @@ describe('GetPicture Tests', () => {
     const baseDirectory = 'baseDirectory';
     let mockLocalPictureAccessorInstance: LocalPictureAccessor;
 
-    let getPicture: GetPicture;
+    let getPictureObjection: GetPictureObjection;
 
     beforeEach(() => {
-        mockQuery.mockClear();
         mockLocalPictureAccessor.mockClear();
         mockJimpAdapter.createJimp.mockClear();
         mockJimpAdapter.read.mockClear();
@@ -44,72 +37,49 @@ describe('GetPicture Tests', () => {
             prototypeFileName,
             baseDirectory
         );
-        getPicture = new GetPicture(mockDB, mockLocalPictureAccessorInstance);
+        getPictureObjection = new GetPictureObjection(
+            mockLocalPictureAccessorInstance
+        );
     });
 
     it('gets the filename from the database, requests picture contents, and returns them', async () => {
-        const expectedFilename = 'filename';
-        const filenameArray = [{ filename: expectedFilename }];
-
-        mockQuery.mockImplementation((text: string, params: string[]) => {
-            text;
-            params;
-            return new Promise((resolve, reject) => {
-                reject;
-                resolve({ rows: filenameArray });
-            });
-        });
+        const expectedFile = {
+            id: 42,
+            name: 'name',
+            created_by: 'created_by',
+            filename: 'filename',
+            filesystem: 'filesystem',
+        };
+        const mockFindById = jest.fn().mockReturnValue(expectedFile);
+        const mockQueryBuilder = {
+            findById: mockFindById,
+        } as unknown as QueryBuilder<PictureObjectionModel>;
+        mockPictureObjectionModel.query.mockReturnValue(mockQueryBuilder);
 
         const expectedContents = 'expectedContents';
         const mockGetPicture =
             mockLocalPictureAccessorInstance.getPicture as jest.Mock;
         mockGetPicture.mockImplementation((filename: string) => {
-            if (filename === expectedFilename) {
+            if (filename === expectedFile.filename) {
                 return expectedContents;
             } else {
+                console.log(`filename is: ${filename}`);
                 throw new Error();
             }
         });
 
-        const results = await getPicture.process(mockDB, body, mockNext);
+        const results = await getPictureObjection.process(body);
 
         expect(results).toEqual(expectedContents);
     });
 
-    it('throws an api error when the database query fails', async () => {
-        mockQuery.mockImplementation((query: string, params: any[]) => {
-            query;
-            params;
-            throw new Error();
-        });
-        await expect(
-            getPicture.process(mockDB, body, mockNext)
-        ).rejects.toThrow(
-            new APIError(500, 'database issue, picture not fetched')
-        );
-    });
-
-    it('throws an api error when the requst for picture contents fails', async () => {
-        const mockGetPicture =
-            mockLocalPictureAccessorInstance.getPicture as jest.Mock;
-        mockGetPicture.mockImplementation((filename: string) => {
-            filename;
-            throw new Error();
-        });
-        await expect(
-            getPicture.process(mockDB, body, mockNext)
-        ).rejects.toThrow(
-            new APIError(500, 'database issue, picture not fetched')
-        );
-    });
-
     it('gives png content type by default', () => {
-        const contentType = getPicture.getContentType();
+        const contentType = getPictureObjection.getContentType();
         expect(contentType).toEqual('image/png');
     });
 
     it('provides input validator', () => {
-        const validator = getPicture.provideInputValidationSchema();
+        const validator = getPictureObjection.provideInputValidationSchema();
         const expectedValidator = Ajv.compile(_schema.GetPictureInput);
 
         expect(validator.schema).toEqual(expectedValidator.schema);
@@ -122,7 +92,7 @@ describe('GetPicture Tests', () => {
             'utf-8'
         );
 
-        const resultingSerializedOutput = getPicture.serializeOutput(
+        const resultingSerializedOutput = getPictureObjection.serializeOutput(
             superCrazyOutputBuffer
         );
         expect(resultingSerializedOutput).toEqual(superCrazyOutputBuffer);
