@@ -1,8 +1,7 @@
 import { GetPictureObjection } from '../../../src/handlers/get_picture_objection';
-import APIError from '../../../src/handlers/api_error';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, _schema } from 'dwf-3-models-tjb';
-import { Ajv, mockNext } from '../mock/utils';
+import { Ajv } from '../mock/utils';
 
 import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
 import { QueryBuilder } from 'objection';
@@ -13,7 +12,7 @@ const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 jest.mock('../../../src/handlers/picture_objection_model');
 const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
 
-describe('GetPictureObjection Tests TJTAG', () => {
+describe('GetPictureObjection Tests', () => {
     const id = 42;
     const body: GetPictureInput = { id: id };
 
@@ -69,56 +68,33 @@ describe('GetPictureObjection Tests TJTAG', () => {
             }
         });
 
-        const results = await getPictureObjection.process(body, mockNext);
+        const results = await getPictureObjection.process(body);
 
         expect(results).toEqual(expectedContents);
     });
 
-    //     // TODO move to api
-    //     it('throws an api error when the database query fails', async () => {
-    //         await expect(
-    //             getPictureObjection.process(body, mockNext)
-    //         ).rejects.toThrow(
-    //             new APIError(500, 'database issue, picture not fetched')
-    //         );
-    //     });
-    //
-    //     it('throws an api error when the requst for picture contents fails', async () => {
-    //         const mockGetPicture =
-    //             mockLocalPictureAccessorInstance.getPicture as jest.Mock;
-    //         mockGetPicture.mockImplementation((filename: string) => {
-    //             filename;
-    //             throw new Error();
-    //         });
-    //         await expect(
-    //             getPictureObjection.process(body, mockNext)
-    //         ).rejects.toThrow(
-    //             new APIError(500, 'database issue, picture not fetched')
-    //         );
-    //     });
-    //
-    //     it('gives png content type by default', () => {
-    //         const contentType = getPictureObjection.getContentType();
-    //         expect(contentType).toEqual('image/png');
-    //     });
-    //
-    //     it('provides input validator', () => {
-    //         const validator = getPictureObjection.provideInputValidationSchema();
-    //         const expectedValidator = Ajv.compile(_schema.GetPictureInput);
-    //
-    //         expect(validator.schema).toEqual(expectedValidator.schema);
-    //     });
-    //
-    //     it('uses passthrough output serialization by default', () => {
-    //         const superCrazyOutput = { thing1: 'thing1key', thing2: 'thing2key' };
-    //         const superCrazyOutputBuffer = Buffer.from(
-    //             JSON.stringify(superCrazyOutput),
-    //             'utf-8'
-    //         );
-    //
-    //         const resultingSerializedOutput = getPictureObjection.serializeOutput(
-    //             superCrazyOutputBuffer
-    //         );
-    //         expect(resultingSerializedOutput).toEqual(superCrazyOutputBuffer);
-    //     });
+    it('gives png content type by default', () => {
+        const contentType = getPictureObjection.getContentType();
+        expect(contentType).toEqual('image/png');
+    });
+
+    it('provides input validator', () => {
+        const validator = getPictureObjection.provideInputValidationSchema();
+        const expectedValidator = Ajv.compile(_schema.GetPictureInput);
+
+        expect(validator.schema).toEqual(expectedValidator.schema);
+    });
+
+    it('uses passthrough output serialization by default', () => {
+        const superCrazyOutput = { thing1: 'thing1key', thing2: 'thing2key' };
+        const superCrazyOutputBuffer = Buffer.from(
+            JSON.stringify(superCrazyOutput),
+            'utf-8'
+        );
+
+        const resultingSerializedOutput = getPictureObjection.serializeOutput(
+            superCrazyOutputBuffer
+        );
+        expect(resultingSerializedOutput).toEqual(superCrazyOutputBuffer);
+    });
 });
