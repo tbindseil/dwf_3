@@ -52,12 +52,7 @@ class TestAPI extends API<
 }
 
 describe('API Tests', () => {
-    let api: TestAPI;
-    beforeEach(() => {
-        api = new TestAPI(true);
-    });
-
-    it('calls', async () => {
+    const makeReqRes = (): [Request, Response] => {
         const req = { body: specialInput } as Request;
         const res = {
             set: jest.fn(),
@@ -65,6 +60,16 @@ describe('API Tests', () => {
             send: jest.fn(),
         } as unknown as Response;
 
+        return [req, res];
+    };
+
+    let api: TestAPI;
+    beforeEach(() => {
+        api = new TestAPI(true);
+    });
+
+    it('calls', async () => {
+        const [req, res] = makeReqRes();
         await api.call(req, res, mockNext);
         expect(res.set).toHaveBeenCalledWith(
             'Content-Type',
@@ -94,14 +99,7 @@ describe('API Tests', () => {
     });
 
     it('intercepts and returns generic 500 when unknown exception occurs during call', async () => {
-        // TODO encapsulate
-        const req = { body: specialInput } as Request;
-        const res = {
-            set: jest.fn(),
-            status: jest.fn(),
-            send: jest.fn(),
-        } as unknown as Response;
-
+        const [req, res] = makeReqRes();
         const apiWithGenericException = new TestAPI(true, true);
         await apiWithGenericException.call(req, res, mockNext);
 
@@ -114,14 +112,7 @@ describe('API Tests', () => {
     });
 
     it('passes api exceptions to middleware when they occur during call', async () => {
-        // TODO encapsulate
-        const req = { body: specialInput } as Request;
-        const res = {
-            set: jest.fn(),
-            status: jest.fn(),
-            send: jest.fn(),
-        } as unknown as Response;
-
+        const [req, res] = makeReqRes();
         const apiWithGenericException = new TestAPI(true, false, true);
         await apiWithGenericException.call(req, res, mockNext);
 

@@ -1,4 +1,4 @@
-import { GetPictureObjection } from '../../../src/handlers/get_picture_objection';
+import { GetPictureObjection } from '../../../src/handlers/get_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, _schema } from 'dwf-3-models-tjb';
 import { Ajv } from '../mock/utils';
@@ -12,7 +12,7 @@ const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 jest.mock('../../../src/handlers/picture_objection_model');
 const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
 
-describe('GetPictureObjection Tests TJTAG', () => {
+describe('GetPictureObjection Tests', () => {
     const id = 42;
     const body: GetPictureInput = { id: id };
 
@@ -30,6 +30,7 @@ describe('GetPictureObjection Tests TJTAG', () => {
 
     beforeEach(() => {
         mockLocalPictureAccessor.mockClear();
+        mockPictureObjectionModel.mockClear();
         mockJimpAdapter.createJimp.mockClear();
         mockJimpAdapter.read.mockClear();
         mockLocalPictureAccessorInstance = new LocalPictureAccessor(
@@ -43,14 +44,14 @@ describe('GetPictureObjection Tests TJTAG', () => {
     });
 
     it('gets the filename from the database, requests picture contents, and returns them', async () => {
-        const expectedFile = {
+        const expectedPicture = {
             id: 42,
             name: 'name',
             created_by: 'created_by',
             filename: 'filename',
             filesystem: 'filesystem',
         };
-        const mockFindById = jest.fn().mockReturnValue(expectedFile);
+        const mockFindById = jest.fn().mockReturnValue(expectedPicture);
         const mockQueryBuilder = {
             findById: mockFindById,
         } as unknown as QueryBuilder<PictureObjectionModel>;
@@ -60,7 +61,7 @@ describe('GetPictureObjection Tests TJTAG', () => {
         const mockGetPicture =
             mockLocalPictureAccessorInstance.getPicture as jest.Mock;
         mockGetPicture.mockImplementation((filename: string) => {
-            if (filename === expectedFile.filename) {
+            if (filename === expectedPicture.filename) {
                 return expectedContents;
             } else {
                 console.log(`filename is: ${filename}`);

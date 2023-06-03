@@ -1,67 +1,54 @@
 // TODO can i remove the *.unit.* and *.integ.* now that I have folders?
 import { GetPictures } from '../../../src/handlers/get_pictures';
-import APIError from '../../../src/handlers/api_error';
-import IDB from '../../../src/db';
-import { Ajv, mockNext } from '../mock/utils';
-import { _schema } from 'dwf-3-models-tjb';
+import { Ajv } from '../mock/utils';
+import { Picture, _schema } from 'dwf-3-models-tjb';
+import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
 
-// jest.mock('../../src/db');
-// const mockQuery = jest.mocked(db.query, true);
-// jest.mock('../../src/db');
-// const mockQuery = jest.mocked(DB.query, true);
-// const mockDB = jest.genMockFromModule<DB>('db');
-// const mockDB = jest.mock<DB>('db');
-// mockDB.
-const mockQuery = jest.fn();
-const mockDB = {
-    query: mockQuery,
-} as IDB;
+jest.mock('../../../src/handlers/picture_objection_model');
+const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
 
 describe('GetPictures Tests', () => {
     let getPictures: GetPictures;
 
     beforeEach(() => {
-        getPictures = new GetPictures(mockDB);
-        mockQuery.mockClear();
+        getPictures = new GetPictures();
     });
 
-    it.only('calls db query when procesing', async () => {
-        const dbQueryOutput = {
-            pictures: [
-                {
-                    id: 1,
-                    name: 'name',
-                    createdBy: 'createdBy',
-                    filename: 'filename',
-                    filesystem: 'filesystem',
-                },
-            ],
-        };
+    it('calls db query when procesing', async () => {
+        const expectedPictures = [
+            {
+                id: 42,
+                name: 'name',
+                created_by: 'created_by',
+                filename: 'filename',
+                filesystem: 'filesystem',
+            },
+            {
+                id: 43,
+                name: 'name_2',
+                created_by: 'created_by_2',
+                filename: 'filename_2',
+                filesystem: 'filesystem_2',
+            },
+        ];
+        mockPictureObjectionModel.query = jest
+            .fn()
+            .mockResolvedValue(expectedPictures);
 
-        mockQuery.mockImplementation((query: string, params: any[]) => {
-            query;
-            params;
-            return new Promise((resolve, reject) => {
-                reject;
-                resolve({ rows: dbQueryOutput.pictures });
-            });
-        });
-        const result = await getPictures.process(mockDB, {}, mockNext);
-
-        expect(mockQuery).toHaveBeenCalledTimes(1);
-        expect(mockQuery).toHaveBeenCalledWith(`select * from picture;`, []);
-        expect(result).toEqual(dbQueryOutput);
-    });
-
-    it('throws an api error when the database query fails', async () => {
-        mockQuery.mockImplementation((query: string, params: any[]) => {
-            query;
-            params;
-            throw new Error();
-        });
-        await expect(getPictures.process(mockDB, {}, mockNext)).rejects.toThrow(
-            new APIError(500, 'database issue, pictures not fetched')
+        const result = await getPictures.process({});
+        const mapped = result.pictures.map(
+            (value: Picture): { [key: string]: string | number } => {
+                return {
+                    id: value.id,
+                    name: value.name,
+                    created_by: value.createdBy,
+                    filename: value.filename,
+                    filesystem: value.filesystem,
+                };
+            }
         );
+
+        expect(mapped).toEqual(expectedPictures);
     });
 
     it('provides input validator', () => {
