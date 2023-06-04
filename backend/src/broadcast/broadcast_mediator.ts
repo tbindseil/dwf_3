@@ -69,12 +69,11 @@ export default class BroadcastMediator {
             this.filenameToClients.set(filename, m);
         }
 
-        this.filenameToClients
-            .get(filename)
-            ?.set(
-                socket.id,
-                this.broadcastClientFactory.createBroadcastClient(socket)
-            );
+        this.filenameToClients.get(filename)?.set(
+            socket.id,
+            // TODO do I still need these factories?
+            this.broadcastClientFactory.createBroadcastClient(socket)
+        );
     }
 
     // first, remove the client that is disconnecting

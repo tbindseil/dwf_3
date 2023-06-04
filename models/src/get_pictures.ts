@@ -1,7 +1,7 @@
-import { PictureShape } from './picture';
+import { PictureDatabaseShape } from './picture';
 
 export interface GetPicturesInput {}
 
 export interface GetPicturesOutput {
-    pictures: PictureShape[];
+    pictures: PictureDatabaseShape[];
 }

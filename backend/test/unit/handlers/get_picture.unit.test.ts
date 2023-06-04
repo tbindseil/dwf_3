@@ -44,7 +44,7 @@ describe('GetPicture Tests', () => {
         const expectedPicture = {
             id: 42,
             name: 'name',
-            created_by: 'created_by',
+            createdBy: 'createdBy',
             filename: 'filename',
             filesystem: 'filesystem',
         };

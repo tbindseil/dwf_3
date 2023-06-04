@@ -32,7 +32,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
 
         Picture.query().insert({
             name: name,
-            created_by: createdBy,
+            createdBy: createdBy,
             filename: filename,
             filesystem: filesystem,
         });

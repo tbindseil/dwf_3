@@ -82,7 +82,7 @@ describe('PostPicture Tests', () => {
 
         expect(mockInsert).toHaveBeenCalledWith({
             name: name,
-            created_by: createdBy,
+            createdBy: createdBy,
             filename: filename,
             filesystem: filesystem,
         });

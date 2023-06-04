@@ -12,23 +12,13 @@ import {
 } from './setup/utils';
 
 describe('get_picture', () => {
-    const expectedPicture = [
-        {
-            id: 4, // TODO need a concerted effort on seeding, maybe a registration system, returning the id of the inserted pictures
-            name: 'name1',
-            createdBy: 'createdb1',
-            filename: 'filenam1',
-            filesystem: 'filesyste1',
-        },
-    ].map((pic) => {
-        return {
-            id: pic.id,
-            name: pic.name,
-            createdby: pic.createdBy,
-            filename: pic.filename,
-            filesystem: pic.filesystem,
-        };
-    })[0];
+    const expectedPicture = {
+        id: 4, // TODO need a concerted effort on seeding, maybe a registration system, returning the id of the inserted pictures
+        name: 'name1',
+        createdBy: 'createdb1',
+        filename: 'filenam1',
+        filesystem: 'filesyste1',
+    };
 
     beforeAll(async () => {
         generateSamplePng(expectedPicture.filename);

@@ -19,14 +19,14 @@ describe('GetPictures Tests', () => {
             {
                 id: 42,
                 name: 'name',
-                created_by: 'created_by',
+                createdBy: 'createdBy',
                 filename: 'filename',
                 filesystem: 'filesystem',
             },
             {
                 id: 43,
                 name: 'name_2',
-                created_by: 'created_by_2',
+                createdBy: 'createdBy',
                 filename: 'filename_2',
                 filesystem: 'filesystem_2',
             },

@@ -30,17 +30,7 @@ describe('get_pictures', () => {
         const scopedKnex = makeKnex();
         Model.knex(scopedKnex);
 
-        await scopedKnex('picture').insert(
-            expectedPictures.map((pic) => {
-                return {
-                    id: pic.id,
-                    name: pic.name,
-                    createdby: pic.createdBy,
-                    filename: pic.filename,
-                    filesystem: pic.filesystem,
-                };
-            })
-        );
+        await scopedKnex('picture').insert(expectedPictures);
 
         scopedKnex.destroy();
     });
