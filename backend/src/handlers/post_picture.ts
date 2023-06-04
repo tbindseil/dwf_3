@@ -1,8 +1,12 @@
-import { PostPictureInput, PostPictureOutput, _schema } from 'dwf-3-models-tjb';
+import {
+    Picture,
+    PostPictureInput,
+    PostPictureOutput,
+    _schema,
+} from 'dwf-3-models-tjb';
 import API from './api';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { ValidateFunction } from 'ajv';
-import PictureObjectionModel from './picture_objection_model';
 
 export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
@@ -27,7 +31,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
             createdBy
         );
 
-        PictureObjectionModel.query().insert({
+        Picture.query().insert({
             name: name,
             created_by: createdBy,
             filename: filename,

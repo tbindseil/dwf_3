@@ -2,17 +2,16 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import { Ajv } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
-import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
 
-jest.mock('../../../src/handlers/picture_objection_model');
-const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
+jest.mock('dwf-3-models-tjb');
+const mockPicture = jest.mocked(Picture, true);
 
 describe('GetPictures Tests', () => {
     let getPictures: GetPictures;
 
     beforeEach(() => {
         getPictures = new GetPictures();
-        mockPictureObjectionModel.mockClear();
+        mockPicture.mockClear();
     });
 
     it('calls db query when procesing', async () => {
@@ -32,24 +31,11 @@ describe('GetPictures Tests', () => {
                 filesystem: 'filesystem_2',
             },
         ];
-        mockPictureObjectionModel.query = jest
-            .fn()
-            .mockResolvedValue(expectedPictures);
+        mockPicture.query = jest.fn().mockResolvedValue(expectedPictures);
 
         const result = await getPictures.process({});
-        const mapped = result.pictures.map(
-            (value: Picture): { [key: string]: string | number } => {
-                return {
-                    id: value.id,
-                    name: value.name,
-                    created_by: value.createdBy,
-                    filename: value.filename,
-                    filesystem: value.filesystem,
-                };
-            }
-        );
 
-        expect(mapped).toEqual(expectedPictures);
+        expect(result.pictures).toEqual(expectedPictures);
     });
 
     it('provides input validator', () => {

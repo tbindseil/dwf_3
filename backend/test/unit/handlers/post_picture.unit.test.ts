@@ -1,15 +1,14 @@
 import { PostPicture } from '../../../src/handlers/post_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { Ajv } from '../mock/utils';
-import { _schema } from 'dwf-3-models-tjb';
-import PictureObjectionModel from '../../../src/handlers/picture_objection_model';
+import { Picture, _schema } from 'dwf-3-models-tjb';
 import { QueryBuilder } from 'objection';
 
 jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 
-jest.mock('../../../src/handlers/picture_objection_model');
-const mockPictureObjectionModel = jest.mocked(PictureObjectionModel, true);
+jest.mock('dwf-3-models-tjb');
+const mockPicture = jest.mocked(Picture, true);
 
 describe('PostPicture Tests TJTAG', () => {
     const name = 'name';
@@ -28,7 +27,7 @@ describe('PostPicture Tests TJTAG', () => {
 
     beforeEach(() => {
         mockLocalPictureAccessor.mockClear();
-        mockPictureObjectionModel.mockClear();
+        mockPicture.mockClear();
         mockJimpAdapter.createJimp.mockClear();
         mockJimpAdapter.read.mockClear();
         mockLocalPictureAccessorInstance = new LocalPictureAccessor(
@@ -46,8 +45,8 @@ describe('PostPicture Tests TJTAG', () => {
         const mockInsert = jest.fn();
         const mockQueryBuilder = {
             insert: mockInsert,
-        } as unknown as QueryBuilder<PictureObjectionModel>;
-        mockPictureObjectionModel.query.mockReturnValue(mockQueryBuilder);
+        } as unknown as QueryBuilder<Picture>;
+        mockPicture.query.mockReturnValue(mockQueryBuilder);
 
         await postPicture.process(body);
 
@@ -76,8 +75,8 @@ describe('PostPicture Tests TJTAG', () => {
         const mockInsert = jest.fn();
         const mockQueryBuilder = {
             insert: mockInsert,
-        } as unknown as QueryBuilder<PictureObjectionModel>;
-        mockPictureObjectionModel.query.mockReturnValue(mockQueryBuilder);
+        } as unknown as QueryBuilder<Picture>;
+        mockPicture.query.mockReturnValue(mockQueryBuilder);
 
         await postPicture.process(body);
 

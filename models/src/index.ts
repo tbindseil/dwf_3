@@ -1,4 +1,4 @@
-import { Picture } from './picture';
+import Picture from './picture';
 import { GetPicturesInput, GetPicturesOutput } from './get_pictures';
 import { GetPictureInput, GetPictureOutput } from './get_picture';
 import { PostPictureInput, PostPictureOutput } from './post_picture';

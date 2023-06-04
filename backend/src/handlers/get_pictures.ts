@@ -1,7 +1,11 @@
-import { GetPicturesInput, GetPicturesOutput, _schema } from 'dwf-3-models-tjb';
+import {
+    GetPicturesInput,
+    GetPicturesOutput,
+    Picture,
+    _schema,
+} from 'dwf-3-models-tjb';
 import API from './api';
 import { ValidateFunction } from 'ajv';
-import PictureObjectionModel from './picture_objection_model';
 
 export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
     public provideInputValidationSchema(): ValidateFunction {
@@ -11,19 +15,10 @@ export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
     public async process(input: GetPicturesInput): Promise<GetPicturesOutput> {
         input;
 
-        const result = await PictureObjectionModel.query();
+        const result = await Picture.query();
 
         return {
-            // TODO once objection model is in models, this should just be return { pictures: result }
-            pictures: result.map((row: PictureObjectionModel) => {
-                return {
-                    id: row.id,
-                    name: row.name,
-                    createdBy: row.created_by,
-                    filename: row.filename,
-                    filesystem: row.filesystem,
-                };
-            }),
+            pictures: result,
         };
     }
 }

@@ -2,3 +2,4 @@ output
 pictures/
 test_pictures/
 build/
+node_modules/

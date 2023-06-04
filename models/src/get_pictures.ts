@@ -1,8 +1,7 @@
-import { Picture } from './picture';
+import { PictureShape } from './picture';
 
-export interface GetPicturesInput {
-}
+export interface GetPicturesInput {}
 
 export interface GetPicturesOutput {
-    pictures: Picture[]
+    pictures: PictureShape[];
 }

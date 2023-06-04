@@ -1,9 +1,13 @@
-import { GetPictureInput, GetPictureOutput, _schema } from 'dwf-3-models-tjb';
+import {
+    GetPictureInput,
+    GetPictureOutput,
+    Picture,
+    _schema,
+} from 'dwf-3-models-tjb';
 import API from './api';
 import APIError from './api_error';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { ValidateFunction } from 'ajv';
-import PictureObjectionModel from './picture_objection_model';
 
 export class GetPictureObjection extends API<
     GetPictureInput,
@@ -22,7 +26,7 @@ export class GetPictureObjection extends API<
     }
 
     public async process(input: GetPictureInput): Promise<GetPictureOutput> {
-        const query = PictureObjectionModel.query().findById(input.id);
+        const query = Picture.query().findById(input.id);
         const picture = await query;
 
         if (!picture || !picture.filename) {

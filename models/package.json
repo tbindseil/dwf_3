@@ -13,5 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript-json-schema": "^0.56.0"
+  },
+  "dependencies": {
+    "objection": "^3.0.1"
   }
 }
