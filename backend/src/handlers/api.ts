@@ -11,7 +11,7 @@ export default abstract class API<I, O> {
 
     // TODO can i also do this with the response, do i even need to?
     public async call(
-        req: Request<{}, {}, I>,
+        req: Request<unknown, unknown, I>,
         res: Response,
         next: NextFunction
     ) {
