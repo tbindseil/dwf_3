@@ -17,6 +17,10 @@ export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
 
         const result = await Picture.query();
 
+        // This will return with created_by instead of with createdBy
+        // maybe that's ok, this commit removes code that translate between
+        // the two, but I think that the benefits of finding a place for
+        // it outweigh the difficulties.
         return {
             pictures: result,
         };
