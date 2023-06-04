@@ -13,8 +13,6 @@ import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
-import { makeKnex } from './db/knex_file';
-import { DB } from './db';
 import {
     GetPictures,
     GetPicture,
@@ -36,7 +34,6 @@ import {
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
-import { GetPictureObjection } from './handlers/get_picture_objection';
 
 const app: Express = express();
 
@@ -64,20 +61,13 @@ const broadcastMediator = new BroadcastMediator(
     pictureSyncClientFactory
 );
 
-// TODO inject -db- (and pictureArray?) via middleware
+// TODO inject -db- (and pictureArray? and ajv?) via middleware
 
 app.get(
     '/pictures',
     // TODO does this need to be async?
     async (req: Request, res: Response, next: NextFunction) => {
         new GetPictures().call(req, res, next);
-    }
-);
-app.get(
-    '/picture_objection',
-    // TODO does this need to be async?
-    async (req: Request, res: Response, next: NextFunction) => {
-        new GetPictureObjection(pictureAccessor).call(req, res, next);
     }
 );
 app.get('/picture', (req: Request, res: Response, next: NextFunction) => {

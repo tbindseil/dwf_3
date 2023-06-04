@@ -10,7 +10,7 @@ const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 jest.mock('dwf-3-models-tjb');
 const mockPicture = jest.mocked(Picture, true);
 
-describe('PostPicture Tests TJTAG', () => {
+describe('PostPicture Tests', () => {
     const name = 'name';
     const createdBy = 'createdBy';
     const body = { name: name, createdBy: createdBy };

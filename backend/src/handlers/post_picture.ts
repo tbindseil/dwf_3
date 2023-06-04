@@ -17,7 +17,6 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
 
     constructor(pictureAccessor: PictureAccessor) {
         super();
-
         this.pictureAccessor = pictureAccessor;
     }
 

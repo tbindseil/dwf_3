@@ -1,4 +1,4 @@
-import { GetPictureObjection } from '../../../src/handlers/get_picture';
+import { GetPicture } from '../../../src/handlers/get_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, Picture, _schema } from 'dwf-3-models-tjb';
 import { Ajv } from '../mock/utils';
@@ -11,7 +11,7 @@ const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
 jest.mock('dwf-3-models-tjb');
 const mockPicture = jest.mocked(Picture, true);
 
-describe('GetPictureObjection Tests', () => {
+describe('GetPicture Tests', () => {
     const id = 42;
     const body: GetPictureInput = { id: id };
 
@@ -25,7 +25,7 @@ describe('GetPictureObjection Tests', () => {
     const baseDirectory = 'baseDirectory';
     let mockLocalPictureAccessorInstance: LocalPictureAccessor;
 
-    let getPictureObjection: GetPictureObjection;
+    let getPicture: GetPicture;
 
     beforeEach(() => {
         mockLocalPictureAccessor.mockClear();
@@ -37,9 +37,7 @@ describe('GetPictureObjection Tests', () => {
             prototypeFileName,
             baseDirectory
         );
-        getPictureObjection = new GetPictureObjection(
-            mockLocalPictureAccessorInstance
-        );
+        getPicture = new GetPicture(mockLocalPictureAccessorInstance);
     });
 
     it('gets the filename from the database, requests picture contents, and returns them', async () => {
@@ -68,7 +66,7 @@ describe('GetPictureObjection Tests', () => {
             }
         });
 
-        const results = await getPictureObjection.process(body);
+        const results = await getPicture.process(body);
 
         expect(results).toEqual(expectedContents);
     });
@@ -80,18 +78,18 @@ describe('GetPictureObjection Tests', () => {
         } as unknown as QueryBuilder<Picture>;
         mockPicture.query.mockReturnValue(mockQueryBuilder);
 
-        await expect(getPictureObjection.process(body)).rejects.toThrow(
+        await expect(getPicture.process(body)).rejects.toThrow(
             new APIError(400, 'picture not found')
         );
     });
 
     it('gives png content type by default', () => {
-        const contentType = getPictureObjection.getContentType();
+        const contentType = getPicture.getContentType();
         expect(contentType).toEqual('image/png');
     });
 
     it('provides input validator', () => {
-        const validator = getPictureObjection.provideInputValidationSchema();
+        const validator = getPicture.provideInputValidationSchema();
         const expectedValidator = Ajv.compile(_schema.GetPictureInput);
 
         expect(validator.schema).toEqual(expectedValidator.schema);
@@ -104,7 +102,7 @@ describe('GetPictureObjection Tests', () => {
             'utf-8'
         );
 
-        const resultingSerializedOutput = getPictureObjection.serializeOutput(
+        const resultingSerializedOutput = getPicture.serializeOutput(
             superCrazyOutputBuffer
         );
         expect(resultingSerializedOutput).toEqual(superCrazyOutputBuffer);

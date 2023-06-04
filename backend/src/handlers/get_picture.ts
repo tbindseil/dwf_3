@@ -9,10 +9,7 @@ import APIError from './api_error';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { ValidateFunction } from 'ajv';
 
-export class GetPictureObjection extends API<
-    GetPictureInput,
-    GetPictureOutput
-> {
+export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
     private readonly pictureAccessor: PictureAccessor;
 
     constructor(pictureAccessor: PictureAccessor) {

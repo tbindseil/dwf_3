@@ -3,15 +3,9 @@ import APIError from './api_error';
 import Ajv, { ValidateFunction } from 'ajv';
 
 export default abstract class API<I, O> {
-    public static readonly DEFAULT_ERROR_STATUS_CODE = 500;
-    public static readonly DEFAULT_ERROR_MSG = JSON.stringify({
-        msg: 'unknown error',
-    });
-
     protected readonly ajv: Ajv;
 
     constructor() {
-        // TODO inject this
         this.ajv = new Ajv();
     }
 
