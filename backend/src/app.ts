@@ -62,14 +62,9 @@ const broadcastMediator = new BroadcastMediator(
 );
 
 // TODO inject -db- (and pictureArray? and ajv?) via middleware
-
-app.get(
-    '/pictures',
-    // TODO does this need to be async?
-    async (req: Request, res: Response, next: NextFunction) => {
-        new GetPictures().call(req, res, next);
-    }
-);
+app.get('/pictures', (req: Request, res: Response, next: NextFunction) => {
+    new GetPictures().call(req, res, next);
+});
 app.get('/picture', (req: Request, res: Response, next: NextFunction) => {
     new GetPicture(pictureAccessor).call(req, res, next);
 });

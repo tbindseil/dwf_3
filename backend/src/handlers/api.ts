@@ -9,9 +9,8 @@ export default abstract class API<I, O> {
         this.ajv = new Ajv();
     }
 
-    // TODO can i also do this with the response, do i even need to?
     public async call(
-        req: Request<unknown, unknown, I>,
+        req: Request<unknown, O, I>,
         res: Response,
         next: NextFunction
     ) {

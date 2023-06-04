@@ -3,7 +3,6 @@ import { Model } from 'objection';
 
 import { io, server } from './app';
 
-// TODO what is this for?
 Model.knex(makeKnex());
 
 io.listen(6543);
