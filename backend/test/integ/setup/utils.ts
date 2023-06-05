@@ -22,6 +22,16 @@ export async function getPictureAsBuffer(filename: string): Promise<Buffer> {
     return await fs.promises.readFile(path.join(DEFAULT_FOLDER_NAME, filename));
 }
 
+export async function removeAllPng(): Promise<void> {
+    (await fs.promises.readdir(DEFAULT_FOLDER_NAME)).forEach((f) => {
+        console.log(`f is ${f}`);
+        if (f == DEFAULT_FILE_NAME.split('/').at(-1)) {
+            return;
+        }
+        removePng(f);
+    });
+}
+
 export async function removePng(filename: string): Promise<void> {
     await fs.promises.unlink(path.join(DEFAULT_FOLDER_NAME, filename));
 }

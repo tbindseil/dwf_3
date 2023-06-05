@@ -2,8 +2,11 @@ import {
     makeKnexWithoutDatabase,
     testDatabase,
 } from '../../../src/db/knex_file';
+import { removeAllPng } from './utils';
 
 module.exports = async () => {
+    removeAllPng();
+
     try {
         const knexWithoutDatabase = makeKnexWithoutDatabase();
         await knexWithoutDatabase.raw(

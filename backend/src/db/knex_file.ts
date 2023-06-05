@@ -32,7 +32,7 @@ const knexBaseConfig = {
         directory: '/Users/tj/Projects/dwf_3/backend/build/src/db/migrations',
     },
     seeds: {
-        directory: '/Users/tj/Projects/dwf_3/backend/build/src/db/seeds',
+        directory: '/Users/tj/Projects/dwf_3/backend/build/test/integ/db/seeds',
     },
     debug: true,
 };

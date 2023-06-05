@@ -12,7 +12,9 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
 
     public provideInputValidationSchema(): ValidateFunction {
-        return this.ajv.compile(_schema.GetPictureInput);
+        console.log(`_schema is ${JSON.stringify(_schema)}}`);
+        const ret = this.ajv.compile(_schema);
+        return ret;
     }
 
     constructor(pictureAccessor: PictureAccessor) {
@@ -30,7 +32,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
             createdBy
         );
 
-        Picture.query().insert({
+        await Picture.query().insert({
             name: name,
             createdBy: createdBy,
             filename: filename,

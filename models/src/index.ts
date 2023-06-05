@@ -1,4 +1,4 @@
-import Picture from './picture';
+import Picture, { PictureDatabaseShape } from './picture';
 import { GetPicturesInput, GetPicturesOutput } from './get_pictures';
 import { GetPictureInput, GetPictureOutput } from './get_picture';
 import { PostPictureInput, PostPictureOutput } from './post_picture';
@@ -17,6 +17,7 @@ import _schema from './schema_validation/_schema';
 
 export {
     Picture,
+    PictureDatabaseShape,
     GetPicturesInput,
     GetPicturesOutput,
     GetPictureInput,

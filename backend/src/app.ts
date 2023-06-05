@@ -29,11 +29,19 @@ import {
     ClientToServerEvents,
     InterServerEvents,
     SocketData,
+    Picture,
 } from 'dwf-3-models-tjb';
 
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
+
+import { makeKnex } from './db/knex_file';
+import { Model } from 'objection';
+console.log('BEFORE');
+// Model.knex(makeKnex());
+Picture.knex(makeKnex());
+console.log('AFTER');
 
 const app: Express = express();
 

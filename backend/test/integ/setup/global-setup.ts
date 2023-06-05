@@ -1,3 +1,4 @@
+import { Model } from 'objection';
 import {
     makeKnex,
     makeKnexWithoutDatabase,
@@ -38,6 +39,7 @@ async function seedTestDatabase() {
 }
 
 module.exports = async () => {
+    Model.knex(makeKnex());
     try {
         await createTestDatabase();
         await seedTestDatabase();

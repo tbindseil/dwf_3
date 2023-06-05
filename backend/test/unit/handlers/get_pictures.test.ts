@@ -1,4 +1,3 @@
-// TODO can i remove the *.unit.* and *.integ.* now that I have folders?
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import { Ajv } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
