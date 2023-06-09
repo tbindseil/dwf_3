@@ -4,4 +4,8 @@ module.exports = {
     testRegex: '/test/.*\\.(test|spec)?\\.(ts|tsx)$',
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     coverageProvider: 'v8',
+    coveragePathIgnorePatterns: [
+        'node_modules',
+        '<rootDir>/src/db/knex_file.ts',
+    ],
 };
