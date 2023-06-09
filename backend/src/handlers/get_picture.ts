@@ -8,6 +8,7 @@ import API from './api';
 import APIError from './api_error';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { ValidateFunction } from 'ajv';
+import { Knex } from 'knex';
 
 export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
     private readonly pictureAccessor: PictureAccessor;
@@ -22,8 +23,11 @@ export class GetPicture extends API<GetPictureInput, GetPictureOutput> {
         return this.ajv.compile(_schema.GetPictureInput);
     }
 
-    public async process(input: GetPictureInput): Promise<GetPictureOutput> {
-        const query = Picture.query().findById(input.id);
+    public async process(
+        input: GetPictureInput,
+        knex: Knex
+    ): Promise<GetPictureOutput> {
+        const query = Picture.query(knex).findById(input.id);
         const picture = await query;
 
         if (!picture || !picture.filename) {

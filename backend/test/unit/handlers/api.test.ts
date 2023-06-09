@@ -3,6 +3,7 @@ import API from '../../../src/handlers/api';
 import { ValidateFunction } from 'ajv';
 import APIError from '../../../src/handlers/api_error';
 import { mockNext } from '../mock/utils';
+import { Knex } from 'knex';
 
 const specialInput = { test: 'SPECIAL_INPUT' };
 const specialOutput = { test: 'SPECIAL_OUTPUT' };
@@ -33,9 +34,13 @@ class TestAPI extends API<
         return validator as unknown as ValidateFunction<unknown>;
     }
 
-    public async process(input: {
-        [key: string]: string;
-    }): Promise<{ [key: string]: string }> {
+    public async process(
+        input: {
+            [key: string]: string;
+        },
+        knex: Knex
+    ): Promise<{ [key: string]: string }> {
+        knex;
         if (this.throwGenericFailure) {
             throw new Error('message');
         }

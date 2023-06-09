@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError from './api_error';
 import Ajv, { ValidateFunction } from 'ajv';
-// import Ajv2019 from 'ajv/dist/2019';
+import { Knex } from 'knex';
+import { makeKnex } from '../db/knex_file';
 
 export default abstract class API<I, O> {
     protected readonly ajv: Ajv;
@@ -13,20 +14,21 @@ export default abstract class API<I, O> {
         // this.ajv.addVocabulary(['GetPictureInput', ...]);
     }
 
+    // this calls mockKnex, i need a way to stub that when unit testing
     public async call(
         req: Request<unknown, O, I>,
         res: Response,
         next: NextFunction
     ) {
+        const scopedKnex = makeKnex();
+
         try {
             const validator = this.provideInputValidationSchema();
-            console.log(`req.body is ${JSON.stringify(req.body)}`);
             if (!validator(req.body)) {
                 throw new APIError(400, 'invalid input');
             }
-            console.log('no errror');
 
-            const output = await this.process(req.body);
+            const output = await this.process(req.body, scopedKnex);
             const serialized_output = this.serializeOutput(output);
 
             res.set('Content-Type', this.getContentType());
@@ -40,11 +42,13 @@ export default abstract class API<I, O> {
                 console.error(error);
                 next(new APIError(500, 'generic failure to handle request'));
             }
+        } finally {
+            scopedKnex.destroy();
         }
     }
 
     public abstract provideInputValidationSchema(): ValidateFunction;
-    public abstract process(input: I): Promise<O>;
+    public abstract process(input: I, knex: Knex): Promise<O>;
 
     public getContentType(): string {
         return 'application/json';

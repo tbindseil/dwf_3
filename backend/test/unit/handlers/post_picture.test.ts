@@ -1,8 +1,9 @@
 import { PostPicture } from '../../../src/handlers/post_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
-import { Ajv } from '../mock/utils';
+import { Ajv, mockKnex } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
 import { QueryBuilder } from 'objection';
+import { ValidateFunction } from 'ajv';
 
 jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);
@@ -48,7 +49,7 @@ describe('PostPicture Tests', () => {
         } as unknown as QueryBuilder<Picture>;
         mockPicture.query.mockReturnValue(mockQueryBuilder);
 
-        await postPicture.process(body);
+        await postPicture.process(body, mockKnex);
 
         expect(mockCreateNewPicture).toHaveBeenCalledTimes(1);
         expect(mockCreateNewPicture).toHaveBeenCalledWith(name, createdBy);
@@ -78,7 +79,7 @@ describe('PostPicture Tests', () => {
         } as unknown as QueryBuilder<Picture>;
         mockPicture.query.mockReturnValue(mockQueryBuilder);
 
-        await postPicture.process(body);
+        await postPicture.process(body, mockKnex);
 
         expect(mockInsert).toHaveBeenCalledWith({
             name: name,
@@ -90,8 +91,7 @@ describe('PostPicture Tests', () => {
 
     it('provides input validator', () => {
         const validator = postPicture.provideInputValidationSchema();
-        const expectedValidator = Ajv.compile(_schema.GetPictureInput);
-
+        const expectedValidator = Ajv.compile(_schema);
         expect(validator.schema).toEqual(expectedValidator.schema);
     });
 });

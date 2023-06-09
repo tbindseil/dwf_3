@@ -1,7 +1,7 @@
 import { GetPicture } from '../../../src/handlers/get_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
 import { GetPictureInput, Picture, _schema } from 'dwf-3-models-tjb';
-import { Ajv } from '../mock/utils';
+import { Ajv, mockKnex } from '../mock/utils';
 import { QueryBuilder } from 'objection';
 import APIError from '../../../src/handlers/api_error';
 
@@ -61,12 +61,11 @@ describe('GetPicture Tests', () => {
             if (filename === expectedPicture.filename) {
                 return expectedContents;
             } else {
-                console.log(`filename is: ${filename}`);
                 throw new Error();
             }
         });
 
-        const results = await getPicture.process(body);
+        const results = await getPicture.process(body, mockKnex);
 
         expect(results).toEqual(expectedContents);
     });
@@ -78,7 +77,7 @@ describe('GetPicture Tests', () => {
         } as unknown as QueryBuilder<Picture>;
         mockPicture.query.mockReturnValue(mockQueryBuilder);
 
-        await expect(getPicture.process(body)).rejects.toThrow(
+        await expect(getPicture.process(body, mockKnex)).rejects.toThrow(
             new APIError(400, 'picture not found')
         );
     });

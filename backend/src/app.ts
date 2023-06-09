@@ -35,13 +35,16 @@ import {
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
-
 import { makeKnex } from './db/knex_file';
-import { Model } from 'objection';
-console.log('BEFORE');
-// Model.knex(makeKnex());
+
+// I either need to:
+// 1. save knex and destroy it on shutdown
+// 2. provide knex to each request and destroy it at the end
+// 3. that's easy to do in api
+
 Picture.knex(makeKnex());
-console.log('AFTER');
+
+Picture.knex().destroy();
 
 const app: Express = express();
 

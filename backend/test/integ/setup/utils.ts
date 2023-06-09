@@ -24,7 +24,6 @@ export async function getPictureAsBuffer(filename: string): Promise<Buffer> {
 
 export async function removeAllPng(): Promise<void> {
     (await fs.promises.readdir(DEFAULT_FOLDER_NAME)).forEach((f) => {
-        console.log(`f is ${f}`);
         if (f == DEFAULT_FILE_NAME.split('/').at(-1)) {
             return;
         }

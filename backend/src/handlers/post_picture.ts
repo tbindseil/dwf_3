@@ -7,12 +7,12 @@ import {
 import API from './api';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { ValidateFunction } from 'ajv';
+import { Knex } from 'knex';
 
 export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
     private pictureAccessor: PictureAccessor;
 
     public provideInputValidationSchema(): ValidateFunction {
-        console.log(`_schema is ${JSON.stringify(_schema)}}`);
         const ret = this.ajv.compile(_schema);
         return ret;
     }
@@ -22,7 +22,10 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
         this.pictureAccessor = pictureAccessor;
     }
 
-    public async process(input: PostPictureInput): Promise<PostPictureOutput> {
+    public async process(
+        input: PostPictureInput,
+        knex: Knex
+    ): Promise<PostPictureOutput> {
         const name = input.name;
         const createdBy = input.createdBy;
 
@@ -32,7 +35,7 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
             createdBy
         );
 
-        await Picture.query().insert({
+        await Picture.query(knex).insert({
             name: name,
             createdBy: createdBy,
             filename: filename,
