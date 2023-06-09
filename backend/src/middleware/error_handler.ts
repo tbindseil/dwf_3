@@ -1,11 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError from '../handlers/api_error';
 
-export interface Error {
-    status?: number;
-    message?: string;
-}
-
 export const myErrorHandler = (
     err: Error,
     req: Request,

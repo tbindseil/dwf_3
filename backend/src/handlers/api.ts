@@ -8,7 +8,7 @@ export default abstract class API<I, O> {
     protected readonly ajv: Ajv;
 
     constructor() {
-        this.ajv = new Ajv({ strict: 'log' });
+        this.ajv = new Ajv({ strict: false });
         // models might have to provide this list of inputs, otherwise its duplicated
         // this.ajv = new Ajv({ strict: true });
         // this.ajv.addVocabulary(['GetPictureInput', ...]);
