@@ -10,7 +10,7 @@ import { Knex } from 'knex';
 
 export class GetPictures extends API<GetPicturesInput, GetPicturesOutput> {
     public provideInputValidationSchema(): ValidateFunction {
-        return (() => true) as unknown as ValidateFunction;
+        return this.ajv.compile(_schema.GetPicturesInput);
     }
 
     public async process(

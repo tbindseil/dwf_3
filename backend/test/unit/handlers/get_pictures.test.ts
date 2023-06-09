@@ -1,5 +1,5 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
-import { mockKnex } from '../mock/utils';
+import { Ajv, mockKnex } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
 import { ValidateFunction } from 'ajv';
 
@@ -42,7 +42,8 @@ describe('GetPictures Tests', () => {
         const validator = getPictures.provideInputValidationSchema();
 
         // for some reason the {} object schema is being weird
-        const expectedValidator = (() => true) as unknown as ValidateFunction;
+        // const expectedValidator = (() => true) as unknown as ValidateFunction;
+        const expectedValidator = Ajv.compile(_schema.GetPicturesInput);
 
         expect(validator.schema).toEqual(expectedValidator.schema);
     });
