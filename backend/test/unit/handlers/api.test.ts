@@ -28,10 +28,10 @@ class TestAPI extends API<
         this.throwAPIErrorFailure = throwAPIErrorFailure ?? false;
     }
 
-    public provideInputValidationSchema(): ValidateFunction<unknown> {
+    public provideInputValidationSchema(): ValidateFunction {
         const validator = jest.fn();
         validator.mockReturnValue(this.validatorReturnValue);
-        return validator as unknown as ValidateFunction<unknown>;
+        return validator as unknown as ValidateFunction;
     }
 
     public async process(

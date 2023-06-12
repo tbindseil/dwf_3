@@ -5,10 +5,11 @@ import { Knex } from 'knex';
 import { makeKnex } from '../db/knex_file';
 
 export default abstract class API<I, O> {
-    protected readonly ajv: Ajv;
+    protected readonly ajv: Ajv.Ajv;
 
     constructor() {
-        this.ajv = new Ajv({ strict: false });
+        this.ajv = new Ajv({ strictKeywords: false });
+
         // models might have to provide this list of inputs, otherwise its duplicated
         // this.ajv = new Ajv({ strict: true });
         // this.ajv.addVocabulary(['GetPictureInput', ...]);
