@@ -1,13 +1,6 @@
 import PictureAccessor from '../../picture_accessor/picture_accessor';
 import BroadcastMediator from '../../../src/broadcast/broadcast_mediator';
-import {
-    ClientToServerEvents,
-    InterServerEvents,
-    PixelUpdate,
-    ServerToClientEvents,
-    SocketData,
-} from 'dwf-3-models-tjb';
-import { Socket } from 'socket.io';
+import { DWFSocket, PixelUpdate } from 'dwf-3-models-tjb';
 import BroadcastClientFactory, {
     BroadcastClient,
 } from '../../../src/broadcast/broadcast_client';
@@ -19,20 +12,10 @@ describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
     const mockSocket = {
         id: 'mockSocketID',
-    } as unknown as Socket<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    >;
+    } as unknown as DWFSocket;
     const mockSocket2 = {
         id: 'mockSocket2',
-    } as unknown as Socket<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    >;
+    } as unknown as DWFSocket;
     const dummyPixelUpdate = {
         name: 'dummyPixelUpdate',
         filename: defaultFilename,
@@ -125,12 +108,7 @@ describe('BroadcastMediator Tests', () => {
 
         const mockSocketNotInMap = {
             id: 'NOT_IN_MAP',
-        } as unknown as Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >;
+        } as unknown as DWFSocket;
 
         // expect(() => broadcastMediator.removeClient(defaultFilename, mockSocketNotInMap)).toThrow(new Error(`unable to remove socket id ${mockSocketNotInMap.id} because it doesn't exist in client map for filename ${defaultFilename}`));
         broadcastMediator.removeClient(defaultFilename, mockSocketNotInMap);
@@ -144,12 +122,7 @@ describe('BroadcastMediator Tests', () => {
 
         const pictureSyncClientSocketFakeout = {
             id: 'PICTURE_SYNC_KEY',
-        } as unknown as Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >;
+        } as unknown as DWFSocket;
         broadcastMediator.removeClient(
             defaultFilename,
             pictureSyncClientSocketFakeout

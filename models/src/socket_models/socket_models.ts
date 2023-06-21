@@ -22,28 +22,49 @@ export interface SocketData {
     age: number;
 }
 
-export interface DWFServer
-    extends Server<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    > {}
+export class DWFServer extends Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+> {}
 
-export interface DWFSocket
-    extends Socket<
-        ServerToClientEvents,
-        ClientToServerEvents,
-        InterServerEvents,
-        SocketData
-    > {}
+export class DWFSocket extends Socket<
+    ServerToClientEvents,
+    ClientToServerEvents,
+    InterServerEvents,
+    SocketData
+> {}
+
+//export interface DWFServer
+//    extends Server<
+//        ClientToServerEvents,
+//        ServerToClientEvents,
+//        InterServerEvents,
+//        SocketData
+//    > {}
+//
+//export interface DWFSocket
+//    extends Socket<
+//        ServerToClientEvents,
+//        ClientToServerEvents,
+//        InterServerEvents,
+//        SocketData
+//    > {}
 
 //export type DWFServer = Server<
 //    ClientToServerEvents,
 //    ServerToClientEvents,
 //    InterServerEvents,
 //    SocketData
-//>
+//>;
+//
+//export type DWFSocket = Socket<
+//    ServerToClientEvents,
+//    ClientToServerEvents,
+//    InterServerEvents,
+//    SocketData
+//>;
 
 // see docs, but can utilize namespace specific event maps
 // export type DWFSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

@@ -1,12 +1,5 @@
-import {
-    ClientToServerEvents,
-    ServerToClientEvents,
-    InterServerEvents,
-    SocketData,
-    PixelUpdate,
-} from 'dwf-3-models-tjb';
+import { PixelUpdate, DWFSocket } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
-import { Socket } from 'socket.io';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import PictureSyncClientFactory from '../../../src/broadcast/picture_sync_client';
 
@@ -14,12 +7,7 @@ describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
     const mockSocket = {
         id: 'mockSocketID',
-    } as unknown as Socket<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    >;
+    } as unknown as DWFSocket;
     const dummyPixelUpdate = {
         name: 'dummyPixelUpdate',
         filename: defaultFilename,
