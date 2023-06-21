@@ -6,6 +6,7 @@
     "scripts": {
         "test": "jest unit --config jest.unit.config.js",
         "integ-test": "export ENV='TEST' && jest integ --config jest.integ.config.js",
+        "all-test": "export ENV='TEST' && jest unit --config jest.unit.config.js && jest integ --config jest.integ.config.js",
         "dev": "export ENV='DEV' && concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
         "start": "export ENV='DEV' && ts-node src/index.ts",
         "lint": "npx eslint src/ test/ --format compact"
