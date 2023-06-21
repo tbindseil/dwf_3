@@ -7,7 +7,8 @@
   "scripts": {
     "schema": "node src/schema_validation/schemaGenerator.js",
     "build": "npm run schema && tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
   },
   "author": "",
   "license": "ISC",

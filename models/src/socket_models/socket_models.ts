@@ -1,3 +1,4 @@
+import { Server, Socket } from 'socket.io';
 import { PixelUpdate } from '../updates/pixel_update';
 
 export interface ClientToServerEvents {
@@ -21,12 +22,38 @@ export interface SocketData {
     age: number;
 }
 
+export interface DWFServer
+    extends Server<
+        ClientToServerEvents,
+        ServerToClientEvents,
+        InterServerEvents,
+        SocketData
+    > {}
+
+export interface DWFSocket
+    extends Socket<
+        ServerToClientEvents,
+        ClientToServerEvents,
+        InterServerEvents,
+        SocketData
+    > {}
+
+//export type DWFServer = Server<
+//    ClientToServerEvents,
+//    ServerToClientEvents,
+//    InterServerEvents,
+//    SocketData
+//>
+
+// see docs, but can utilize namespace specific event maps
+// export type DWFSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
 export interface PictureRequest {
-    filename: string
+    filename: string;
 }
 
 export interface PictureResponse {
-    width: number,
-    height: number,
-    data: ArrayBuffer
+    width: number;
+    height: number;
+    data: ArrayBuffer;
 }

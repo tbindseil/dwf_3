@@ -1,42 +1,16 @@
 import Client from './client';
-import { Socket } from 'socket.io';
-import {
-    PixelUpdate,
-    ServerToClientEvents,
-    ClientToServerEvents,
-    InterServerEvents,
-    SocketData,
-} from 'dwf-3-models-tjb';
+import { PixelUpdate, DWFSocket } from 'dwf-3-models-tjb';
 
 export default class BroadcastClientFactory {
-    public createBroadcastClient(
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ): BroadcastClient {
+    public createBroadcastClient(socket: DWFSocket): BroadcastClient {
         return new BroadcastClient(socket);
     }
 }
 
 export class BroadcastClient extends Client {
-    private readonly socket: Socket<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    >;
+    private readonly socket: DWFSocket;
 
-    constructor(
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ) {
+    constructor(socket: DWFSocket) {
         super();
 
         this.socket = socket;

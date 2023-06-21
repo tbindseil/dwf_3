@@ -10,6 +10,8 @@ import {
     ServerToClientEvents,
     InterServerEvents,
     SocketData,
+    DWFServer,
+    DWFSocket,
     PictureRequest,
     PictureResponse,
 } from './socket_models/socket_models';
@@ -32,6 +34,8 @@ export {
     ServerToClientEvents,
     InterServerEvents,
     SocketData,
+    DWFServer,
+    DWFSocket,
     PictureRequest,
     PictureResponse,
     _schema,

@@ -3,14 +3,7 @@ import BroadcastClientFactory from './broadcast_client';
 import PictureSyncClientFactory from './picture_sync_client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
-import { Socket } from 'socket.io';
-import {
-    PixelUpdate,
-    ServerToClientEvents,
-    ClientToServerEvents,
-    InterServerEvents,
-    SocketData,
-} from 'dwf-3-models-tjb';
+import { PixelUpdate, DWFSocket } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default class BroadcastMediator {
@@ -36,15 +29,7 @@ export default class BroadcastMediator {
     }
 
     // TODO type alias for Socket<Cli....
-    public async addClient(
-        filename: string,
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ): Promise<void> {
+    public async addClient(filename: string, socket: DWFSocket): Promise<void> {
         console.log(
             `adding client, filename: ${filename} and socket id: ${socket.id}`
         );
@@ -81,15 +66,7 @@ export default class BroadcastMediator {
     // make sure its the broadcast client and remove that
     //
     // revisiting, this can be done much cleaner using the features of socket.io
-    public removeClient(
-        filename: string,
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ): void {
+    public removeClient(filename: string, socket: DWFSocket): void {
         console.log(
             `remove client, filename: ${filename} and socket id: ${socket.id}`
         );

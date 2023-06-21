@@ -7,7 +7,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
-import { Server, Socket } from 'socket.io';
 
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
@@ -25,11 +24,9 @@ import { pictureRequestHandler, updateHandler } from './socket_functions';
 import {
     PictureRequest,
     PixelUpdate,
-    ServerToClientEvents,
-    ClientToServerEvents,
-    InterServerEvents,
-    SocketData,
     Picture,
+    DWFServer,
+    DWFSocket,
 } from 'dwf-3-models-tjb';
 
 import BroadcastClientFactory from './broadcast/broadcast_client';
@@ -90,18 +87,13 @@ app.use(myErrorHandler);
 
 export const server: http.Server = http.createServer(app);
 
-export const io = new Server<
-    ClientToServerEvents,
-    ServerToClientEvents,
-    InterServerEvents,
-    SocketData
->(server, {
+export const io = new DWFServer(server, {
     cors: {
         origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
     },
 });
-io.on('connection', (socket: Socket) => {
+io.on('connection', (socket: DWFSocket) => {
     // TODO make event names constants and share accross frontend and backend
     socket.on('picture_request', async (pictureRequest: PictureRequest) => {
         pictureRequestHandler(
