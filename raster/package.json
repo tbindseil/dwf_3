@@ -2,7 +2,7 @@
   "name": "dwf-3-raster-tjb",
   "version": "1.0.1",
   "description": "functions used to update the raster in draw with friends application",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc"
