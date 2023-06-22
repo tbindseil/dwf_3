@@ -25,14 +25,17 @@ import {
     PictureRequest,
     PixelUpdate,
     Picture,
-    DWFServer,
-    DWFSocket,
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData,
 } from 'dwf-3-models-tjb';
 
 import BroadcastClientFactory from './broadcast/broadcast_client';
 import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
 import { makeKnex } from './db/knex_file';
+import { Server, Socket } from 'socket.io';
 
 // I either need to:
 // 1. save knex and destroy it on shutdown
@@ -87,30 +90,45 @@ app.use(myErrorHandler);
 
 export const server: http.Server = http.createServer(app);
 
-export const io = new DWFServer(server, {
+export const io = new Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+>(server, {
     cors: {
         origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
     },
 });
-io.on('connection', (socket: DWFSocket) => {
-    // TODO make event names constants and share accross frontend and backend
-    socket.on('picture_request', async (pictureRequest: PictureRequest) => {
-        pictureRequestHandler(
-            pictureRequest,
-            broadcastMediator,
-            pictureAccessor,
-            socket
-        );
-    });
-    socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
-        updateHandler(pixelUpdate, broadcastMediator, socket.id);
-    });
+io.on(
+    'connection',
+    (
+        socket: Socket<
+            ClientToServerEvents,
+            ServerToClientEvents,
+            InterServerEvents,
+            SocketData
+        >
+    ) => {
+        // TODO make event names constants and share accross frontend and backend
+        socket.on('picture_request', async (pictureRequest: PictureRequest) => {
+            pictureRequestHandler(
+                pictureRequest,
+                broadcastMediator,
+                pictureAccessor,
+                socket
+            );
+        });
+        socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
+            updateHandler(pixelUpdate, broadcastMediator, socket.id);
+        });
 
-    socket.on('unsubscribe', (filename: string) => {
-        console.log(
-            `socket unsubscribe. Socket id: ${socket.id} and filename: ${filename}`
-        );
-        broadcastMediator.removeClient(filename, socket);
-    });
-});
+        socket.on('unsubscribe', (filename: string) => {
+            console.log(
+                `socket unsubscribe. Socket id: ${socket.id} and filename: ${filename}`
+            );
+            broadcastMediator.removeClient(filename, socket);
+        });
+    }
+);

@@ -1,5 +1,12 @@
-import { DWFSocket, PixelUpdate } from 'dwf-3-models-tjb';
+import {
+    ClientToServerEvents,
+    InterServerEvents,
+    PixelUpdate,
+    ServerToClientEvents,
+    SocketData,
+} from 'dwf-3-models-tjb';
 import BroadcastClientFactory from '../../../src/broadcast/broadcast_client';
+import { Socket } from 'socket.io';
 
 describe('BroadcastClient Tests', () => {
     const defaultFilename = 'filename';
@@ -8,7 +15,12 @@ describe('BroadcastClient Tests', () => {
     const mockSocket = {
         emit: mockEmit,
         id: 'mockSocketID',
-    } as unknown as DWFSocket;
+    } as unknown as Socket<
+        ClientToServerEvents,
+        ServerToClientEvents,
+        InterServerEvents,
+        SocketData
+    >;
     const dummyPixelUpdate = {
         name: 'dummyPixelUpdate',
         filename: defaultFilename,

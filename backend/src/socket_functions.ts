@@ -1,12 +1,25 @@
-import { PictureRequest, PixelUpdate, DWFSocket } from 'dwf-3-models-tjb';
+import {
+    PictureRequest,
+    PixelUpdate,
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData,
+} from 'dwf-3-models-tjb';
 import BroadcastMediator from './broadcast/broadcast_mediator';
 import PictureAccessor from './picture_accessor/picture_accessor';
+import { Socket } from 'socket.io';
 
 export async function pictureRequestHandler(
     pictureRequest: PictureRequest,
     broadcastMediator: BroadcastMediator,
     pictureAccessor: PictureAccessor,
-    socket: DWFSocket
+    socket: Socket<
+        ClientToServerEvents,
+        ServerToClientEvents,
+        InterServerEvents,
+        SocketData
+    >
 ): Promise<void> {
     await broadcastMediator.addClient(pictureRequest.filename, socket);
     const pictureResponse = await pictureAccessor.getRaster(
