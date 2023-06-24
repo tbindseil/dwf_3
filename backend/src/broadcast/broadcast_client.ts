@@ -47,7 +47,6 @@ export class BroadcastClient extends Client {
         sourceSocketId: string
     ): void {
         if (sourceSocketId !== this.socket.id) {
-            // TODO TJTAG might need to rethink what events are in what group?
             this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }

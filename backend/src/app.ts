@@ -1,9 +1,3 @@
-// TODO save vim compiler configs in this repo since they are somewhat repo specific (at this point)
-// maybe point to them from dotfiles
-//
-// or better yet, get my own commands to match those, they are probably ubiquitous
-// tsc - done
-// jest - not done
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -111,7 +105,6 @@ io.on(
             SocketData
         >
     ) => {
-        // TODO make event names constants and share accross frontend and backend
         socket.on('picture_request', async (pictureRequest: PictureRequest) => {
             pictureRequestHandler(
                 pictureRequest,

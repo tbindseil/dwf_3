@@ -9,10 +9,6 @@ jest.mock('../../../src/picture_accessor/filename_generator');
 const mockGeneratePictureFilename = jest.mocked(generatePictureFilename, true);
 
 describe('LocalPictureAccessor tests', () => {
-    // TODO, I wonder if I could write a more generatic basic mock factory? Maybe that is already done by jest
-    // https://stackoverflow.com/questions/52122234/mock-a-typescript-interface-with-jest
-    //
-    // or just use ts-mockito
     const mockJimpAdapter = {
         createJimp: jest.fn(),
         read: jest.fn(),
