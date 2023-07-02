@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Route, useNavigate } from "react-router-dom";
 
 
 export function HomeScreen() {
@@ -8,9 +8,13 @@ export function HomeScreen() {
     };
 
     return (
-        <div className="Home">
+            <Route
+            path="/"
+            element={
+            <div className="Home">
             <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/pictures");}}>Pictures</button></p>
             <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/new-picture");}}>New Picture</button></p>
-        </div>
-    );
+            </div>
+            }/>
+           );
 }
