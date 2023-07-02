@@ -26,8 +26,8 @@ function Canvas() {
       return;
     }
 
-    let canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    let ctx = canvas!.getContext('2d');
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+    const ctx = canvas!.getContext('2d');
     const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
     ctx!.putImageData(id, 0, 0);
   }, [raster]);
@@ -40,9 +40,9 @@ function Canvas() {
     [raster, updateCanvas],
   );
 
-  const picture_response_callback = useCallback(
+  const pictureResponseCallback = useCallback(
     (pictureResponse: PictureResponse) => {
-      let canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
       canvas.width = pictureResponse.width;
       canvas.height = pictureResponse.height;
@@ -89,11 +89,11 @@ function Canvas() {
 
   useEffect(() => {
     socket.removeListener('picture_response');
-    socket.on('picture_response', picture_response_callback);
+    socket.on('picture_response', pictureResponseCallback);
 
     socket.removeListener('server_to_client_update');
     socket.on('server_to_client_update', updateImageData);
-  }, [socket, picture_response_callback]);
+  }, [socket, pictureResponseCallback]);
 
   useEffect(() => {
     socket.emit('picture_request', { filename: picture.filename });

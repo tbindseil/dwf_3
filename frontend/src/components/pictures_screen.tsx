@@ -35,6 +35,7 @@ export function PicturesScreen() {
       {pictures.map((picture) => {
         return (
           <button
+            key={picture.id}
             onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
               void event;
               goToPicture(picture);

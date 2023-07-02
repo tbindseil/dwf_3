@@ -12,6 +12,7 @@ function App() {
       <div className='App'>
         <BrowserRouter>
           <Routes>
+            <Route path='/' element={<HomeScreen />} />
             <Route path='/pictures' element={<PicturesScreen />} />
             <Route path='/new-picture' element={<NewPictureScreen />} />
             <Route path='/picture' element={<Canvas />} />
