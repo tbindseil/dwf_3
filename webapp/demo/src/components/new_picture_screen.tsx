@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 
 export function NewPictureScreen() {
@@ -46,7 +46,7 @@ export function NewPictureScreen() {
                 {'Created By:'}
             </label>
             <input
-                type={"text"}
+                type={'text'}
                 name={'createdBy'}
                 value={createdBy}
                 onChange={handleCreatedByChange}/>
@@ -54,7 +54,7 @@ export function NewPictureScreen() {
                 {'Picture Name:'}
             </label>
             <input
-                type={"text"}
+                type={'text'}
                 name={'pictureName'}
                 value={pictureName}
                 onChange={handlePictureNameChange}/>
@@ -63,8 +63,8 @@ export function NewPictureScreen() {
                 Create Picture
             </button>
 
-            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/pictures");}}>Pictures</button></p>
-            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go("/new-picture");}}>New Picture</button></p>
+            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go('/pictures');}}>Pictures</button></p>
+            <p><button onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { void event; go('/new-picture');}}>New Picture</button></p>
         </div>
     );
 }

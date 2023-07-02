@@ -1,15 +1,15 @@
 class PicturesClient {
-    private static instance: PicturesClient;
-    public static getClient() {
-        if (!this.instance) {
-            PicturesClient.instance = new PicturesClient();
-        }
-        return PicturesClient.instance;
+  private static instance: PicturesClient;
+  public static getClient() {
+    if (!this.instance) {
+      PicturesClient.instance = new PicturesClient();
     }
+    return PicturesClient.instance;
+  }
 
-    // api calls
-    // make a list of paragraphs with return msg and requested url
-    /*  from backend/index.js
+  // api calls
+  // make a list of paragraphs with return msg and requested url
+  /*  from backend/index.js
     if (url_tokens.length === 1 && url_tokens[0] === 'pictures') {
         if (req.method === 'GET') {
             // TODO return list of all photos by name and maybe include a thumbnail

@@ -1,5 +1,5 @@
 import { useEffect, useState} from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { Picture } from 'dwf-3-models-tjb';
 
 
@@ -12,8 +12,7 @@ export function PicturesScreen() {
         fetch('http://localhost:8080/pictures', {
                 method: 'GET',
                 mode: 'cors',
-            })
-                .then(result => result.json())
+            }) .then(result => result.json())
                 .then(
                     result => setPictures(result.pictures),
                     error => console.log(`first catch and error is: ${error}`)
