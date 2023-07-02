@@ -1,27 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { SocketContext, socket } from './context/socket';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Canvas from './canvas/canvas';
+import { PicturesScreen } from './components/pictures_screen'; // TODO screens index
+import { HomeScreen } from './components/home_screen';
+import { NewPictureScreen } from './components/new_picture_screen';
 
 function App() {
-  return (
-    <div className='App'>
-      <header className='App-header'>
-        <img src={logo} className='App-logo' alt='logo' />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>stuff in a para</p>
-        <a
-          className='App-link'
-          href='https://reactjs.org'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <SocketContext.Provider value={socket}>
+            <div className="App">
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/pictures" element={<PicturesScreen/>}/>
+                        <Route path="/new-picture" element={<NewPictureScreen/>}/>
+                        <Route path="/picture" element= {<Canvas/>}/>
+                    </Routes>
+                </BrowserRouter>
+            </div>
+        </SocketContext.Provider>
+    );
 }
 
 export default App;
