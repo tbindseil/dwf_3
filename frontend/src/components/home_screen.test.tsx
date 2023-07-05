@@ -1,34 +1,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { HomeScreen } from './home_screen';
-import { NewPictureScreen } from './new_picture_screen';
-import { PicturesScreen } from './pictures_screen';
+import { RouterProvider } from 'react-router-dom';
+import { createMemoryRouterWrapper } from '../test_utils/memoryRouterFactory';
 
 describe('HomeScreen tests', () => {
-  let router: ReturnType<typeof createMemoryRouter>;
+  let router: ReturnType<typeof createMemoryRouterWrapper>;
 
   beforeEach(() => {
     // seems like this could be defined once as a utility and
     // parameterized with the initialEntries
-    router = createMemoryRouter(
-      [
-        {
-          path: '/',
-          element: <HomeScreen />,
-        },
-        {
-          path: '/new-picture',
-          element: <NewPictureScreen />,
-        },
-        {
-          path: '/pictures',
-          element: <PicturesScreen />,
-        },
-      ],
-      {
-        initialEntries: ['/'],
-      },
-    );
+    router = createMemoryRouterWrapper(['/']);
 
     render(<RouterProvider router={router} />);
   });
