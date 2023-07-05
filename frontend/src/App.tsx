@@ -1,7 +1,7 @@
 import './App.css';
 import { SocketContext, socket } from './context/socket';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { routes } from './routes';
+import { screens } from './components/screens';
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <div className='App'>
         <BrowserRouter>
           <Routes>
-            {routes.map((route) => (
+            {screens.map((route) => (
               <Route path={route.path} element={route.element} />
             ))}
           </Routes>

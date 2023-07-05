@@ -1,8 +1,8 @@
 import { createMemoryRouter } from 'react-router-dom';
-import { routes } from '../routes';
+import { screens } from '../components/screens';
 
 export const createMemoryRouterWrapper = (initialEntries: string[]) => {
-  return createMemoryRouter(routes, {
+  return createMemoryRouter(screens, {
     initialEntries: initialEntries,
   });
 };

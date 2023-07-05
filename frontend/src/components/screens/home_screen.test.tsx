@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
-import { createMemoryRouterWrapper } from '../test_utils/memoryRouterFactory';
+import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
 describe('HomeScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
