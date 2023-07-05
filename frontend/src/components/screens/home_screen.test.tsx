@@ -6,8 +6,6 @@ describe('HomeScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
 
   beforeEach(() => {
-    // seems like this could be defined once as a utility and
-    // parameterized with the initialEntries
     router = createMemoryRouterWrapper(['/']);
 
     render(<RouterProvider router={router} />);
