@@ -1,10 +1,7 @@
 import './App.css';
 import { SocketContext, socket } from './context/socket';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Canvas from './canvas/canvas';
-import { PicturesScreen } from './components/pictures_screen'; // TODO screens index
-import { HomeScreen } from './components/home_screen';
-import { NewPictureScreen } from './components/new_picture_screen';
+import { routes } from './routes';
 
 function App() {
   return (
@@ -12,10 +9,9 @@ function App() {
       <div className='App'>
         <BrowserRouter>
           <Routes>
-            <Route path='/' element={<HomeScreen />} />
-            <Route path='/pictures' element={<PicturesScreen />} />
-            <Route path='/new-picture' element={<NewPictureScreen />} />
-            <Route path='/picture' element={<Canvas />} />
+            {routes.map((route) => (
+              <Route path={route.path} element={route.element} />
+            ))}
           </Routes>
         </BrowserRouter>
       </div>
