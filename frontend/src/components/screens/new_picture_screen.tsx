@@ -10,20 +10,15 @@ export function NewPictureScreen() {
   const [createdBy, setCreatedBy] = useState('');
   const [pictureName, setPictureName] = useState('');
 
-  const handleCreatedByChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const target = event.target;
-    const value = target.value;
-
-    setCreatedBy(value);
+  const handleChange = (
+    setFunc: (s: string) => void,
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setFunc(event.target.value);
   };
 
-  const handlePictureNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const target = event.target;
-    const value = target.value;
-
-    setPictureName(value);
-  };
-
+  // could be a good opportunity to inject this worker function
+  // then it could be tested in isolation
   const createPicture = () => {
     fetch('http://localhost:8080/picture', {
       method: 'POST',
@@ -41,14 +36,25 @@ export function NewPictureScreen() {
 
   return (
     <div>
-      <label>{'Created By:'}</label>
-      <input type={'text'} name={'createdBy'} value={createdBy} onChange={handleCreatedByChange} />
-      <label>{'Picture Name:'}</label>
+      <label htmlFor={'createdBy'}>Created By:</label>
+      <input
+        type={'text'}
+        name={'createdBy'}
+        id={'createdBy'}
+        value={createdBy}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          handleChange(setCreatedBy, event);
+        }}
+      />
+      <label htmlFor={'pictureName'}>{'Picture Name:'}</label>
       <input
         type={'text'}
         name={'pictureName'}
+        id={'pictureName'}
         value={pictureName}
-        onChange={handlePictureNameChange}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          handleChange(setPictureName, event);
+        }}
       />
       <button
         onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -73,10 +79,10 @@ export function NewPictureScreen() {
         <button
           onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             void event;
-            go('/new-picture');
+            go('/');
           }}
         >
-          New Picture
+          Home
         </button>
       </p>
     </div>

@@ -10,7 +10,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             {screens.map((route) => (
-              <Route path={route.path} element={route.element} />
+              <Route key={route.path.replace('/', '_')} path={route.path} element={route.element} />
             ))}
           </Routes>
         </BrowserRouter>

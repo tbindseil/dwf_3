@@ -11,6 +11,10 @@ describe('HomeScreen tests', () => {
     render(<RouterProvider router={router} />);
   });
 
+  it('is defined at the right path', () => {
+    expect(router.state.location.pathname).toEqual('/');
+  });
+
   it('renders PicturesScreen button', async () => {
     const picturesButton = screen.getByText('Pictures');
     expect(picturesButton).toBeInTheDocument();
@@ -25,8 +29,6 @@ describe('HomeScreen tests', () => {
   it('renders NewPictureScreen button', async () => {
     const newPictureButton = screen.getByText('New Picture');
     expect(newPictureButton).toBeInTheDocument();
-
-    expect(router.state.location.pathname).toEqual('/');
 
     fireEvent.click(newPictureButton);
 
