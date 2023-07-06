@@ -2,12 +2,12 @@ import './App.css';
 import { SocketContext, socket } from './context/socket';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { screens } from './components/screens';
-import PictureService from './services/picture_service';
+import { GlobalServices } from './services/global_services';
 
 function App() {
   return (
     <SocketContext.Provider value={socket}>
-      <PictureService>
+      <GlobalServices>
         <div className='App'>
           <BrowserRouter>
             <Routes>
@@ -21,7 +21,7 @@ function App() {
             </Routes>
           </BrowserRouter>
         </div>
-      </PictureService>
+      </GlobalServices>
     </SocketContext.Provider>
   );
 }
