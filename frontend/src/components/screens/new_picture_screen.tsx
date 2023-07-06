@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePictureService } from '../../services/picture_service';
 
 export function NewPictureScreen() {
   const navigate = useNavigate();
   const go = (url: string) => {
     navigate(url);
   };
+
+  const pictureService = usePictureService();
 
   const [createdBy, setCreatedBy] = useState('');
   const [pictureName, setPictureName] = useState('');
@@ -15,23 +18,6 @@ export function NewPictureScreen() {
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setFunc(event.target.value);
-  };
-
-  // could be a good opportunity to inject this worker function
-  // then it could be tested in isolation
-  const createPicture = () => {
-    fetch('http://localhost:8080/picture', {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ createdBy: createdBy, name: pictureName }),
-    })
-      .then((result) => result.json())
-      .then(
-        (result) => console.log(`result is: ${result}`),
-        (error) => console.log(`first catch and error is: ${error}`),
-      )
-      .catch((error) => console.log(`last catch and error is: ${error}`));
   };
 
   return (
@@ -58,8 +44,8 @@ export function NewPictureScreen() {
       />
       <button
         onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-          void event;
-          createPicture();
+          event;
+          pictureService.createPicture(createdBy, pictureName);
         }}
       >
         Create Picture
