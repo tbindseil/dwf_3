@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
+import PictureService from '../../services/picture_service';
 import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
 describe('NewPictureScreen tests', () => {
@@ -8,7 +9,11 @@ describe('NewPictureScreen tests', () => {
   beforeEach(() => {
     router = createMemoryRouterWrapper(['/new-picture']);
 
-    render(<RouterProvider router={router} />);
+    render(
+      <PictureService>
+        <RouterProvider router={router} />
+      </PictureService>,
+    );
   });
 
   it('is defined at the right path', () => {
