@@ -1,10 +1,13 @@
-import { createContext, useContext } from 'react';
+import Contextualizer from './contextualizer';
+import ProvidedServices from './provided_services';
 
 export interface IPictureService {
   createPicture(createdBy: string, pictureName: string): Promise<void>;
 }
 
-export const PictureServiceContext = createContext<IPictureService | undefined>(undefined);
+export const PictureServiceContext = Contextualizer.createContext(ProvidedServices.PictureService);
+export const usePictureService = (): IPictureService =>
+  Contextualizer.use<IPictureService>(ProvidedServices.PictureService);
 
 const PictureService = ({ children }: any) => {
   const pictureService = {
@@ -31,16 +34,6 @@ const PictureService = ({ children }: any) => {
       </PictureServiceContext.Provider>
     </>
   );
-};
-
-export const usePictureService = (): IPictureService => {
-  const context = useContext<IPictureService | undefined>(PictureServiceContext);
-  if (context === undefined) {
-    throw new Error(
-      'PictureServiceContext was not provided. Make sure your component is a child of the PictureService',
-    );
-  }
-  return context;
 };
 
 export default PictureService;
