@@ -1,6 +1,6 @@
-import Contextualizer from './contextualizer';
-import { IPictureService } from './picture_service';
-import ProvidedServices from './provided_services';
+import Contextualizer from '../contextualizer';
+import { IPictureService } from '../picture_service';
+import ProvidedServices from '../provided_services';
 
 export const MockPictureServiceContext = Contextualizer.createContext(
   ProvidedServices.MockPictureService,
@@ -8,14 +8,10 @@ export const MockPictureServiceContext = Contextualizer.createContext(
 export const useMockPictureService = (): IPictureService =>
   Contextualizer.use<IPictureService>(ProvidedServices.MockPictureService);
 
+// most of this stuff is boiler plate, copied from picture_service.tsx
 const MockPictureService = ({ children }: any) => {
   const mockPictureService = {
-    // async createPicture(createdBy: string, pictureName: string): Promise<void>: jest.fn(),
-    async createPicture(createdBy: string, pictureName: string): Promise<void> {
-      createdBy;
-      pictureName;
-      console.log('MockPictureService.createPicture');
-    },
+    createPicture: jest.fn(),
   };
 
   return (
