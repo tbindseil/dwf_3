@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import ProvidedServices from './provided_services';
+import ProvidedServices, { mockServicesMap } from './provided_services';
 
 const contexts = new Map<ProvidedServices, React.Context<any | undefined>>();
 
@@ -11,6 +11,18 @@ const Contextualizer = {
   },
 
   use: <T>(requestedService: ProvidedServices): T => {
+    // package.json exports the ENV var for testing so we use mock services
+    const env = process.env.ENV || 'DEV';
+    if (env === 'TEST') {
+      const mockRequestedService = mockServicesMap.get(requestedService);
+      if (mockRequestedService === undefined) {
+        throw new Error(
+          `${ProvidedServices[requestedService]} was not added to mockRequestedService`,
+        );
+      }
+      requestedService = mockRequestedService;
+    }
+
     const context = contexts.get(requestedService);
     if (context === undefined) {
       throw new Error(`${ProvidedServices[requestedService]} was not created`);
