@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { MockGlobalServices } from '../../services/mock_services/mock_global_services';
+import { mockPictureService } from '../../services/mock_services/mock_picture_service';
 import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
 describe('NewPictureScreen tests', () => {
@@ -62,5 +63,22 @@ describe('NewPictureScreen tests', () => {
     await waitFor(() => {
       expect(pictureNameInput.value).toBe(inputVal);
     });
+  });
+
+  it('has createPicture button', () => {
+    const createPictureButton = screen.getByText('Create Picture');
+    expect(createPictureButton).toBeInTheDocument();
+
+    const createdByInput = screen.getByLabelText('Created By:') as HTMLInputElement;
+    const createdByInputVal = 'nameInputVal';
+    fireEvent.change(createdByInput, { target: { value: createdByInputVal } });
+
+    const pictureNameInput = screen.getByLabelText('Picture Name:') as HTMLInputElement;
+    const pictureNameInputVal = 'nameInputVal';
+    fireEvent.change(pictureNameInput, { target: { value: pictureNameInputVal } });
+
+    fireEvent.click(createPictureButton);
+
+    expect(mockPictureService.createPicture).toBeCalledWith(createdByInputVal, pictureNameInputVal);
   });
 });

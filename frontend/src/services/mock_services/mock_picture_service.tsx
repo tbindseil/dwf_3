@@ -9,11 +9,13 @@ export const useMockPictureService = (): IPictureService =>
   Contextualizer.use<IPictureService>(ProvidedServices.MockPictureService);
 
 // most of this stuff is boiler plate, copied from picture_service.tsx
-const MockPictureService = ({ children }: any) => {
-  const mockPictureService = {
-    createPicture: jest.fn(),
-  };
+// ...
+// with the exception of exposing the service in order to verify how the mocks were interacted with
+export const mockPictureService = {
+  createPicture: jest.fn(),
+};
 
+const MockPictureService = ({ children }: any) => {
   return (
     <>
       <MockPictureServiceContext.Provider value={mockPictureService}>
