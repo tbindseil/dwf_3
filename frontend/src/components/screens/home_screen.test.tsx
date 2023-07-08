@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
-import PictureService from '../../services/picture_service';
+import { MockGlobalServices } from '../../services/mock_global_services';
 import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
 describe('HomeScreen tests', () => {
@@ -10,9 +10,9 @@ describe('HomeScreen tests', () => {
     router = createMemoryRouterWrapper(['/']);
 
     render(
-      <PictureService>
+      <MockGlobalServices>
         <RouterProvider router={router} />
-      </PictureService>,
+      </MockGlobalServices>,
     );
   });
 

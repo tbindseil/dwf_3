@@ -36,4 +36,22 @@ const PictureService = ({ children }: any) => {
   );
 };
 
+const MockPictureService = ({ children }: any) => {
+  const pictureService = {
+    async createPicture(createdBy: string, pictureName: string): Promise<void> {
+      createdBy;
+      pictureName;
+      console.log('MockPictureService.createPicture');
+    },
+  };
+
+  return (
+    <>
+      <PictureServiceContext.Provider value={pictureService}>
+        {children}
+      </PictureServiceContext.Provider>
+    </>
+  );
+};
+
 export default PictureService;
