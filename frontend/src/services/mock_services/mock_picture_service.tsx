@@ -11,6 +11,8 @@ export const useMockPictureService = (): IPictureService =>
 // most of this stuff is boiler plate, copied from picture_service.tsx
 // ...
 // with the exception of exposing the service in order to verify how the mocks were interacted with
+//
+// i think with how i am going to test the provider, that will also export the internal service object
 export const mockPictureService = {
   createPicture: jest.fn(),
 };

@@ -9,24 +9,19 @@ export const PictureServiceContext = Contextualizer.createContext(ProvidedServic
 export const usePictureService = (): IPictureService =>
   Contextualizer.use<IPictureService>(ProvidedServices.PictureService);
 
-const PictureService = ({ children }: any) => {
-  const pictureService = {
-    async createPicture(createdBy: string, pictureName: string): Promise<void> {
-      fetch('http://localhost:8080/picture', {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ createdBy: createdBy, name: pictureName }),
-      })
-        .then((result) => result.json())
-        .then(
-          (result) => console.log(`result is: ${result}`),
-          (error) => console.log(`first catch and error is: ${error}`),
-        )
-        .catch((error) => console.log(`last catch and error is: ${error}`));
-    },
-  };
+export const pictureService = {
+  async createPicture(createdBy: string, pictureName: string): Promise<void> {
+    const result = await fetch('http://localhost:8080/picture', {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ createdBy: createdBy, name: pictureName }),
+    });
+    return result.json();
+  },
+};
 
+const PictureService = ({ children }: any) => {
   return (
     <>
       <PictureServiceContext.Provider value={pictureService}>
