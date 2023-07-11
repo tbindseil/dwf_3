@@ -79,6 +79,9 @@ describe('NewPictureScreen tests', () => {
 
     fireEvent.click(createPictureButton);
 
-    expect(mockPictureService.createPicture).toBeCalledWith(createdByInputVal, pictureNameInputVal);
+    expect(mockPictureService.createPicture).toBeCalledWith({
+      createdBy: createdByInputVal,
+      name: pictureNameInputVal,
+    });
   });
 });

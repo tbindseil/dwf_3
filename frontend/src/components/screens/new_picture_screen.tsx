@@ -46,8 +46,11 @@ export function NewPictureScreen() {
         onClick={async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           event;
           try {
-            const result = await pictureService.createPicture(createdBy, pictureName);
-            console.log(`result is: ${result}`);
+            const result = await pictureService.createPicture({
+              createdBy: createdBy,
+              name: pictureName,
+            });
+            console.log(`result is: ${JSON.stringify(result)}`);
           } catch (error: unknown) {
             console.error(`issue creating picture. Error is ${error}`);
           }
