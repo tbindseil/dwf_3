@@ -9,12 +9,13 @@ describe('NewPictureScreen tests', () => {
 
   beforeEach(() => {
     router = createMemoryRouterWrapper(['/new-picture']);
-
     render(
       <MockGlobalServices>
         <RouterProvider router={router} />
       </MockGlobalServices>,
     );
+
+    mockPictureService.createPicture.mockClear();
   });
 
   it('is defined at the right path', () => {
@@ -82,6 +83,20 @@ describe('NewPictureScreen tests', () => {
     expect(mockPictureService.createPicture).toBeCalledWith({
       createdBy: createdByInputVal,
       name: pictureNameInputVal,
+    });
+  });
+
+  it('displays an error when the picture fails to be created', async () => {
+    expect(() => screen.getByText('Error creating picture')).toThrow();
+
+    mockPictureService.createPicture.mockRejectedValue(new Error('forced error'));
+
+    const createPictureButton = screen.getByText('Create Picture');
+    fireEvent.click(createPictureButton);
+
+    await waitFor(() => {
+      const errorText = screen.getByText('Error creating picture');
+      expect(errorText).toBeInTheDocument();
     });
   });
 });

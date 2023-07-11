@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePictureService } from '../../services/picture_service';
+import { ErrorText } from '../error_text';
 
 export function NewPictureScreen() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export function NewPictureScreen() {
 
   const pictureService = usePictureService();
 
+  const [error, setError] = useState(false);
   const [createdBy, setCreatedBy] = useState('');
   const [pictureName, setPictureName] = useState('');
 
@@ -46,18 +48,20 @@ export function NewPictureScreen() {
         onClick={async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           event;
           try {
-            const result = await pictureService.createPicture({
+            await pictureService.createPicture({
               createdBy: createdBy,
               name: pictureName,
             });
-            console.log(`result is: ${JSON.stringify(result)}`);
           } catch (error: unknown) {
+            setError(true);
             console.error(`issue creating picture. Error is ${error}`);
           }
         }}
       >
         Create Picture
       </button>
+
+      <ErrorText inError={error} message={'Error creating picture'} />
 
       <p>
         <button
