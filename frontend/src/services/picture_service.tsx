@@ -10,14 +10,13 @@ export const usePictureService = (): IPictureService =>
   Contextualizer.use<IPictureService>(ProvidedServices.PictureService);
 
 export const pictureService = {
-  async createPicture(createdBy: string, pictureName: string): Promise<void> {
-    const result = await fetch('http://localhost:8080/picture', {
+  async createPicture(createdBy: string, pictureName: string): Promise<Response> {
+    return await fetch('http://localhost:8080/picture', {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ createdBy: createdBy, name: pictureName }),
     });
-    return result.json();
   },
 };
 
