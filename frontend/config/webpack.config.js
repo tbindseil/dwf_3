@@ -321,6 +321,7 @@ module.exports = function (webpackEnv) {
           babelRuntimeRegenerator,
         ]),
       ],
+      fallback: { path: false },
     },
     module: {
       strictExportPresence: true,
