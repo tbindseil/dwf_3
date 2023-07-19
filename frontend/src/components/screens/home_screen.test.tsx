@@ -1,12 +1,20 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { MockGlobalServices } from '../../services/mock_services/mock_global_services';
+import { mockPictureService } from '../../services/mock_services/mock_picture_service';
 import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
 describe('HomeScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
 
   beforeEach(() => {
+    mockPictureService.getPictures.mockClear();
+    mockPictureService.getPictures.mockImplementation(() => {
+      console.log('@@ TJTAG @@ mock impl');
+      return new Promise((value: unknown) => {
+        return { pictures: [] };
+      });
+    });
     router = createMemoryRouterWrapper(['/']);
 
     render(

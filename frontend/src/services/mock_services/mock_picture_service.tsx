@@ -15,6 +15,7 @@ export const useMockPictureService = (): IPictureService =>
 // i think with how i am going to test the provider, that will also export the internal service object
 export const mockPictureService = {
   createPicture: jest.fn(),
+  getPictures: jest.fn(),
 };
 
 const MockPictureService = ({ children }: any) => {

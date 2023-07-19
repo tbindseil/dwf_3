@@ -1,30 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Picture } from 'dwf-3-models-tjb';
+import { usePictureService } from '../../services/picture_service';
+import { GetPicturesOutput, PictureDatabaseShape } from 'dwf-3-models-tjb';
 
 export function PicturesScreen() {
   const navigate = useNavigate();
 
-  const [pictures, setPictures] = useState<Picture[]>([]);
+  const pictureService = usePictureService();
 
-  const fetchPictures = () => {
-    fetch('http://localhost:8080/pictures', {
-      method: 'GET',
-      mode: 'cors',
-    })
-      .then((result) => result.json())
-      .then(
-        (result) => setPictures(result.pictures),
-        (error) => console.log(`first catch and error is: ${error}`),
-      )
-      .catch((error) => console.log(`last catch and error is: ${error}`));
+  const [pictures, setPictures] = useState<PictureDatabaseShape[]>([]);
+
+  const fetchPictures = async () => {
+    const result = await pictureService.getPictures({});
+    setPictures(result.pictures);
   };
 
   useEffect(() => {
     fetchPictures();
   }, []);
 
-  const goToPicture = (picture: Picture) => {
+  const goToPicture = (picture: PictureDatabaseShape) => {
     navigate('/picture', { state: { picture: picture, replace: true } });
   };
 
