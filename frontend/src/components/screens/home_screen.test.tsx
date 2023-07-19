@@ -9,14 +9,9 @@ describe('HomeScreen tests', () => {
 
   beforeEach(() => {
     mockPictureService.getPictures.mockClear();
-    mockPictureService.getPictures.mockImplementation(() => {
-      console.log('@@ TJTAG @@ mock impl');
-      return new Promise((value: unknown) => {
-        return { pictures: [] };
-      });
-    });
-    router = createMemoryRouterWrapper(['/']);
+    mockPictureService.getPictures.mockResolvedValue({ pictures: [] });
 
+    router = createMemoryRouterWrapper(['/']);
     render(
       <MockGlobalServices>
         <RouterProvider router={router} />

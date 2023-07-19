@@ -9,12 +9,8 @@ describe('NewPictureScreen tests', () => {
 
   beforeEach(() => {
     mockPictureService.getPictures.mockClear();
-    mockPictureService.getPictures.mockImplementation(() => {
-      console.log('@@ TJTAG @@ mock impl');
-      return new Promise((value: unknown) => {
-        return { pictures: [] };
-      });
-    });
+    mockPictureService.getPictures.mockResolvedValue({ pictures: [] });
+
     router = createMemoryRouterWrapper(['/new-picture']);
     render(
       <MockGlobalServices>
