@@ -89,7 +89,9 @@ describe('NewPictureScreen tests', () => {
   it('displays an error when the picture fails to be created', async () => {
     expect(() => screen.getByText('Error creating picture')).toThrow();
 
-    mockPictureService.createPicture.mockRejectedValue(new Error('forced error'));
+    mockPictureService.createPicture.mockImplementation(() => {
+      throw new Error('throwing instead of rejecting');
+    });
 
     const createPictureButton = screen.getByText('Create Picture');
     fireEvent.click(createPictureButton);
