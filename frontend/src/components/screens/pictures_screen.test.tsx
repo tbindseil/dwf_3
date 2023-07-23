@@ -1,4 +1,4 @@
-import { findByText, render, screen, waitFor } from '@testing-library/react';
+import { findByText, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { MockGlobalServices } from '../../services/mock_services/mock_global_services';
 import { mockPictureService } from '../../services/mock_services/mock_picture_service';
@@ -34,6 +34,24 @@ describe('NewPictureScreen tests', () => {
     await waitFor(() => {
       const pButton = screen.getByText(/by/);
       expect(pButton).toBeInTheDocument();
+    });
+  });
+
+  it('goes to canvas page after clicking picture button', async () => {
+    // getting an initial reference to satisfy compiler, it doesn't know the code in
+    // waitFor's callback is garuanteed to run
+    let pButton: Element = screen.getByText(/Pic/);
+    await waitFor(() => {
+      pButton = screen.getByText(/by/);
+      expect(pButton).toBeInTheDocument();
+    });
+
+    fireEvent.click(pButton);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toEqual('/picture');
+      expect(router.state.location.state.picture).toEqual(expectedPicture);
+      expect(router.state.location.state.replace).toEqual(true);
     });
   });
 });
