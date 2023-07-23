@@ -1,4 +1,4 @@
-import { findByText, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { MockGlobalServices } from '../../services/mock_services/mock_global_services';
 import { mockPictureService } from '../../services/mock_services/mock_picture_service';
