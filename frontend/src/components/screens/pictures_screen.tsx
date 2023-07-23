@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePictureService } from '../../services/picture_service';
-import { GetPicturesOutput, PictureDatabaseShape } from 'dwf-3-models-tjb';
+import { PictureDatabaseShape } from 'dwf-3-models-tjb';
 
 export function PicturesScreen() {
   const navigate = useNavigate();

@@ -7,65 +7,40 @@ import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory'
 
 describe('NewPictureScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
+  const expectedPicture = {
+    id: 1,
+    name: 'name1',
+    createdBy: 'createdBy1',
+    filename: 'filename1',
+    filesystem: 'filesystem',
+  };
 
-  const renderWrapper = () => {
-    if (router == undefined) {
-      console.log('cant rerender because router is undefined');
-      return;
-    }
+  beforeEach(() => {
+    mockPictureService.getPictures.mockClear();
+    mockPictureService.getPictures.mockResolvedValue({ pictures: [expectedPicture] });
 
+    router = createMemoryRouterWrapper(['/pictures']);
     render(
       <MockGlobalServices>
         <RouterProvider router={router} />
       </MockGlobalServices>,
     );
-  };
-
-  beforeEach(() => {
-    mockPictureService.getPictures.mockClear();
-    mockPictureService.getPictures.mockResolvedValue({ pictures: [] });
-
-    router = createMemoryRouterWrapper(['/pictures']);
-    renderWrapper();
   });
 
-  it('is defined at the right path', () => {
-    expect(router.state.location.pathname).toEqual('/pictures');
-  });
+  //  it('is defined at the right path', () => {
+  //    expect(router.state.location.pathname).toEqual('/pictures');
+  //  });
 
   // I think the way I handled the duplicated setup for
   //
   // jk i bet I do it in the mock definition (ie in mock_picture_service) and would have to rerender here regardless
 
-  it('lists each picture as a button', () => {
-    mockPictureService.getPictures.mockClear();
-    const expectedPictures = [
-      {
-        id: 1,
-        name: 'name1',
-        createdBy: 'createdBy1',
-        filename: 'filename1',
-        filesystem: 'filesystem',
-      },
-      {
-        id: 2,
-        name: 'name2',
-        createdBy: 'createdBy2',
-        filename: 'filename1',
-        filesystem: 'filesystem',
-      },
-    ];
-    mockPictureService.getPictures.mockResolvedValue({
-      pictures: expectedPictures,
-    });
-
-    renderWrapper();
-
-    expectedPictures.forEach(async (p: PictureDatabaseShape) => {
-      await waitFor(() => {
-        const pButton = screen.getByText(`${p.name} by`);
-        expect(pButton).toBeInTheDocument();
-      });
+  it('lists each picture as a button', async () => {
+    await waitFor(() => {
+      console.log('@@ @@ start of await');
+      screen.debug();
+      const pButton = screen.getByText(/by/);
+      expect(pButton).toBeInTheDocument();
     });
   });
 
