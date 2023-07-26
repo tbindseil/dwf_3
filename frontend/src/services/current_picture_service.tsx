@@ -4,6 +4,7 @@ import ProvidedServices from './provided_services';
 
 export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
+  getCurrentPicture(): PictureDatabaseShape;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -17,6 +18,9 @@ const CurrentPictureService = ({ children }: any) => {
   const currentPictureService = {
     setCurrentPicture(picture: PictureDatabaseShape): void {
       currentPicture = picture;
+    },
+    getCurrentPicture(): PictureDatabaseShape {
+      return currentPicture;
     },
   };
 

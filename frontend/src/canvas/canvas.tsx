@@ -4,6 +4,8 @@ import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useCurrentPictureService } from '../services/current_picture_service';
+import picture from 'dwf-3-models-tjb/build/picture';
 
 // TJTAG TODO
 // well first problem, can't pass state (and doesn't handle no state well)
@@ -24,8 +26,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 //
 // I like 2 because it gives me a chance to take my time and do things "right"
 function Canvas() {
-  const location = useLocation();
-  const picture = location?.state?.picture; // next thing, new pictures
+  const currentPictureService = useCurrentPictureService();
+  const picture = currentPictureService.getCurrentPicture();
 
   const socket = useContext(SocketContext);
 

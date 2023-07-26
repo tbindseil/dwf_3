@@ -10,6 +10,7 @@ export const useMockCurrentPictureService = (): ICurrentPictureService =>
 
 export const mockCurrentPictureService = {
   setCurrentPicture: jest.fn(),
+  getCurrentPicture: jest.fn(),
 };
 
 const MockCurrentPictureService = ({ children }: any) => {
