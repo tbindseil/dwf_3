@@ -8,6 +8,7 @@ describe('NewPictureScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
 
   beforeEach(() => {
+    // TODO dry this out
     mockPictureService.getPictures.mockClear();
     mockPictureService.getPictures.mockResolvedValue({ pictures: [] });
 

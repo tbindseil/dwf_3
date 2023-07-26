@@ -47,4 +47,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 
 # Additions to CRA README
+
+## Testing
 * to run tests and get coverage report: `npm run test -- --coverage .`
+* paradigm - not sure.. it seems like I am just making sure things are there and that they navigate appropriatel

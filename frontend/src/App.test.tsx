@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-//  render(<App />);
-//  const linkElement = screen.getByText(/learn react/i);
-//  expect(linkElement).toBeInTheDocument();
+test('initially renders on home page', () => {
+  const { container } = render(<App />);
+  const value = container.getElementsByClassName('Home');
+  expect(value.length).toEqual(1);
 });
+// mappings of route to screen are configuration, not going to test
