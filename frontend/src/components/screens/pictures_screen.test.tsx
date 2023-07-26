@@ -1,10 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
+import { mockCurrentPictureService } from '../../services/mock_services/mock_current_picture_service';
 import { MockGlobalServices } from '../../services/mock_services/mock_global_services';
 import { mockPictureService } from '../../services/mock_services/mock_picture_service';
 import { createMemoryRouterWrapper } from '../../test_utils/memoryRouterFactory';
 
-describe('NewPictureScreen tests', () => {
+describe('PicturesScreen tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
   const expectedPicture = {
     id: 1,
@@ -17,6 +18,8 @@ describe('NewPictureScreen tests', () => {
   beforeEach(() => {
     mockPictureService.getPictures.mockClear();
     mockPictureService.getPictures.mockResolvedValue({ pictures: [expectedPicture] });
+
+    mockCurrentPictureService.setCurrentPicture.mockClear();
 
     router = createMemoryRouterWrapper(['/pictures']);
     render(
@@ -49,9 +52,8 @@ describe('NewPictureScreen tests', () => {
     fireEvent.click(pButton);
 
     await waitFor(() => {
+      expect(mockCurrentPictureService.setCurrentPicture).toHaveBeenCalledWith(expectedPicture);
       expect(router.state.location.pathname).toEqual('/picture');
-      expect(router.state.location.state.picture).toEqual(expectedPicture);
-      expect(router.state.location.state.replace).toEqual(true);
     });
   });
 });

@@ -1,8 +1,9 @@
+import { PictureDatabaseShape } from 'dwf-3-models-tjb';
 import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
 
 export interface ICurrentPictureService {
-  setCurrentPicture(picture: string): void;
+  setCurrentPicture(picture: PictureDatabaseShape): void;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -12,9 +13,10 @@ export const useCurrentPictureService = (): ICurrentPictureService =>
   Contextualizer.use<ICurrentPictureService>(ProvidedServices.CurrentPictureService);
 
 const CurrentPictureService = ({ children }: any) => {
+  let currentPicture: PictureDatabaseShape;
   const currentPictureService = {
-    setCurrentPicture(picture: string): void {
-      console.log('do something');
+    setCurrentPicture(picture: PictureDatabaseShape): void {
+      currentPicture = picture;
     },
   };
 

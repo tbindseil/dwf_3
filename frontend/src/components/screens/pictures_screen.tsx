@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePictureService } from '../../services/picture_service';
 import { PictureDatabaseShape } from 'dwf-3-models-tjb';
+import { useCurrentPictureService } from '../../services/current_picture_service';
 
 export function PicturesScreen() {
   const navigate = useNavigate();
 
   const pictureService = usePictureService();
+  const currentPictureService = useCurrentPictureService();
 
   const [pictures, setPictures] = useState<PictureDatabaseShape[]>([]);
 
@@ -20,7 +22,8 @@ export function PicturesScreen() {
   }, []);
 
   const goToPicture = (picture: PictureDatabaseShape) => {
-    navigate('/picture', { state: { picture: picture, replace: true } });
+    currentPictureService.setCurrentPicture(picture);
+    navigate('/picture');
   };
 
   return (

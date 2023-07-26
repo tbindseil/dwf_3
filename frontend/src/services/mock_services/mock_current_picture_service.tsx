@@ -9,8 +9,7 @@ export const useMockCurrentPictureService = (): ICurrentPictureService =>
   Contextualizer.use<ICurrentPictureService>(ProvidedServices.MockCurrentPictureService);
 
 export const mockCurrentPictureService = {
-  createPicture: jest.fn(),
-  getPictures: jest.fn(),
+  setCurrentPicture: jest.fn(),
 };
 
 const MockCurrentPictureService = ({ children }: any) => {
