@@ -5,6 +5,24 @@ import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+// TJTAG TODO
+// well first problem, can't pass state (and doesn't handle no state well)
+// so, I should change it from state that's passed in global app state
+// now comes the brainstorm options and pros and cons
+// 1. add it to picture service
+//   this would involve some sort of setting the current picture in that object
+//   (upon selection in the PicturesScreen), and then here we would just get current
+//   picture from picture service.
+//   pros:
+//   seems pretty easy
+//   cons:
+//   breaks the picture service's current role as api calls only
+// 2. add a new service (current_picture_service)
+//   this would handle setting the current picture
+//   and fetching its contents
+//   and even live updating from the current user and other users
+//
+// I like 2 because it gives me a chance to take my time and do things "right"
 function Canvas() {
   const location = useLocation();
   const picture = location?.state?.picture; // next thing, new pictures

@@ -49,6 +49,8 @@ const PictureService = ({ children }: any) => {
       return result as PostPictureOutput;
     },
 
+    // since this can be globally available as context,
+    // we could have a current picture concept
     async getPictures(input: GetPicturesInput): Promise<GetPicturesOutput> {
       input;
       const result = await (
