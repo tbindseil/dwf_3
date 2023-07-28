@@ -3,28 +3,9 @@ import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { SocketContext } from '../context/socket';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
-import picture from 'dwf-3-models-tjb/build/picture';
 
-// TJTAG TODO
-// well first problem, can't pass state (and doesn't handle no state well)
-// so, I should change it from state that's passed in global app state
-// now comes the brainstorm options and pros and cons
-// 1. add it to picture service
-//   this would involve some sort of setting the current picture in that object
-//   (upon selection in the PicturesScreen), and then here we would just get current
-//   picture from picture service.
-//   pros:
-//   seems pretty easy
-//   cons:
-//   breaks the picture service's current role as api calls only
-// 2. add a new service (current_picture_service)
-//   this would handle setting the current picture
-//   and fetching its contents
-//   and even live updating from the current user and other users
-//
-// I like 2 because it gives me a chance to take my time and do things "right"
 function Canvas() {
   const currentPictureService = useCurrentPictureService();
   const picture = currentPictureService.getCurrentPicture();
@@ -40,6 +21,7 @@ function Canvas() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // create an image that has the new raster and put it on the canvas
   const updateCanvas = useCallback((): void => {
     if (raster.width === 0 || raster.height === 0) {
       console.log('raster width or height is 0, not updating');
@@ -52,6 +34,7 @@ function Canvas() {
     ctx!.putImageData(id, 0, 0);
   }, [raster]);
 
+  // update the raster, then update the canvas
   const updateImageData = useCallback(
     (pixelUpdate: PixelUpdate): void => {
       raster.handlePixelUpdate(pixelUpdate);
@@ -60,13 +43,17 @@ function Canvas() {
     [raster, updateCanvas],
   );
 
+  // gets called when we get the raster back
+  // this needs to go in currentPictureService
   const pictureResponseCallback = useCallback(
     (pictureResponse: PictureResponse) => {
+      console.log('TJTAG when does this get called?');
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
       canvas.width = pictureResponse.width;
       canvas.height = pictureResponse.height;
 
+      // or maybe only this part...
       const nextRaster = new Raster(
         pictureResponse.width,
         pictureResponse.height,
@@ -84,6 +71,7 @@ function Canvas() {
       // for now just gonna do white pixels
       const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
       const y = event.pageY - (canvasRef.current?.offsetTop ?? 0);
+      // update current picture via current picture service
       const pixelUpdate = {
         filename: picture.filename,
         createdBy: 'tj', // TODO usernames
@@ -101,12 +89,7 @@ function Canvas() {
     [updateImageData, socket],
   );
 
-  useEffect(() => {
-    // currently, this only covers when initially receiving the raster becasue the raster state updates asynchronously
-    // I think it could be used to ping pong though
-    updateCanvas();
-  }, [raster]);
-
+  // setup socket handlers
   useEffect(() => {
     socket.removeListener('picture_response');
     socket.on('picture_response', pictureResponseCallback);
@@ -115,6 +98,7 @@ function Canvas() {
     socket.on('server_to_client_update', updateImageData);
   }, [socket, pictureResponseCallback]);
 
+  // this runs once at the beginning and asks for the raster
   useEffect(() => {
     socket.emit('picture_request', { filename: picture.filename });
     return () => {
