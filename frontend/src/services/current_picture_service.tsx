@@ -1,4 +1,4 @@
-import { PictureDatabaseShape, PictureResponse } from 'dwf-3-models-tjb';
+import { PictureDatabaseShape, PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { socket } from '../context/socket';
 import Contextualizer from './contextualizer';
@@ -25,12 +25,17 @@ const CurrentPictureService = ({ children }: any) => {
     setCurrentPicture(picture: PictureDatabaseShape): void {
       currentPicture = picture;
 
-      // request raster AND start receiving updates
+      // setup raster handler AND start receiving updates, and request raster
       socket.removeListener('picture_response');
       socket.on('picture_response', this.setCurrentRaster);
+
+      socket.removeListener('server_to_client_update');
+      socket.on('server_to_client_update', this.handleUpdate);
+
       socket.emit('picture_request', { filename: picture.filename });
     },
     setCurrentRaster(pictureResponse: PictureResponse): void {
+      // this is private...
       currentRaster = new Raster(
         pictureResponse.width,
         pictureResponse.height,
@@ -43,8 +48,9 @@ const CurrentPictureService = ({ children }: any) => {
     getCurrentRaster(): Raster {
       return currentRaster;
     },
-    handleUpdate(): void {
-      console.log('todo');
+    handleUpdate(pixelUpdate: PixelUpdate): void {
+      // what if I get an update before I get the initial raster? need to buffer it i guess
+      currentRaster.handlePixelUpdate(pixelUpdate);
     },
   };
 
