@@ -100,6 +100,7 @@ function Canvas() {
 
   // this runs once at the beginning and asks for the raster
   useEffect(() => {
+    // I think it needs to be a socket because there is associated bookeeping with updates that happen
     socket.emit('picture_request', { filename: picture.filename });
     return () => {
       socket.emit('unsubscribe', picture.filename);
