@@ -1,5 +1,5 @@
 import '../App.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
 
