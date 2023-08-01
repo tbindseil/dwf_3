@@ -8,7 +8,8 @@ export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
   getCurrentPicture(): PictureDatabaseShape;
   getCurrentRaster(): Raster;
-  handleUpdate(): void;
+  handleReceivedUpdate(pixelUpdate: PixelUpdate): void;
+  handleUserUpdate(pixelUpdate: PixelUpdate): void;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -30,7 +31,7 @@ const CurrentPictureService = ({ children }: any) => {
       socket.on('picture_response', this.setCurrentRaster);
 
       socket.removeListener('server_to_client_update');
-      socket.on('server_to_client_update', this.handleUpdate);
+      socket.on('server_to_client_update', this.handleReceivedUpdate);
 
       socket.emit('picture_request', { filename: picture.filename });
     },
@@ -48,9 +49,14 @@ const CurrentPictureService = ({ children }: any) => {
     getCurrentRaster(): Raster {
       return currentRaster;
     },
-    handleUpdate(pixelUpdate: PixelUpdate): void {
+    handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       currentRaster.handlePixelUpdate(pixelUpdate);
+    },
+    // how do I know that these will happen in order?
+    handleUserUpdate(pixelUpdate: PixelUpdate): void {
+      currentRaster.handlePixelUpdate(pixelUpdate);
+      socket.emit('client_to_server_udpate', pixelUpdate);
     },
   };
 
@@ -64,3 +70,48 @@ const CurrentPictureService = ({ children }: any) => {
 };
 
 export default CurrentPictureService;
+
+// so,
+// how am i gonna do this?
+// 1, 2, or 3 rasters?
+//
+// how long does it take to copy the entire raster?
+//
+// void event;
+// console.log('timing a raster copy');
+// //  const currentRaster = currentPictureService.getCurrentRaster();
+// const currentRaster = raster;
+// const currentMutableBuffer = currentRaster.getBuffer();
+// const newBuffer = new ArrayBuffer(currentRaster.width * currentRaster.height);
+// const newMutableBuffer = new Uint8ClampedArray(newBuffer);
+//
+// console.log(
+//   `currentRaster.w = ${currentRaster.width} and currentRaster.h = ${currentRaster.height}`,
+// );
+//
+// const start = performance.now();
+// for (let i = 0; i < currentMutableBuffer.byteLength; ++i) {
+//   newMutableBuffer[i] != currentMutableBuffer.at(i);
+// }
+// const end = performance.now();
+//
+// console.log(
+//   `currentRaster.w = ${currentRaster.width} and currentRaster.h = ${currentRaster.height}`,
+// );
+// console.log(`copy time is: ${end} - ${start} = ${end - start}`);
+//
+// its kind of irrelevant though because it will depend on what machine its running on
+//
+// but I just wrapped it like done in raster.ts and found the following:
+// * 1619 * 1000 pixels in 433 ms
+//
+// basically, I could update once or twice a second if doing full copies at this size
+//
+//
+// so, I need to keep things up to date
+//
+// would I find any advntage to two buffers?
+//
+// really, that's all implementation details of the current_picture_service
+//
+// it just needs a draw update function

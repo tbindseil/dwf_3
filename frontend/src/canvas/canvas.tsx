@@ -47,7 +47,6 @@ function Canvas() {
   // this needs to go in currentPictureService
   const pictureResponseCallback = useCallback(
     (pictureResponse: PictureResponse) => {
-      console.log('TJTAG when does this get called?');
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
       canvas.width = pictureResponse.width;
