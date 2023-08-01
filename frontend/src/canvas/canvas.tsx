@@ -24,6 +24,11 @@ function Canvas() {
 
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       const ctx = canvas!.getContext('2d');
+      console.log(
+        `raster.getBuffer(), raster.width, raster.height is: ${raster.getBuffer()}, ${
+          raster.width
+        }, ${raster.height}`,
+      );
       const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
       ctx!.putImageData(id, 0, 0);
     }, 30);

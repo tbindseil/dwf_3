@@ -4,3 +4,4 @@
 // learn more: https://github.com/testing-library/jest-dom
 import 'setimmediate';
 import '@testing-library/jest-dom';
+import 'jest-canvas-mock';

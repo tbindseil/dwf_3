@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, RenderResult, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouterWrapper } from '../test_utils/memoryRouterFactory';
 import { MockGlobalServices } from '../services/mock_services/mock_global_services';
 import { RouterProvider } from 'react-router-dom';
@@ -8,6 +8,8 @@ import { mockPictureService } from '../services/mock_services/mock_picture_servi
 
 describe('Canvas tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
+  let renerResult: RenderResult;
+  let currentRaster: Raster;
 
   beforeEach(() => {
     const expectedPicture = {
@@ -21,55 +23,63 @@ describe('Canvas tests', () => {
     mockPictureService.getPictures.mockResolvedValue({ pictures: [expectedPicture] });
 
     mockCurrentPictureService.getCurrentPicture.mockClear();
-    mockCurrentPictureService.getCurrentRaster.mockReturnValue(expectedPicture);
+    mockCurrentPictureService.getCurrentPicture.mockReturnValue(expectedPicture);
 
-    const width = 5;
-    const height = 5;
-    const currentRasterBuffer = new ArrayBuffer(width * height);
+    mockCurrentPictureService.handleUserUpdate.mockClear();
+
+    const width = 6;
+    const height = 6;
+    const currentRasterBuffer = new ArrayBuffer(width * height * 4);
     const currentRasterBufferAsArray = new Uint8ClampedArray(currentRasterBuffer);
-    for (let i = 0; i < width * height; ++i) {
+    for (let i = 0; i < width * height * 4; ++i) {
       currentRasterBufferAsArray[i] = i;
     }
-    const currentRaster = new Raster(width, height, currentRasterBuffer);
+    currentRaster = new Raster(width, height, currentRasterBuffer);
     mockCurrentPictureService.getCurrentRaster.mockClear();
     mockCurrentPictureService.getCurrentRaster.mockReturnValue(currentRaster);
 
     router = createMemoryRouterWrapper(['/picture']);
-    render(
+    renerResult = render(
       <MockGlobalServices>
         <RouterProvider router={router} />
       </MockGlobalServices>,
     );
   });
 
-  // TODO this shoud be its own thing maybe? Maybe more than just this one?
+  it.only('periodically asks cps for the raster', async () => {
+    await waitFor(() => {
+      expect(mockCurrentPictureService.getCurrentRaster).toBeCalledWith(
+        currentRaster.getBuffer(),
+        currentRaster.width,
+        currentRaster.height,
+      );
+    });
 
-  // maybe 30 x a second is an implementation detail
-  // and we can say that we just test that it does update...
-  //
-  // it('renders 30 times a second', () => {
-  // this would be a heuristic... suboptimal
-  // const startOfTest = performance.now();
-  // wait till canvas is updated (still the crux, maybe this is reason enough that it should be its own thing)
-  // const endOfTest = performance.now()
-  // assert(endOfTest - startOfTest ~ 30 ms
-  // ...
-  // wait 1 second
-  // });
+    // adjust currentRaster and wait again
+    // might need to be serialized - naw, setup the mock to return something new, not sure that will work either..
 
-  it('forwards updates to the currentPictureService', () => {
-    // TODO make sure we call cps
+    await waitFor(() => {
+      expect(mockCurrentPictureService.getCurrentRaster).toBeCalledWith(
+        currentRaster.getBuffer(),
+        currentRaster.width,
+        currentRaster.height,
+      );
+    });
   });
 
-  // this essentially the check that it does update
-  // because, we nevr actually explicitly have to subscribe,
-  // we just draw whats given by currentPictureService
-  it('receives forwarded updates from currentPictureService', () => {
-    // TODO
-  });
+  it('forwards updates to the currentPictureService', async () => {
+    const canvas = renerResult.container.querySelector('#canvas');
+    expect(canvas).toBeInTheDocument();
 
-  it('updates on click', () => {
-    // TODO check that cps is called
+    if (canvas === null) {
+      throw Error('no canvas!');
+    }
+
+    fireEvent.click(canvas);
+
+    await waitFor(() => {
+      expect(mockCurrentPictureService.handleUserUpdate).toBeCalled();
+    });
   });
 
   it('renders PicturesScreen button', async () => {
