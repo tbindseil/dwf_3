@@ -6,10 +6,23 @@ import { mockCurrentPictureService } from '../services/mock_services/mock_curren
 import { Raster } from 'dwf-3-raster-tjb';
 import { mockPictureService } from '../services/mock_services/mock_picture_service';
 
+import { blotRasterToCanvas } from './utils';
+jest.mock('./utils.ts');
+const mockBlotRasterToCanvas = jest.mocked(blotRasterToCanvas, true);
+
 describe('Canvas tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
   let renerResult: RenderResult;
   let currentRaster: Raster;
+
+  const makeRaster = (width: number, height: number, start: number = 0): Raster => {
+    const currentRasterBuffer = new ArrayBuffer(width * height * 4);
+    const currentRasterBufferAsArray = new Uint8ClampedArray(currentRasterBuffer);
+    for (let i = 0; i < width * height * 4; ++i) {
+      currentRasterBufferAsArray[i] = start + i;
+    }
+    return new Raster(width, height, currentRasterBuffer);
+  };
 
   beforeEach(() => {
     const expectedPicture = {
@@ -27,14 +40,7 @@ describe('Canvas tests', () => {
 
     mockCurrentPictureService.handleUserUpdate.mockClear();
 
-    const width = 6;
-    const height = 6;
-    const currentRasterBuffer = new ArrayBuffer(width * height * 4);
-    const currentRasterBufferAsArray = new Uint8ClampedArray(currentRasterBuffer);
-    for (let i = 0; i < width * height * 4; ++i) {
-      currentRasterBufferAsArray[i] = i;
-    }
-    currentRaster = new Raster(width, height, currentRasterBuffer);
+    currentRaster = makeRaster(6, 6);
     mockCurrentPictureService.getCurrentRaster.mockClear();
     mockCurrentPictureService.getCurrentRaster.mockReturnValue(currentRaster);
 
@@ -46,24 +52,18 @@ describe('Canvas tests', () => {
     );
   });
 
-  it.only('periodically asks cps for the raster', async () => {
+  it('periodically asks cps for the raster', async () => {
     await waitFor(() => {
-      expect(mockCurrentPictureService.getCurrentRaster).toBeCalledWith(
-        currentRaster.getBuffer(),
-        currentRaster.width,
-        currentRaster.height,
-      );
+      expect(mockBlotRasterToCanvas).toBeCalledWith(currentRaster, expect.any(HTMLCanvasElement));
     });
 
-    // adjust currentRaster and wait again
-    // might need to be serialized - naw, setup the mock to return something new, not sure that will work either..
+    const newRaster = makeRaster(6, 6, 7);
+    // how is this not a race condition?
+    mockCurrentPictureService.getCurrentRaster.mockClear();
+    mockCurrentPictureService.getCurrentRaster.mockReturnValue(newRaster);
 
     await waitFor(() => {
-      expect(mockCurrentPictureService.getCurrentRaster).toBeCalledWith(
-        currentRaster.getBuffer(),
-        currentRaster.width,
-        currentRaster.height,
-      );
+      expect(mockBlotRasterToCanvas).toBeCalledWith(newRaster, expect.any(HTMLCanvasElement));
     });
   });
 

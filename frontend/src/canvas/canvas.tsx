@@ -2,6 +2,7 @@ import '../App.css';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
+import { blotRasterToCanvas } from './utils';
 
 function Canvas() {
   const currentPictureService = useCurrentPictureService();
@@ -17,20 +18,9 @@ function Canvas() {
   useEffect(() => {
     const interval = setInterval(() => {
       const raster = currentPictureService.getCurrentRaster();
-      if (!raster || raster.width === 0 || raster.height === 0) {
-        console.log('raster width or height is 0, not updating');
-        return;
-      }
-
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-      const ctx = canvas!.getContext('2d');
-      console.log(
-        `raster.getBuffer(), raster.width, raster.height is: ${raster.getBuffer()}, ${
-          raster.width
-        }, ${raster.height}`,
-      );
-      const id = new ImageData(raster.getBuffer(), raster.width, raster.height);
-      ctx!.putImageData(id, 0, 0);
+
+      blotRasterToCanvas(raster, canvas);
     }, 30);
     return () => clearInterval(interval);
   }, []);
