@@ -27,34 +27,43 @@ const CurrentPictureService = ({ children }: any) => {
   let currentPicture: PictureDatabaseShape;
   let currentRaster: Raster;
 
+  console.log('TJTAG - setting up socket connectin handler');
+  socket.on('connect', () => {
+    setupListeners();
+  });
+
+  // so, if we miss events,
+  // its bad obviously
+  // but the point was that in between some things happeninug we could miss events
+  //
+  // now thuis next paragraph is about
+  // the fact that I probably want to use rooms
+  // where the room corresponds to the picture being drawn
+  const setupListeners = () => {
+    console.log('TJTAG setting up current listeners');
+
+    // setup raster handler AND start receiving updates, and request raster
+    socket.removeListener('picture_response');
+    console.log('TJTAG 0');
+    socket.on('picture_response', currentPictureService.setCurrentRaster);
+    console.log('TJTAG 1');
+
+    socket.removeListener('server_to_client_update');
+    console.log('TJTAG 2');
+    socket.on('server_to_client_update', currentPictureService.handleReceivedUpdate);
+
+    console.log(
+      `TJTAG emitting picture_request and currentPicture.filename is: ${currentPicture.filename}`,
+    );
+    socket.emit('picture_request', {
+      filename: currentPicture.filename,
+    });
+  };
+
   const currentPictureService = {
     setCurrentPicture(picture: PictureDatabaseShape): void {
       currentPicture = picture;
-
-      // setup raster handler AND start receiving updates, and request raster
-      socket.removeListener('picture_response');
-      socket.on('picture_response', this.setCurrentRaster);
-
-      socket.removeListener('server_to_client_update');
-      socket.on('server_to_client_update', this.handleReceivedUpdate);
-
-      socket.emit('picture_request', { filename: picture.filename });
-
-      socket.on('reconnect', () => {
-        console.log('TJTAG reconnected');
-      });
-
-      // 1. pull up two tabs
-      // 2. notice that dots on one show up on the other
-      // 3. bounce backend
-      // 4. notice that dots do not show up, but status shows connected
-      // I think this is because we don't handle on reconnect
-      // but, the below didn't solve
-      //      socket.on('reconnect', () => {
-      //        console.log('TJTAG reconnected');
-      //      });
-      // so instead I could tet whether the callbacks are happening
-      // the handleReceivedUpdate doesn't get called
+      setupListeners();
     },
     setCurrentRaster(pictureResponse: PictureResponse): void {
       // this is private...
