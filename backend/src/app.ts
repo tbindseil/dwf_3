@@ -105,6 +105,7 @@ io.on(
             SocketData
         >
     ) => {
+        console.log(`io.on connection and socket.id is: ${socket.id}`);
         socket.on('picture_request', async (pictureRequest: PictureRequest) => {
             pictureRequestHandler(
                 pictureRequest,

@@ -1,8 +1,11 @@
 import { PictureDatabaseShape, PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
-import { socket } from '../context/socket';
 import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
+import { io } from 'socket.io-client';
+
+const ENDPOINT = 'http://127.0.0.1:6543/';
+const socket = io(ENDPOINT);
 
 export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
@@ -10,6 +13,8 @@ export interface ICurrentPictureService {
   getCurrentRaster(): Raster;
   handleReceivedUpdate(pixelUpdate: PixelUpdate): void;
   handleUserUpdate(pixelUpdate: PixelUpdate): void;
+
+  checkSocketStatus(): void;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -34,6 +39,22 @@ const CurrentPictureService = ({ children }: any) => {
       socket.on('server_to_client_update', this.handleReceivedUpdate);
 
       socket.emit('picture_request', { filename: picture.filename });
+
+      socket.on('reconnect', () => {
+        console.log('TJTAG reconnected');
+      });
+
+      // 1. pull up two tabs
+      // 2. notice that dots on one show up on the other
+      // 3. bounce backend
+      // 4. notice that dots do not show up, but status shows connected
+      // I think this is because we don't handle on reconnect
+      // but, the below didn't solve
+      //      socket.on('reconnect', () => {
+      //        console.log('TJTAG reconnected');
+      //      });
+      // so instead I could tet whether the callbacks are happening
+      // the handleReceivedUpdate doesn't get called
     },
     setCurrentRaster(pictureResponse: PictureResponse): void {
       // this is private...
@@ -50,13 +71,21 @@ const CurrentPictureService = ({ children }: any) => {
       return currentRaster;
     },
     handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
+      console.log('TJTAG handleReceivedUpdate');
       // what if I get an update before I get the initial raster? need to buffer it i guess
       currentRaster.handlePixelUpdate(pixelUpdate);
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
+      console.log('TJTAG handleUserUpdate');
       currentRaster.handlePixelUpdate(pixelUpdate);
       socket.emit('client_to_server_udpate', pixelUpdate);
+    },
+
+    checkSocketStatus(): void {
+      console.log(`disconnected is: ${socket.disconnected}`);
+      console.log(`connected is: ${socket.connected}`);
+      console.log(`active is: ${socket.active}`);
     },
   };
 

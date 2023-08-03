@@ -35,6 +35,7 @@ function Canvas() {
   // so,
   //  open the picture instead of just a random one
   //  save the picture as its updated
+  // I guess I still need to test current picture service...
   const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     // for now just gonna do white pixels
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
@@ -75,6 +76,16 @@ function Canvas() {
           }}
         >
           New Picture
+        </button>
+      </p>
+      <p>
+        <button
+          onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            void event;
+            currentPictureService.checkSocketStatus();
+          }}
+        >
+          Check socket status
         </button>
       </p>
       <br />

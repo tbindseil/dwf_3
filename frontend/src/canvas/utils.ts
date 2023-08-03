@@ -2,7 +2,7 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 // hard to test due to issues getting canvas.getContext('2d');
 export const blotRasterToCanvas = (raster: Raster, canvas: HTMLCanvasElement) => {
-  if (raster.width === 0 || raster.height === 0) {
+  if (!raster || raster.width === 0 || raster.height === 0) {
     console.log('raster width or height is 0, not updating');
     return;
   }
