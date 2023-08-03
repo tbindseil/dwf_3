@@ -25,6 +25,16 @@ function Canvas() {
     return () => clearInterval(interval);
   }, []);
 
+  // TJTAG
+  // so what's next?
+  // settings? no , they belong to users
+  // so users is next...
+  // yikes that's a big one
+  // anything before that?
+  // yeah, actually respect the pictures
+  // so,
+  //  open the picture instead of just a random one
+  //  save the picture as its updated
   const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     // for now just gonna do white pixels
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
