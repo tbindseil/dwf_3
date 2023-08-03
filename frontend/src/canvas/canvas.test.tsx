@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom';
 import { mockCurrentPictureService } from '../services/mock_services/mock_current_picture_service';
 import { Raster } from 'dwf-3-raster-tjb';
 import { mockPictureService } from '../services/mock_services/mock_picture_service';
+import { makeRaster } from '../test_utils/make_raster';
 
 import { blotRasterToCanvas } from './utils';
 jest.mock('./utils.ts');
@@ -14,15 +15,6 @@ describe('Canvas tests', () => {
   let router: ReturnType<typeof createMemoryRouterWrapper>;
   let renerResult: RenderResult;
   let currentRaster: Raster;
-
-  const makeRaster = (width: number, height: number, start: number = 0): Raster => {
-    const currentRasterBuffer = new ArrayBuffer(width * height * 4);
-    const currentRasterBufferAsArray = new Uint8ClampedArray(currentRasterBuffer);
-    for (let i = 0; i < width * height * 4; ++i) {
-      currentRasterBufferAsArray[i] = start + i;
-    }
-    return new Raster(width, height, currentRasterBuffer);
-  };
 
   beforeEach(() => {
     const expectedPicture = {
