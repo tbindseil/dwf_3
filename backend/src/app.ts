@@ -114,11 +114,9 @@ io.on(
                 socket
             );
         });
-        console.log('TJTAG inbetween handlers');
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
             updateHandler(pixelUpdate, broadcastMediator, socket.id);
         });
-        console.log('TJTAG inbetween handlers 2');
 
         socket.on('unsubscribe', (filename: string) => {
             console.log(
@@ -126,6 +124,5 @@ io.on(
             );
             broadcastMediator.removeClient(filename, socket);
         });
-        console.log('TJTAG inbetween handlers 3');
     }
 );

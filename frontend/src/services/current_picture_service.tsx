@@ -5,7 +5,6 @@ import ProvidedServices from './provided_services';
 import { io } from 'socket.io-client';
 
 const ENDPOINT = 'http://127.0.0.1:6543/';
-console.log('TJTAG making socket');
 const socket = io(ENDPOINT);
 
 export interface ICurrentPictureService {
@@ -30,11 +29,8 @@ const CurrentPictureService = ({ children }: any) => {
   let currentPicture: PictureDatabaseShape;
   let currentRaster: Raster;
 
-  console.log('TJTAG - setting up socket connectin handler');
   socket.on('connect', () => {
-    console.log('TJTAG start connect handler');
     setupListeners();
-    console.log('TJTAG end connect handler');
   });
 
   // so, if we miss events,
@@ -45,29 +41,18 @@ const CurrentPictureService = ({ children }: any) => {
   // the fact that I probably want to use rooms
   // where the room corresponds to the picture being drawn
   const setupListeners = () => {
-    console.log('TJTAG setting up current listeners');
-
     // setup raster handler AND start receiving updates, and request raster
     socket.removeListener('picture_response');
-    console.log('TJTAG 0');
     socket.on('picture_response', currentPictureService.setCurrentRaster);
-    console.log('TJTAG 1');
 
     socket.removeListener('server_to_client_update');
-    console.log('TJTAG 2');
     socket.on('server_to_client_update', currentPictureService.handleReceivedUpdate);
 
-    console.log(`currentPicture is: ${currentPicture}`);
-    console.log('TJTAG 2.5');
-    //    console.log(
-    //      `TJTAG emitting picture_request and currentPicture.filename is: ${currentPicture.filename}`,
-    //    );
     if (currentPicture) {
       socket.emit('picture_request', {
         filename: currentPicture.filename,
       });
     }
-    console.log('TJTAG 3');
   };
 
   const currentPictureService = {
@@ -76,7 +61,6 @@ const CurrentPictureService = ({ children }: any) => {
       setupListeners();
     },
     setCurrentRaster(pictureResponse: PictureResponse): void {
-      console.log('TJTAG setCurrentRaster');
       // this is private...
       currentRaster = new Raster(
         pictureResponse.width,
@@ -91,13 +75,11 @@ const CurrentPictureService = ({ children }: any) => {
       return currentRaster;
     },
     handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
-      console.log('TJTAG handleReceivedUpdate');
       // what if I get an update before I get the initial raster? need to buffer it i guess
       currentRaster.handlePixelUpdate(pixelUpdate);
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
-      console.log('TJTAG handleUserUpdate');
       currentRaster.handlePixelUpdate(pixelUpdate);
       socket.emit('client_to_server_udpate', pixelUpdate);
     },
