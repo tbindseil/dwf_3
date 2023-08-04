@@ -67,12 +67,19 @@ export default class BroadcastMediator {
             );
 
             this.filenameToClients.set(filename, m);
+            console.log('TJTAG first in map');
         }
 
         this.filenameToClients.get(filename)?.set(
             socket.id,
             // TODO do I still need these factories?
             this.broadcastClientFactory.createBroadcastClient(socket)
+        );
+
+        console.log(
+            `TJTAG this.filenameToClients.get(filename)?.size is: ${
+                this.filenameToClients.get(filename)?.size
+            }`
         );
     }
 

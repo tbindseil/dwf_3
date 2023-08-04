@@ -21,6 +21,7 @@ export async function pictureRequestHandler(
         SocketData
     >
 ): Promise<void> {
+    console.log('pictureRequestHandler start');
     await broadcastMediator.addClient(pictureRequest.filename, socket);
     const pictureResponse = await pictureAccessor.getRaster(
         pictureRequest.filename
