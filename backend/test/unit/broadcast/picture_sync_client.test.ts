@@ -51,11 +51,4 @@ describe('PictureSyncClient Tests', () => {
 
         expect(mockHandlePixelUpdate).toHaveBeenCalledWith(dummyPixelUpdate);
     });
-
-    //    itwrites periodically when updated and doesn't write when no updates
-    //    it('writes on forcePictureWrite', () => {
-    //        pictureSyncClient.forcePictureWrite();
-    //
-    //        expect(mockWriteRaster).toHaveBeenCalledWith(mockRaster);
-    //    });
 });
