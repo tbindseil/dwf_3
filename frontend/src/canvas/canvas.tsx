@@ -33,7 +33,7 @@ function Canvas() {
   // anything before that?
   // yeah, actually respect the pictures
   // so,
-  //  open the picture instead of just a random one
+  //  open the picture instead of just a random one - already done
   //  save the picture as its updated
   // I guess I still need to test current picture service...
   const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {

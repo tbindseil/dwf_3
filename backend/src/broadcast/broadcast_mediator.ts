@@ -115,13 +115,15 @@ export default class BroadcastMediator {
             return;
         }
 
-        // not sure what the below is for
-        // temporary to test saving of file
-        // this.filenameToClients.get(filename)?.get(BroadcastMediator.PICTURE_SYNC_KEY)?.forcePictureWrite();
-
         clientMap.delete(socket.id);
         if (Array.from(clientMap.keys()).length === 1) {
             if (clientMap.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
+                // kind of hacky... TODO
+                // or
+                // on the timer end, it could kick itself off only if dirty
+                // and if not dirty wehn the update comes in, or if timer is null we re do the timer
+                clientMap.get(BroadcastMediator.PICTURE_SYNC_KEY)?.close();
+
                 clientMap.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                 this.filenameToClients.delete(filename);
             } else {

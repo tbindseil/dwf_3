@@ -51,8 +51,4 @@ describe('BroadcastClient Tests', () => {
 
         expect(mockEmit).not.toHaveBeenCalled();
     });
-
-    it('does nothing on forcePictureWrite', () => {
-        broadcastClient.forcePictureWrite();
-    });
 });
