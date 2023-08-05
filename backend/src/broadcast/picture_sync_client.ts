@@ -1,7 +1,11 @@
+// wow...
+// what if I made a lambda picture sync client
+
 import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
+import Queue from 'queue';
 
 export default class PictureSyncClientFactory {
     public createPictureSyncClient(
@@ -17,9 +21,15 @@ export class PictureSyncClient extends Client {
     private readonly raster: Raster;
     private dirty: boolean;
     private readonly writingInterval: NodeJS.Timer;
+    private readonly queue: Queue;
 
     constructor(pictureAccessor: PictureAccessor, raster: Raster) {
         super();
+
+        this.queue = new Queue({
+            concurrency: 1,
+            autostart: true,
+        });
 
         this.pictureAccessor = pictureAccessor;
         // TODO this needs a reader writer lock
@@ -37,8 +47,6 @@ export class PictureSyncClient extends Client {
         }, 30000);
     }
 
-    // TODO do i know that subsequent calls here will alays go in order? no! I think they won't
-    // ... i think i need somehting like queue https://www.npmjs.com/package/queue
     public handleUpdate(
         pixelUpdate: PixelUpdate,
         sourceSocketId: string
@@ -46,11 +54,25 @@ export class PictureSyncClient extends Client {
         sourceSocketId;
 
         // TODO each update needs to take in the raster and do the update itself
-        this.raster.handlePixelUpdate(pixelUpdate);
+        this.queue.push(() => {
+            return new Promise((resolve, reject) => {
+                reject;
+                this.raster.handlePixelUpdate(pixelUpdate);
+                const result = 'success';
+                resolve(result);
+            });
+        });
     }
 
     public close(): void {
         clearInterval(this.writingInterval);
+
+        // now once we run out, add the handler to do the final write
+        this.queue.addEventListener('success', (e) => {
+            this.pictureAccessor.writeRaster(this.raster);
+        });
+
+        // and write just in case
         this.pictureAccessor.writeRaster(this.raster);
     }
 }
