@@ -1,6 +1,3 @@
-// wow...
-// what if I made a lambda picture sync client
-
 import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
@@ -30,18 +27,14 @@ export class PictureSyncClient extends Client {
             concurrency: 1,
             autostart: true,
         });
-
         this.pictureAccessor = pictureAccessor;
-        // TODO this needs a reader writer lock
+        // no thread protection needed because its only ever being read
         this.raster = raster;
         this.dirty = false;
 
         this.writingInterval = setInterval(() => {
             if (this.dirty) {
                 pictureAccessor.writeRaster(this.raster);
-
-                // no need to worry about edge case where an update (specifically the last one) comes between write and
-                // dirty being cleared. the picture sync client writes when all things are done in the queue
                 this.dirty = false;
             }
         }, 30000);
@@ -53,7 +46,6 @@ export class PictureSyncClient extends Client {
     ): void {
         sourceSocketId;
 
-        // TODO each update needs to take in the raster and do the update itself
         this.queue.push(() => {
             return new Promise((resolve, reject) => {
                 reject;
@@ -69,6 +61,7 @@ export class PictureSyncClient extends Client {
 
         // now once we run out, add the handler to do the final write
         this.queue.addEventListener('success', (e) => {
+            e;
             this.pictureAccessor.writeRaster(this.raster);
         });
 
