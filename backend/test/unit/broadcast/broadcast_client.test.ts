@@ -5,7 +5,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from 'dwf-3-models-tjb';
-import BroadcastClientFactory from '../../../src/broadcast/broadcast_client';
+import { BroadcastClient } from '../../../src/broadcast/broadcast_client';
 import { Socket } from 'socket.io';
 
 describe('BroadcastClient Tests', () => {
@@ -26,9 +26,7 @@ describe('BroadcastClient Tests', () => {
         filename: defaultFilename,
     } as unknown as PixelUpdate;
 
-    const broadcastClient = new BroadcastClientFactory().createBroadcastClient(
-        mockSocket
-    );
+    const broadcastClient = new BroadcastClient(mockSocket);
 
     beforeEach(() => {
         mockEmit.mockClear();

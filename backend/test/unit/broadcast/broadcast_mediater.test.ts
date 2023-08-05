@@ -7,13 +7,15 @@ import {
     ServerToClientEvents,
     SocketData,
 } from 'dwf-3-models-tjb';
-import BroadcastClientFactory, {
-    BroadcastClient,
-} from '../../../src/broadcast/broadcast_client';
-import PictureSyncClientFactory, {
-    PictureSyncClient,
-} from '../../../src/broadcast/picture_sync_client';
+import { BroadcastClient } from '../../../src/broadcast/broadcast_client';
+import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
+
+jest.mock('../../../src/broadcast/broadcast_client');
+const mockBroadcastClient = jest.mocked(BroadcastClient, true);
+
+jest.mock('../../../src/broadcast/picture_sync_client');
+const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
 
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
@@ -43,35 +45,26 @@ describe('BroadcastMediator Tests', () => {
         getRaster: mockGetRaster,
     } as unknown as PictureAccessor;
 
-    const mockCreateBroadcastClient = jest.fn();
-    const mockBroadcastClientFactory = {
-        createBroadcastClient: mockCreateBroadcastClient,
-    } as unknown as BroadcastClientFactory;
-
-    const mockCreatePictureSyncClient = jest.fn();
-    const mockPictureSyncClientFactory = {
-        createPictureSyncClient: mockCreatePictureSyncClient,
-    } as unknown as PictureSyncClientFactory;
-
-    const mockPictureSyncHandleUpdate = jest.fn();
-    const mockPictureSyncClient = {
-        handleUpdate: mockPictureSyncHandleUpdate,
-    } as unknown as PictureSyncClient;
-
     const mockBroadcastHandleUpdate = jest.fn();
-    const mockBroadcastClient = {
+    const mockBroadcastClientInstance = {
         handleUpdate: mockBroadcastHandleUpdate,
     } as unknown as BroadcastClient;
 
-    mockCreatePictureSyncClient.mockReturnValue(mockPictureSyncClient);
-    mockCreateBroadcastClient.mockReturnValue(mockBroadcastClient);
+    const mockPictureSyncHandleUpdate = jest.fn();
+    const mockPictureSyncClientInstance = {
+        handleUpdate: mockPictureSyncHandleUpdate,
+    } as unknown as PictureSyncClient;
 
     let broadcastMediator: BroadcastMediator;
 
     beforeEach(() => {
         mockGetRaster.mockClear();
-        mockCreatePictureSyncClient.mockClear();
-        mockCreateBroadcastClient.mockClear();
+
+        mockBroadcastClient.mockClear();
+        mockBroadcastClient.mockReturnValue(mockBroadcastClientInstance);
+
+        mockPictureSyncClient.mockClear();
+        mockPictureSyncClient.mockReturnValue(mockPictureSyncClientInstance);
 
         mockGetRaster.mockReturnValueOnce({
             width: 1,
@@ -79,11 +72,7 @@ describe('BroadcastMediator Tests', () => {
             data: [],
         });
 
-        broadcastMediator = new BroadcastMediator(
-            mockPictureAccessor,
-            mockBroadcastClientFactory,
-            mockPictureSyncClientFactory
-        );
+        broadcastMediator = new BroadcastMediator(mockPictureAccessor);
     });
 
     it('throws when pictureAccessor.getRaster throws', async () => {

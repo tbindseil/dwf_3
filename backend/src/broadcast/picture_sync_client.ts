@@ -6,16 +6,6 @@ import { Queue } from './queue';
 
 // TJTAG tests for new stuff and see if it works in the web
 
-export default class PictureSyncClientFactory {
-    public createPictureSyncClient(
-        queue: Queue,
-        pictureAccessor: PictureAccessor,
-        raster: Raster
-    ): PictureSyncClient {
-        return new PictureSyncClient(queue, pictureAccessor, raster);
-    }
-}
-
 export class PictureSyncClient extends Client {
     private readonly pictureAccessor: PictureAccessor;
     private readonly raster: Raster;
@@ -23,7 +13,7 @@ export class PictureSyncClient extends Client {
     private readonly writingInterval: NodeJS.Timer;
     private readonly queue: Queue;
 
-    constructor(
+    public constructor(
         queue: Queue,
         pictureAccessor: PictureAccessor,
         raster: Raster

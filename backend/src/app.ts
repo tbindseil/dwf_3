@@ -25,8 +25,6 @@ import {
     SocketData,
 } from 'dwf-3-models-tjb';
 
-import BroadcastClientFactory from './broadcast/broadcast_client';
-import PictureSyncClientFactory from './broadcast/picture_sync_client';
 import { myErrorHandler } from './middleware/error_handler';
 import { makeKnex } from './db/knex_file';
 import { Server, Socket } from 'socket.io';
@@ -57,14 +55,8 @@ const pictureAccessor = new LocalPictureAccessor(
     prototypeFileName,
     baseDirectory
 );
-const pictureSyncClientFactory = new PictureSyncClientFactory();
-const broadcastClientFactory = new BroadcastClientFactory();
 
-const broadcastMediator = new BroadcastMediator(
-    pictureAccessor,
-    broadcastClientFactory,
-    pictureSyncClientFactory
-);
+const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
 // TODO inject -db- (and pictureArray? and ajv?) via middleware
 app.get('/pictures', (req: Request, res: Response, next: NextFunction) => {

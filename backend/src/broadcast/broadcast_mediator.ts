@@ -1,6 +1,6 @@
 import Client from './client';
-import BroadcastClientFactory from './broadcast_client';
-import PictureSyncClientFactory from './picture_sync_client';
+import { BroadcastClient } from './broadcast_client';
+import { PictureSyncClient } from './picture_sync_client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 
 import {
@@ -23,22 +23,14 @@ export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
 
     private readonly pictureAccessor: PictureAccessor;
-    private readonly broadcastClientFactory: BroadcastClientFactory;
-    private readonly pictureSyncClientFactory: PictureSyncClientFactory;
 
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
     private readonly filenameToClients: Map<string, TrackedPicture>;
 
-    constructor(
-        pictureAccessor: PictureAccessor,
-        broadcastClientFactory: BroadcastClientFactory,
-        pictureSyncClientFactory: PictureSyncClientFactory
-    ) {
+    constructor(pictureAccessor: PictureAccessor) {
         this.filenameToClients = new Map();
 
         this.pictureAccessor = pictureAccessor;
-        this.broadcastClientFactory = broadcastClientFactory;
-        this.pictureSyncClientFactory = pictureSyncClientFactory;
     }
 
     // TODO mechanism to know a new client will always receive all updates from after the raster is given to them
@@ -66,11 +58,7 @@ export default class BroadcastMediator {
             const m = new Map();
             m.set(
                 BroadcastMediator.PICTURE_SYNC_KEY,
-                this.pictureSyncClientFactory.createPictureSyncClient(
-                    new Queue(),
-                    this.pictureAccessor,
-                    raster
-                )
+                new PictureSyncClient(new Queue(), this.pictureAccessor, raster)
             );
 
             this.filenameToClients.set(filename, {
@@ -81,11 +69,7 @@ export default class BroadcastMediator {
 
         const clientMap = this.filenameToClients.get(filename);
         if (clientMap) {
-            clientMap.idToClientMap.set(
-                socket.id,
-                // TODO do I still need these factories?
-                this.broadcastClientFactory.createBroadcastClient(socket)
-            );
+            clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));
         }
     }
 

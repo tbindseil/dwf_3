@@ -8,19 +8,6 @@ import {
     SocketData,
 } from 'dwf-3-models-tjb';
 
-export default class BroadcastClientFactory {
-    public createBroadcastClient(
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ): BroadcastClient {
-        return new BroadcastClient(socket);
-    }
-}
-
 export class BroadcastClient extends Client {
     private readonly socket: Socket<
         ClientToServerEvents,

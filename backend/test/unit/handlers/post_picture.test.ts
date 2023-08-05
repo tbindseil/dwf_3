@@ -3,7 +3,6 @@ import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_ac
 import { Ajv, mockKnex } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
 import { QueryBuilder } from 'objection';
-import { ValidateFunction } from 'ajv';
 
 jest.mock('../../../src/picture_accessor/local_picture_accessor');
 const mockLocalPictureAccessor = jest.mocked(LocalPictureAccessor, true);

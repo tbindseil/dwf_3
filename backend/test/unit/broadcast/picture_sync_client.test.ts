@@ -7,8 +7,12 @@ import {
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
-import PictureSyncClientFactory from '../../../src/broadcast/picture_sync_client';
+import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
+import { Queue } from '../../broadcast/queue';
+
+jest.mock('../../../src/broadcast/picture_sync_client');
+const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
 
 describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
@@ -35,13 +39,16 @@ describe('PictureSyncClient Tests', () => {
         handlePixelUpdate: mockHandlePixelUpdate,
     } as unknown as Raster;
 
-    const pictureSyncClient =
-        new PictureSyncClientFactory().createPictureSyncClient(
-            mockPictureAccessor,
-            mockRaster
-        );
+    // TODO do i need to mock this?
+    const mockQueue = new Queue();
+    const pictureSyncClient = new PictureSyncClient(
+        mockQueue,
+        mockPictureAccessor,
+        mockRaster
+    );
 
     beforeEach(() => {
+        mockPictureSyncClient.mockClear();
         mockWriteRaster.mockClear();
         mockHandlePixelUpdate.mockClear();
     });
