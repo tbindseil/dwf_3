@@ -10,12 +10,23 @@ import {
 import { BroadcastClient } from '../../../src/broadcast/broadcast_client';
 import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
+import { Queue } from '../../broadcast/queue';
+import { Raster } from 'dwf-3-raster-tjb';
 
 jest.mock('../../../src/broadcast/broadcast_client');
-const mockBroadcastClient = jest.mocked(BroadcastClient, true);
+const mockBroadcastClientClass = jest.mocked(BroadcastClient, true);
 
 jest.mock('../../../src/broadcast/picture_sync_client');
-const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
+const mockPictureSyncClientClass = jest.mocked(PictureSyncClient, true);
+
+class MockClient {
+    public handleUpdate: jest.Mock<any, any> = jest.fn();
+    public close: jest.Mock<any, any> = jest.fn();
+    public mockClear() {
+        this.handleUpdate.mockClear();
+        this.close.mockClear();
+    }
+}
 
 describe('BroadcastMediator Tests', () => {
     const defaultFilename = 'filename';
@@ -45,31 +56,50 @@ describe('BroadcastMediator Tests', () => {
         getRaster: mockGetRaster,
     } as unknown as PictureAccessor;
 
-    const mockBroadcastHandleUpdate = jest.fn();
-    const mockBroadcastClose = jest.fn();
-    const mockBroadcastClientInstance = {
-        handleUpdate: mockBroadcastHandleUpdate,
-        close: mockBroadcastClose,
-    } as unknown as BroadcastClient;
+    // this is kinda tricky, we track the vended clients from the mocked BroadcastClient
+    // and PictureSyncClient. That way, we can make sure the appropriate ones are being verified
+    // now this pattern could probably be encapsulated, and maybe thats what ts mockito does
+    // TODO also could be just one map and one func with one caveat being the socketid vs picturesync as key
+    const mockBroadcastClients = new Map<string, MockClient>();
+    const mockPictureSyncClients = new Map<string, MockClient>();
 
-    const mockPictureSyncHandleUpdate = jest.fn();
-    const mockPictureSyncClose = jest.fn();
-    const mockPictureSyncClientInstance = {
-        handleUpdate: mockPictureSyncHandleUpdate,
-        close: mockPictureSyncClose,
-    } as unknown as PictureSyncClient;
+    const makeMockBroadcastClientInstance = (): MockClient => new MockClient();
+    mockBroadcastClientClass.mockImplementation(
+        (
+            socket: Socket<
+                ClientToServerEvents,
+                ServerToClientEvents,
+                InterServerEvents,
+                SocketData
+            >
+        ) => {
+            const mockClient = makeMockBroadcastClientInstance();
+            mockBroadcastClients.set(socket.id, mockClient);
+            return mockClient as unknown as BroadcastClient;
+        }
+    );
+
+    const makeMockPictureSyncClientInstance = (): MockClient =>
+        new MockClient();
+    mockPictureSyncClientClass.mockImplementation(
+        (queue: Queue, pictureAccessor: PictureAccessor, raster: Raster) => {
+            queue;
+            pictureAccessor;
+            raster;
+
+            const MockClient = makeMockPictureSyncClientInstance();
+            mockPictureSyncClients.set('PICTURE_SYNC_KEY', MockClient);
+            return MockClient as unknown as PictureSyncClient;
+        }
+    );
 
     let broadcastMediator: BroadcastMediator;
 
     beforeEach(() => {
+        mockBroadcastClients.clear();
+        mockPictureSyncClients.clear();
+
         mockGetRaster.mockClear();
-
-        mockBroadcastClient.mockClear();
-        mockBroadcastClient.mockReturnValue(mockBroadcastClientInstance);
-
-        mockPictureSyncClient.mockClear();
-        mockPictureSyncClient.mockReturnValue(mockPictureSyncClientInstance);
-
         mockGetRaster.mockReturnValueOnce({
             width: 1,
             height: 1,
@@ -167,9 +197,12 @@ describe('BroadcastMediator Tests', () => {
 
         broadcastMediator.removeClient(defaultFilename, mockSocket2);
 
+        const removedBroadcastClient = mockBroadcastClients.get(mockSocket2.id);
+
         const afterClients = broadcastMediator.listClients(defaultFilename);
         expect(afterClients.length).toEqual(2);
         expect(afterClients.includes(mockSocket2.id)).toBeFalsy();
+        expect(removedBroadcastClient?.close).toBeCalled();
     });
 
     it('removes the PictureSyncClient when the last client is removed', async () => {
@@ -181,21 +214,34 @@ describe('BroadcastMediator Tests', () => {
 
         broadcastMediator.removeClient(defaultFilename, mockSocket);
 
+        const removedBroadcastClient = mockBroadcastClients.get(mockSocket.id);
+        const mockPictureSyncClient =
+            mockPictureSyncClients.get('PICTURE_SYNC_KEY');
+
         const afterClients = broadcastMediator.listClients(defaultFilename);
         expect(afterClients.length).toEqual(0);
         expect(afterClients.includes('PICTURE_SYNC_KEY')).toBeFalsy();
+        expect(removedBroadcastClient?.close).toBeCalled();
+        expect(mockPictureSyncClient?.close).toBeCalled();
     });
 
     it('sends the update to all registered', async () => {
         await broadcastMediator.addClient(defaultFilename, mockSocket);
+        await broadcastMediator.addClient(defaultFilename, mockSocket2);
 
         broadcastMediator.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
-        expect(mockBroadcastHandleUpdate).toHaveBeenCalledWith(
-            dummyPixelUpdate,
-            mockSocket.id
-        );
-        expect(mockPictureSyncHandleUpdate).toHaveBeenCalledWith(
+        // WTF the client is in charge of filtering updates?
+        mockBroadcastClients.forEach((mockBroadcastClient: MockClient) => {
+            expect(mockBroadcastClient?.handleUpdate).toHaveBeenCalledWith(
+                dummyPixelUpdate,
+                mockSocket.id
+            );
+        });
+
+        const mockPictureSyncClient =
+            mockPictureSyncClients.get('PICTURE_SYNC_KEY');
+        expect(mockPictureSyncClient?.handleUpdate).toHaveBeenCalledWith(
             dummyPixelUpdate,
             mockSocket.id
         );
