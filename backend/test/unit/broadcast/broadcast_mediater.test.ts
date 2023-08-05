@@ -46,13 +46,17 @@ describe('BroadcastMediator Tests', () => {
     } as unknown as PictureAccessor;
 
     const mockBroadcastHandleUpdate = jest.fn();
+    const mockBroadcastClose = jest.fn();
     const mockBroadcastClientInstance = {
         handleUpdate: mockBroadcastHandleUpdate,
+        close: mockBroadcastClose,
     } as unknown as BroadcastClient;
 
     const mockPictureSyncHandleUpdate = jest.fn();
+    const mockPictureSyncClose = jest.fn();
     const mockPictureSyncClientInstance = {
         handleUpdate: mockPictureSyncHandleUpdate,
+        close: mockPictureSyncClose,
     } as unknown as PictureSyncClient;
 
     let broadcastMediator: BroadcastMediator;
@@ -212,4 +216,6 @@ describe('BroadcastMediator Tests', () => {
         const ret = broadcastMediator.listClients(defaultFilename);
         expect(ret.length).toEqual(0);
     });
+
+    // TODO test that clients are closed after removal
 });
