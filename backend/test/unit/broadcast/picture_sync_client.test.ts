@@ -56,5 +56,13 @@ describe('PictureSyncClient Tests', () => {
         pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
         verify(mockedQueue.push(anything())).called();
+
+        // TODO verify that actual update is queued
     });
+
+    // waits for queeu to finish adn writes clears the interval
+    //
+    //
+    // writes every so often
+    // writes every so often and only if dirty (sets the dirty to true on a the queued callback)
 });
