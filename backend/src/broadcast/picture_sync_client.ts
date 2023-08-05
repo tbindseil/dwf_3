@@ -2,7 +2,25 @@ import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
-import Queue from 'queue';
+
+// TJTAG tests for new stuff and see if it works in the web
+
+type Job = () => Promise<void>;
+class Queue {
+    private jobs: Job[];
+
+    public constructor() {
+        this.jobs = [];
+    }
+    public push(job: Job): void {
+        this.jobs.push(job);
+    }
+    public async waitForCompletion(): Promise<void> {
+        while (this.jobs.length > 0) {
+            console.log('waitForCompletion');
+        }
+    }
+}
 
 export default class PictureSyncClientFactory {
     public createPictureSyncClient(
@@ -23,10 +41,7 @@ export class PictureSyncClient extends Client {
     constructor(pictureAccessor: PictureAccessor, raster: Raster) {
         super();
 
-        this.queue = new Queue({
-            concurrency: 1,
-            autostart: true,
-        });
+        this.queue = new Queue();
         this.pictureAccessor = pictureAccessor;
         // no thread protection needed because its only ever being read
         this.raster = raster;
@@ -49,21 +64,18 @@ export class PictureSyncClient extends Client {
         this.queue.push(() => {
             return new Promise((resolve, reject) => {
                 reject;
+
                 this.raster.handlePixelUpdate(pixelUpdate);
-                const result = 'success';
-                resolve(result);
+                resolve();
             });
         });
     }
 
-    public close(): void {
+    public async close(): Promise<void> {
         clearInterval(this.writingInterval);
 
         // now once we run out, add the handler to do the final write
-        this.queue.addEventListener('success', (e) => {
-            e;
-            this.pictureAccessor.writeRaster(this.raster);
-        });
+        await this.queue.waitForCompletion();
 
         // and write just in case
         this.pictureAccessor.writeRaster(this.raster);
