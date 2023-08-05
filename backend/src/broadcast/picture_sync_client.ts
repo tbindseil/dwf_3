@@ -40,6 +40,7 @@ export class PictureSyncClient extends Client {
     ): void {
         sourceSocketId;
 
+        console.log('TJTAG pushes to queue');
         this.queue.push(() => {
             return new Promise((resolve, reject) => {
                 reject;

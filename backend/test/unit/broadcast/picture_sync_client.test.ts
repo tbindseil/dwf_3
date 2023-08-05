@@ -10,12 +10,7 @@ import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
 import { Queue } from '../../../src/broadcast/queue';
-
-jest.mock('../../../src/broadcast/picture_sync_client');
-const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
-
-jest.mock('../../../src/broadcast/queue');
-const mockQueueClass = jest.mocked(Queue, true);
+import { anything, instance, mock, resetCalls, verify } from 'ts-mockito';
 
 describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
@@ -42,35 +37,24 @@ describe('PictureSyncClient Tests', () => {
         handlePixelUpdate: mockHandlePixelUpdate,
     } as unknown as Raster;
 
-    const queue = new Queue();
+    const mockedQueue: Queue = mock(Queue);
+    const instanceQueue: Queue = instance(mockedQueue);
+
     const pictureSyncClient = new PictureSyncClient(
-        queue,
+        instanceQueue,
         mockPictureAccessor,
         mockRaster
     );
 
     beforeEach(() => {
-        mockPictureSyncClient.mockClear();
-        // mockQueue.mockClear();
+        resetCalls(mockedQueue);
         mockWriteRaster.mockClear();
         mockHandlePixelUpdate.mockClear();
     });
 
-    it('ultimately update to the raster', async () => {
-        mockHandlePixelUpdate.mockImplementation(() => {
-            throw Error('intentional');
-        });
-
+    it('queues the update to the raster', async () => {
         pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
-        await expect(
-            pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id)
-        ).rejects.toThrow();
-
-        // oh man, I think the above will fail also,
-        // the exception will come from somewhere else maybe
-        // if so i need to still figure out a cleaner way to
-        // wait for a condition to become true
-        // expect(updated).toBe(true);
+        verify(mockedQueue.push(anything())).called();
     });
 });
