@@ -10,7 +10,7 @@ export class PostUpdate extends API<PostUpdateInput, PostUpdateOutput> {
     }
 
     public provideInputValidationSchema(): ValidateFunction {
-        return this.ajv.compile(_schema.GetPictureInput);
+        return this.ajv.compile(_schema.PostUpdateInput);
     }
 
     public async process(

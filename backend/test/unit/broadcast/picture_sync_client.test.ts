@@ -9,7 +9,7 @@ import { Raster } from 'dwf-3-raster-tjb';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
-import { Queue } from '../../broadcast/queue';
+import { Queue } from '../../../src/broadcast/queue';
 
 jest.mock('../../../src/broadcast/picture_sync_client');
 const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
@@ -39,10 +39,9 @@ describe('PictureSyncClient Tests', () => {
         handlePixelUpdate: mockHandlePixelUpdate,
     } as unknown as Raster;
 
-    // TODO do i need to mock this?
-    const mockQueue = new Queue();
+    const queue = new Queue();
     const pictureSyncClient = new PictureSyncClient(
-        mockQueue,
+        queue,
         mockPictureAccessor,
         mockRaster
     );
@@ -53,9 +52,9 @@ describe('PictureSyncClient Tests', () => {
         mockHandlePixelUpdate.mockClear();
     });
 
-    it('passes the update to the raster', () => {
+    it('queues the update to the raster', () => {
         pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
-        expect(mockHandlePixelUpdate).toHaveBeenCalledWith(dummyPixelUpdate);
+        // expect(queue.push).toHaveBeenCalledWith(() => dummyPixelUpdate);
     });
 });

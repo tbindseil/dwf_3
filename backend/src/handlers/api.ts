@@ -12,7 +12,7 @@ export default abstract class API<I, O> {
 
         // models might have to provide this list of inputs, otherwise its duplicated
         // this.ajv = new Ajv({ strict: true });
-        // this.ajv.addVocabulary(['GetPictureInput', ...]);
+        // this.ajv.addVocabulary(['GetPicturesInput', ...]);
     }
 
     // this calls mockKnex, i need a way to stub that when unit testing

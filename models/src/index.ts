@@ -1,6 +1,5 @@
 import Picture, { PictureDatabaseShape } from './picture';
 import { GetPicturesInput, GetPicturesOutput } from './get_pictures';
-import { GetPictureInput, GetPictureOutput } from './get_picture';
 import { PostPictureInput, PostPictureOutput } from './post_picture';
 import { PostUpdateInput, PostUpdateOutput } from './post_update';
 import { Update } from './updates/update';
@@ -20,8 +19,6 @@ export {
     PictureDatabaseShape,
     GetPicturesInput,
     GetPicturesOutput,
-    GetPictureInput,
-    GetPictureOutput,
     PostPictureInput,
     PostPictureOutput,
     PostUpdateInput,

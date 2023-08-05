@@ -1,11 +1,6 @@
 import request from 'supertest';
-import {
-    GetPictureInput,
-    GetPictureOutput,
-    PostPictureInput,
-} from 'dwf-3-models-tjb';
+import { PostPictureInput } from 'dwf-3-models-tjb';
 import { server } from '../../src/app';
-import { generateSamplePng, getPictureAsBuffer } from './setup/utils';
 
 describe('happy case', () => {
     const expectedPictures = [
@@ -60,23 +55,8 @@ describe('happy case', () => {
         expect(pictures.pictures.length).toEqual(expectedPictures.length);
 
         // set up to get an individual picture
-        const expectedPicture = expectedPictures[0];
-        generateSamplePng(expectedPicture.filename);
 
-        // get an individual picture, buffer and all
-        const payload: GetPictureInput = {
-            id: expectedPicture.id,
-        };
-        const { body: picture } = await request(server)
-            .get('/picture')
-            .send(payload)
-            .set('Content-Type', 'application/json')
-            .set('Accept', 'application/json')
-            .expect(200);
-        const getPictureResponse = picture as GetPictureOutput;
-        const expectedBuffer = await getPictureAsBuffer(
-            expectedPicture.filename
-        );
-        expect(getPictureResponse).toEqual(expectedBuffer);
+        // TODO add to this this test, needs to use socket request
+        // in order to properly synchronize with updates
     });
 });

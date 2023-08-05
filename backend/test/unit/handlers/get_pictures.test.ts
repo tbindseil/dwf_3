@@ -1,7 +1,6 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
 import { Ajv, mockKnex } from '../mock/utils';
 import { Picture, _schema } from 'dwf-3-models-tjb';
-import { ValidateFunction } from 'ajv';
 
 jest.mock('dwf-3-models-tjb');
 const mockPicture = jest.mocked(Picture, true);

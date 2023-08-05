@@ -6,12 +6,7 @@ import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
-import {
-    GetPictures,
-    GetPicture,
-    PostPicture,
-    PostUpdate,
-} from './handlers/index';
+import { GetPictures, PostPicture, PostUpdate } from './handlers/index';
 
 import { pictureRequestHandler, updateHandler } from './socket_functions';
 
@@ -61,9 +56,6 @@ const broadcastMediator = new BroadcastMediator(pictureAccessor);
 // TODO inject -db- (and pictureArray? and ajv?) via middleware
 app.get('/pictures', (req: Request, res: Response, next: NextFunction) => {
     new GetPictures().call(req, res, next);
-});
-app.get('/picture', (req: Request, res: Response, next: NextFunction) => {
-    new GetPicture(pictureAccessor).call(req, res, next);
 });
 app.post('/picture', (req: Request, res: Response, next: NextFunction) => {
     new PostPicture(pictureAccessor).call(req, res, next);
