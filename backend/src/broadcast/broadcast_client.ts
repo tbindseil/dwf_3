@@ -50,4 +50,8 @@ export class BroadcastClient extends Client {
             this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }
+
+    public close(): void {
+        // do nothing
+    }
 }

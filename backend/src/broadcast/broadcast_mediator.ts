@@ -15,7 +15,6 @@ import { Socket } from 'socket.io';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
-    dirty: boolean;
     raster: Raster;
 }
 
@@ -39,26 +38,9 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
         this.broadcastClientFactory = broadcastClientFactory;
         this.pictureSyncClientFactory = pictureSyncClientFactory;
-
-        const interval = setInterval(() => {
-            this.filenameToClients.forEach((trackedPicture: TrackedPicture) => {
-                if (trackedPicture.dirty) {
-                    pictureAccessor.writeRaster(trackedPicture.raster);
-
-                    // no need to worry about edge case where an update (specifically the last one) comes between write and
-                    // dirty being cleared. in that case, the client will be removed and a final write will occur
-                    // TODO make sure that the write upon last client removal isn't done until all updates are processed
-                    trackedPicture.dirty = false;
-                }
-            });
-        }, 30);
-
-        // one timer for lifetime of broacast_client
-        // no need to close because broadcast_client is a singleton
-        interval;
     }
 
-    // TODO type alias for Socket<Cli....
+    // TODO mechanism to know a new client will always receive all updates from after the raster is given to them
     public async addClient(
         filename: string,
         socket: Socket<
@@ -91,9 +73,6 @@ export default class BroadcastMediator {
 
             this.filenameToClients.set(filename, {
                 idToClientMap: m,
-                dirty: false,
-                // as long as this is ultimately written to after all updates are received,
-                // its not important for it to be written to after each update
                 raster: raster,
             });
         }
@@ -138,7 +117,8 @@ export default class BroadcastMediator {
         const trackedPicture = this.filenameToClients.get(filename);
 
         if (trackedPicture) {
-            if (!trackedPicture.idToClientMap.has(socket.id)) {
+            const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
+            if (!clientToDelete) {
                 // throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
                 console.log(
                     `unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
@@ -146,13 +126,16 @@ export default class BroadcastMediator {
                 return;
             }
 
+            clientToDelete.close();
             const idToClientMap = trackedPicture.idToClientMap;
             idToClientMap.delete(socket.id);
-            if (Array.from(idToClientMap.keys()).length === 1) {
-                if (idToClientMap.has(BroadcastMediator.PICTURE_SYNC_KEY)) {
-                    // TODO make sure that the write upon last client removal isn't done until all updates are processed
-                    this.pictureAccessor.writeRaster(trackedPicture.raster);
 
+            if (Array.from(idToClientMap.keys()).length === 1) {
+                const pictureSyncClient = idToClientMap.get(
+                    BroadcastMediator.PICTURE_SYNC_KEY
+                );
+                if (pictureSyncClient) {
+                    pictureSyncClient.close();
                     idToClientMap.delete(BroadcastMediator.PICTURE_SYNC_KEY);
                     this.filenameToClients.delete(filename);
                 } else {
@@ -172,10 +155,8 @@ export default class BroadcastMediator {
 
         if (trackedPicture) {
             trackedPicture.idToClientMap.forEach((client) =>
-                // TODO hmm, maybe if I wait here, I will know that the write happened before setting to dirty
                 client.handleUpdate(pixelUpdate, sourceSocketId)
             );
-            trackedPicture.dirty = true;
         }
     }
 
