@@ -2,32 +2,17 @@ import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
+import { Queue } from './queue';
 
 // TJTAG tests for new stuff and see if it works in the web
 
-type Job = () => Promise<void>;
-class Queue {
-    private jobs: Job[];
-
-    public constructor() {
-        this.jobs = [];
-    }
-    public push(job: Job): void {
-        this.jobs.push(job);
-    }
-    public async waitForCompletion(): Promise<void> {
-        while (this.jobs.length > 0) {
-            console.log('waitForCompletion');
-        }
-    }
-}
-
 export default class PictureSyncClientFactory {
     public createPictureSyncClient(
+        queue: Queue,
         pictureAccessor: PictureAccessor,
         raster: Raster
     ): PictureSyncClient {
-        return new PictureSyncClient(pictureAccessor, raster);
+        return new PictureSyncClient(queue, pictureAccessor, raster);
     }
 }
 
@@ -38,10 +23,14 @@ export class PictureSyncClient extends Client {
     private readonly writingInterval: NodeJS.Timer;
     private readonly queue: Queue;
 
-    constructor(pictureAccessor: PictureAccessor, raster: Raster) {
+    constructor(
+        queue: Queue,
+        pictureAccessor: PictureAccessor,
+        raster: Raster
+    ) {
         super();
 
-        this.queue = new Queue();
+        this.queue = queue;
         this.pictureAccessor = pictureAccessor;
         // no thread protection needed because its only ever being read
         this.raster = raster;

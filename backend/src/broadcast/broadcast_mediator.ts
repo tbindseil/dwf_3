@@ -12,6 +12,7 @@ import {
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { Socket } from 'socket.io';
+import { Queue } from './queue';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
@@ -66,6 +67,7 @@ export default class BroadcastMediator {
             m.set(
                 BroadcastMediator.PICTURE_SYNC_KEY,
                 this.pictureSyncClientFactory.createPictureSyncClient(
+                    new Queue(),
                     this.pictureAccessor,
                     raster
                 )
