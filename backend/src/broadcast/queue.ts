@@ -3,7 +3,7 @@ export class Queue {
     private readonly waitForCompletionIntervalMS: number;
     private readonly jobs: Job[];
 
-    public constructor(waitForCompletionIntervalMS: number) {
+    public constructor(waitForCompletionIntervalMS: number = 1000) {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
         this.jobs = [];
     }
