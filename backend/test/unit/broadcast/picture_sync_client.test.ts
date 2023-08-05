@@ -14,6 +14,9 @@ import { Queue } from '../../../src/broadcast/queue';
 jest.mock('../../../src/broadcast/picture_sync_client');
 const mockPictureSyncClient = jest.mocked(PictureSyncClient, true);
 
+jest.mock('../../../src/broadcast/queue');
+const mockQueueClass = jest.mocked(Queue, true);
+
 describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
     const mockSocket = {
@@ -48,13 +51,26 @@ describe('PictureSyncClient Tests', () => {
 
     beforeEach(() => {
         mockPictureSyncClient.mockClear();
+        // mockQueue.mockClear();
         mockWriteRaster.mockClear();
         mockHandlePixelUpdate.mockClear();
     });
 
-    it('queues the update to the raster', () => {
+    it('ultimately update to the raster', async () => {
+        mockHandlePixelUpdate.mockImplementation(() => {
+            throw Error('intentional');
+        });
+
         pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
-        // expect(queue.push).toHaveBeenCalledWith(() => dummyPixelUpdate);
+        await expect(
+            pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id)
+        ).rejects.toThrow();
+
+        // oh man, I think the above will fail also,
+        // the exception will come from somewhere else maybe
+        // if so i need to still figure out a cleaner way to
+        // wait for a condition to become true
+        // expect(updated).toBe(true);
     });
 });
