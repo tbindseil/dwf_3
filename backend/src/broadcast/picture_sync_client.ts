@@ -17,7 +17,7 @@ export class PictureSyncClient extends Client {
         queue: Queue,
         pictureAccessor: PictureAccessor,
         raster: Raster,
-        writeInterval: number = 30000
+        writeInterval: number = 300
     ) {
         super();
 
@@ -28,6 +28,7 @@ export class PictureSyncClient extends Client {
         this.dirty = false;
 
         this.writingInterval = setInterval(() => {
+            console.log('TJTAG writing interval');
             if (this.dirty) {
                 this.pictureAccessor.writeRaster(this.raster);
                 this.dirty = false;

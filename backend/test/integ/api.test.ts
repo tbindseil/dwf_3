@@ -1,13 +1,8 @@
 import request from 'supertest';
-import {
-    PictureDatabaseShape,
-    PictureResponse,
-    PostPictureInput,
-} from 'dwf-3-models-tjb';
+import { PictureResponse, PostPictureInput } from 'dwf-3-models-tjb';
 import { io, server } from '../../src/app';
 import { io as io_package } from 'socket.io-client';
 import { Raster } from 'dwf-3-raster-tjb';
-import { performance } from 'perf_hooks';
 
 // the actual program cant be running or there is a collision on the port
 // TODO use a new port, or more generally organize startup and ports and stuff
@@ -19,8 +14,6 @@ server.listen(port, () => {
 });
 
 describe('happy case', () => {
-    // I'm using dummy names but actual names are being used
-    // so i have to get things more like they are in standard application operation
     const expectedPictures = [
         {
             id: 1,
@@ -99,7 +92,6 @@ describe('happy case', () => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             expect(receivedPictures.has(picture.id)).toBe(true);
-            console.log('TJTAG end');
         }
 
         socket.close();
@@ -130,7 +122,6 @@ describe('happy case', () => {
         id: number,
         receivedPictures: Map<number, Raster>
     ) => {
-        console.log(`TJTAG - receiving picture_response for ${id}`);
         receivedPictures.set(
             id,
             new Raster(

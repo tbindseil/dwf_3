@@ -68,8 +68,6 @@ app.use(myErrorHandler);
 
 export const server: http.Server = http.createServer(app);
 
-console.log('TJTAG - creating the Server (variable)');
-
 export const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
