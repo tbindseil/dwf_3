@@ -10,7 +10,16 @@ import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
 import { Socket } from 'socket.io';
 import { Queue } from '../../../src/broadcast/queue';
-import { anything, instance, mock, resetCalls, verify } from 'ts-mockito';
+import {
+    anything,
+    capture,
+    instance,
+    mock,
+    resetCalls,
+    verify,
+    when,
+} from 'ts-mockito';
+import { waitForMS } from '../mock/utils';
 
 describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
@@ -37,6 +46,8 @@ describe('PictureSyncClient Tests', () => {
         handlePixelUpdate: mockHandlePixelUpdate,
     } as unknown as Raster;
 
+    // so we assert on mockedQueue, so what about multiple mock instances?
+    // maybe that could be a pull request
     const mockedQueue: Queue = mock(Queue);
     const instanceQueue: Queue = instance(mockedQueue);
 
@@ -52,17 +63,55 @@ describe('PictureSyncClient Tests', () => {
         mockHandlePixelUpdate.mockClear();
     });
 
-    it('queues the update to the raster', async () => {
+    afterEach(async () => {
+        await pictureSyncClient.close();
+    });
+
+    it('queues the update to the raster', () => {
         pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
 
         verify(mockedQueue.push(anything())).called();
+        const [job] = capture(mockedQueue.push).last();
 
-        // TODO verify that actual update is queued
+        job();
+
+        expect(mockHandlePixelUpdate).toHaveBeenCalledWith(dummyPixelUpdate);
     });
 
-    // waits for queeu to finish adn writes clears the interval
-    //
-    //
-    // writes every so often
-    // writes every so often and only if dirty (sets the dirty to true on a the queued callback)
+    it('writes every so often but only if an update has occurred', async () => {
+        const queue = new Queue();
+        const pictureSyncClientWithRealQueue = new PictureSyncClient(
+            queue,
+            mockPictureAccessor,
+            mockRaster,
+            30
+        );
+        pictureSyncClientWithRealQueue.handleUpdate(
+            dummyPixelUpdate,
+            mockSocket.id
+        );
+
+        await waitForMS(300);
+
+        expect(mockWriteRaster).toHaveBeenCalledWith(mockRaster);
+        expect(mockWriteRaster).toHaveBeenCalledTimes(1);
+
+        await waitForMS(300);
+
+        expect(mockWriteRaster).toHaveBeenCalledTimes(1);
+
+        await pictureSyncClientWithRealQueue.close();
+    });
+
+    it('waits for queue to finish, writes the raster', async () => {
+        when(mockedQueue.waitForCompletion()).thenResolve();
+
+        await pictureSyncClient.close();
+
+        verify(mockedQueue.waitForCompletion()).called();
+    });
+
+    //  and closes the interval on close
+
+    // TODO move ignore own updates to bm
 });

@@ -16,7 +16,8 @@ export class PictureSyncClient extends Client {
     public constructor(
         queue: Queue,
         pictureAccessor: PictureAccessor,
-        raster: Raster
+        raster: Raster,
+        writeInterval: number = 30000
     ) {
         super();
 
@@ -28,10 +29,10 @@ export class PictureSyncClient extends Client {
 
         this.writingInterval = setInterval(() => {
             if (this.dirty) {
-                pictureAccessor.writeRaster(this.raster);
+                this.pictureAccessor.writeRaster(this.raster);
                 this.dirty = false;
             }
-        }, 30000);
+        }, writeInterval);
     }
 
     public handleUpdate(
