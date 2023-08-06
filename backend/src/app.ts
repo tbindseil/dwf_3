@@ -8,10 +8,10 @@ import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
 import { GetPictures, PostPicture, PostUpdate } from './handlers/index';
 
-import { pictureRequestHandler, updateHandler } from './socket_functions';
+import { joinPictureRequestHandler, updateHandler } from './socket_functions';
 
 import {
-    PictureRequest,
+    JoinPictureRequest,
     PixelUpdate,
     Picture,
     ClientToServerEvents,
@@ -90,14 +90,17 @@ io.on(
         >
     ) => {
         console.log(`io.on connection and socket.id is: ${socket.id}`);
-        socket.on('picture_request', async (pictureRequest: PictureRequest) => {
-            pictureRequestHandler(
-                pictureRequest,
-                broadcastMediator,
-                pictureAccessor,
-                socket
-            );
-        });
+        socket.on(
+            'join_picture_request',
+            async (joinPictureRequest: JoinPictureRequest) => {
+                joinPictureRequestHandler(
+                    joinPictureRequest,
+                    broadcastMediator,
+                    pictureAccessor,
+                    socket
+                );
+            }
+        );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
             updateHandler(pixelUpdate, broadcastMediator, socket.id);
         });

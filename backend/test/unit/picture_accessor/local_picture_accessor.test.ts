@@ -88,9 +88,9 @@ describe('LocalPictureAccessor tests', () => {
 
         mockJimpAdapter.read.mockReturnValue(jimg);
 
-        const pictureResponse = await localPictureAccessor.getRaster(filename);
+        const joinPictureResponse = await localPictureAccessor.getRaster(filename);
 
-        expect(pictureResponse).toEqual({
+        expect(joinPictureResponse).toEqual({
             width: jimg.bitmap.width,
             height: jimg.bitmap.height,
             data: jimg.bitmap.data,

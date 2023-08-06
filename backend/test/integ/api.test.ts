@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { PictureResponse, PostPictureInput } from 'dwf-3-models-tjb';
+import { JoinPictureResponse, PostPictureInput } from 'dwf-3-models-tjb';
 import { io, server } from '../../src/app';
 import { io as io_package } from 'socket.io-client';
 import { Raster } from 'dwf-3-raster-tjb';
@@ -73,19 +73,18 @@ describe('happy case', () => {
 
         // pictures.pictures.forEach(async (picture: PictureDatabaseShape) => {
         for (const picture of pictures.pictures) {
-            socket.removeListener('picture_response');
+            socket.removeListener('join_picture_response');
             socket.on(
-                'picture_response',
-                (pictureResponse: PictureResponse) => {
+                'join_picture_response',
+                (joinPictureResponse: JoinPictureResponse) => {
                     setReceivedRaster(
-                        pictureResponse,
+                        joinPictureResponse,
                         picture.id,
                         receivedPictures
                     );
                 }
             );
-            // TODO probably rename to join_picture_request
-            socket.emit('picture_request', {
+            socket.emit('join_picture_request', {
                 filename: picture.filename,
             });
 
@@ -107,7 +106,7 @@ describe('happy case', () => {
         //        );
         //
         //        if (currentPicture) {
-        //            socket.emit('picture_request', {
+        //            socket.emit('join_picture_request', {
         //                filename: currentPicture.filename,
         //            });
         //        }
@@ -121,16 +120,16 @@ describe('happy case', () => {
     });
 
     const setReceivedRaster = (
-        pictureResponse: PictureResponse,
+        joinPictureResponse: JoinPictureResponse,
         id: number,
         receivedPictures: Map<number, Raster>
     ) => {
         receivedPictures.set(
             id,
             new Raster(
-                pictureResponse.width,
-                pictureResponse.height,
-                pictureResponse.data
+                joinPictureResponse.width,
+                joinPictureResponse.height,
+                joinPictureResponse.data
             )
         );
     };

@@ -9,8 +9,8 @@ import {
     ServerToClientEvents,
     InterServerEvents,
     SocketData,
-    PictureRequest,
-    PictureResponse,
+    JoinPictureRequest,
+    JoinPictureResponse,
 } from './socket_models/socket_models';
 import _schema from './schema_validation/_schema';
 
@@ -29,7 +29,7 @@ export {
     ServerToClientEvents,
     InterServerEvents,
     SocketData,
-    PictureRequest,
-    PictureResponse,
+    JoinPictureRequest,
+    JoinPictureResponse,
     _schema,
 };

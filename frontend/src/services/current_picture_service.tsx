@@ -1,4 +1,4 @@
-import { PictureDatabaseShape, PictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
+import { PictureDatabaseShape, JoinPictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
@@ -42,14 +42,14 @@ const CurrentPictureService = ({ children }: any) => {
   // where the room corresponds to the picture being drawn
   const setupListeners = () => {
     // setup raster handler AND start receiving updates, and request raster
-    socket.removeListener('picture_response');
-    socket.on('picture_response', currentPictureService.setCurrentRaster);
+    socket.removeListener('join_picture_response');
+    socket.on('join_picture_response', currentPictureService.setCurrentRaster);
 
     socket.removeListener('server_to_client_update');
     socket.on('server_to_client_update', currentPictureService.handleReceivedUpdate);
 
     if (currentPicture) {
-      socket.emit('picture_request', {
+      socket.emit('join_picture_request', {
         filename: currentPicture.filename,
       });
     }
@@ -60,16 +60,16 @@ const CurrentPictureService = ({ children }: any) => {
       currentPicture = picture;
       setupListeners();
     },
-    setCurrentRaster(pictureResponse: PictureResponse): void {
+    setCurrentRaster(joinPictureResponse: JoinPictureResponse): void {
       // TODO something is off, the width and height are right but the picture is too "short"
       console.log(
-        `got picture response, width is: ${pictureResponse.width} and height is : ${pictureResponse.height}`,
+        `got join picture response, width is: ${joinPictureResponse.width} and height is : ${joinPictureResponse.height}`,
       );
       // this is private...
       currentRaster = new Raster(
-        pictureResponse.width,
-        pictureResponse.height,
-        pictureResponse.data,
+        joinPictureResponse.width,
+        joinPictureResponse.height,
+        joinPictureResponse.data,
       );
     },
     getCurrentPicture(): PictureDatabaseShape {
