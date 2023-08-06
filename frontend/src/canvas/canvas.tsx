@@ -25,9 +25,6 @@ function Canvas() {
     return () => clearInterval(interval);
   }, []);
 
-  // TODO this is somewhere else too, but if one func does an insane amount of processing, will it ever release?
-  // without await or then or anything
-
   // TJTAG
   // so what's next?
   // settings? no , they belong to users

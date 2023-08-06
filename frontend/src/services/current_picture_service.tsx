@@ -61,6 +61,10 @@ const CurrentPictureService = ({ children }: any) => {
       setupListeners();
     },
     setCurrentRaster(pictureResponse: PictureResponse): void {
+      // TODO something is off, the width and height are right but the picture is too "short"
+      console.log(
+        `got picture response, width is: ${pictureResponse.width} and height is : ${pictureResponse.height}`,
+      );
       // this is private...
       currentRaster = new Raster(
         pictureResponse.width,
