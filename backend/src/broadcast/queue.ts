@@ -27,12 +27,14 @@ export class Queue {
     }
 
     private start(): void {
+        /* c8 ignore start */
         if (this.jobs.length !== 1) {
             console.error(
                 `queue started with non-one jobs. this.jobs.length is: ${this.jobs.length}`
             );
             return;
         }
+        /* c8 ignore stop */
 
         this.runJob();
     }
@@ -44,10 +46,12 @@ export class Queue {
         // and then we could enqueue a new job, start, dequeue that,
         const nextJob = this.jobs.at(0);
 
+        /* c8 ignore start */
         if (!nextJob) {
             console.error('nextJob undefined');
             return;
         }
+        /* c8 ignore stop */
 
         await nextJob();
 
