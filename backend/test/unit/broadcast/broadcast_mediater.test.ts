@@ -229,21 +229,29 @@ describe('BroadcastMediator Tests', () => {
         await broadcastMediator.addClient(defaultFilename, mockSocket);
         await broadcastMediator.addClient(defaultFilename, mockSocket2);
 
-        broadcastMediator.handleUpdate(dummyPixelUpdate, mockSocket.id);
+        const sourceSocketId = mockSocket.id;
+
+        broadcastMediator.handleUpdate(dummyPixelUpdate, sourceSocketId);
 
         // WTF the client is in charge of filtering updates?
-        mockBroadcastClients.forEach((mockBroadcastClient: MockClient) => {
-            expect(mockBroadcastClient?.handleUpdate).toHaveBeenCalledWith(
-                dummyPixelUpdate,
-                mockSocket.id
-            );
-        });
+        mockBroadcastClients.forEach(
+            (mockBroadcastClient: MockClient, socketId: string) => {
+                if (sourceSocketId !== socketId) {
+                    expect(
+                        mockBroadcastClient?.handleUpdate
+                    ).toHaveBeenCalledWith(dummyPixelUpdate);
+                } else {
+                    expect(
+                        mockBroadcastClient?.handleUpdate
+                    ).toHaveBeenCalledTimes(0);
+                }
+            }
+        );
 
         const mockPictureSyncClient =
             mockPictureSyncClients.get('PICTURE_SYNC_KEY');
         expect(mockPictureSyncClient?.handleUpdate).toHaveBeenCalledWith(
-            dummyPixelUpdate,
-            mockSocket.id
+            dummyPixelUpdate
         );
     });
 

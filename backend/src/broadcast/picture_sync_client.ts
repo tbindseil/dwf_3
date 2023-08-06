@@ -35,12 +35,7 @@ export class PictureSyncClient extends Client {
         }, writeInterval);
     }
 
-    public handleUpdate(
-        pixelUpdate: PixelUpdate,
-        sourceSocketId: string
-    ): void {
-        sourceSocketId;
-
+    public handleUpdate(pixelUpdate: PixelUpdate): void {
         this.queue.push(() => {
             return new Promise((resolve, reject) => {
                 reject;

@@ -33,21 +33,12 @@ describe('BroadcastClient Tests', () => {
     });
 
     it('passes the update to the socket if the id does not match', () => {
-        broadcastClient.handleUpdate(
-            dummyPixelUpdate,
-            `${mockSocket.id}_NON_MATCHING_ID_ADD_ON`
-        );
+        broadcastClient.handleUpdate(dummyPixelUpdate);
 
         expect(mockEmit).toHaveBeenCalledWith(
             'server_to_client_update',
             dummyPixelUpdate
         );
-    });
-
-    it('passes does not pass the update to the socket if the id matches', () => {
-        broadcastClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
-
-        expect(mockEmit).not.toHaveBeenCalled();
     });
 
     it('does nothing on close', () => {

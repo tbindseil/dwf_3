@@ -1,14 +1,7 @@
-import {
-    ClientToServerEvents,
-    InterServerEvents,
-    PixelUpdate,
-    ServerToClientEvents,
-    SocketData,
-} from 'dwf-3-models-tjb';
+import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { PictureSyncClient } from '../../../src/broadcast/picture_sync_client';
-import { Socket } from 'socket.io';
 import { Queue } from '../../../src/broadcast/queue';
 import {
     anything,
@@ -23,14 +16,6 @@ import { waitForMS } from '../mock/utils';
 
 describe('PictureSyncClient Tests', () => {
     const defaultFilename = 'filename';
-    const mockSocket = {
-        id: 'mockSocketID',
-    } as unknown as Socket<
-        ClientToServerEvents,
-        ServerToClientEvents,
-        InterServerEvents,
-        SocketData
-    >;
     const dummyPixelUpdate = {
         name: 'dummyPixelUpdate',
         filename: defaultFilename,
@@ -68,7 +53,7 @@ describe('PictureSyncClient Tests', () => {
     });
 
     it('queues the update to the raster', () => {
-        pictureSyncClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
+        pictureSyncClient.handleUpdate(dummyPixelUpdate);
 
         verify(mockedQueue.push(anything())).called();
         const [job] = capture(mockedQueue.push).last();
@@ -86,10 +71,7 @@ describe('PictureSyncClient Tests', () => {
             mockRaster,
             30
         );
-        pictureSyncClientWithRealQueue.handleUpdate(
-            dummyPixelUpdate,
-            mockSocket.id
-        );
+        pictureSyncClientWithRealQueue.handleUpdate(dummyPixelUpdate);
 
         await waitForMS(300);
 
@@ -112,6 +94,4 @@ describe('PictureSyncClient Tests', () => {
     });
 
     //  and closes the interval on close
-
-    // TODO move ignore own updates to bm
 });

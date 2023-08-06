@@ -140,8 +140,12 @@ export default class BroadcastMediator {
         const trackedPicture = this.filenameToClients.get(filename);
 
         if (trackedPicture) {
-            trackedPicture.idToClientMap.forEach((client) =>
-                client.handleUpdate(pixelUpdate, sourceSocketId)
+            trackedPicture.idToClientMap.forEach(
+                (client: Client, socketId: string) => {
+                    if (socketId != sourceSocketId) {
+                        client.handleUpdate(pixelUpdate);
+                    }
+                }
             );
         }
     }
