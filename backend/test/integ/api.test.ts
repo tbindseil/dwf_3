@@ -80,14 +80,10 @@ describe('happy case', () => {
 
         // pictures.pictures.forEach(async (picture: PictureDatabaseShape) => {
         for (const picture of pictures.pictures) {
-            console.log(`start with id: ${picture.id}`);
             socket.removeListener('picture_response');
             socket.on(
                 'picture_response',
                 (pictureResponse: PictureResponse) => {
-                    console.log(
-                        `TJTAG - in bound func, picture.id is: ${picture.id}`
-                    );
                     setReceivedRaster(
                         pictureResponse,
                         picture.id,
@@ -96,22 +92,17 @@ describe('happy case', () => {
                 }
             );
             // TODO probably rename to join_picture_request
-            console.log(`TJTAG - emitting picture_request for ${picture.id}`);
             socket.emit('picture_request', {
                 filename: picture.filename,
             });
 
-            console.log(`TJTAG - about to wait at ${performance.now()}`);
-            // wait a bit...
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            console.log(`TJTAG - done waiting at ${performance.now()}`);
 
-            // TODO test with different sizes
             expect(receivedPictures.has(picture.id)).toBe(true);
-            console.log(`end with id: ${picture.id}`);
+            console.log('TJTAG end');
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        socket.close();
 
         // these will be in the start listening to a picture flow
         //        socket.removeListener('server_to_client_update');
@@ -127,6 +118,11 @@ describe('happy case', () => {
         //        }
         // TODO add to this this test, needs to use socket request
         // in order to properly synchronize with updates
+    });
+
+    afterAll(() => {
+        io.close();
+        server.close();
     });
 
     const setReceivedRaster = (
