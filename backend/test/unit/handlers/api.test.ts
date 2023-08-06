@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import API from '../../../src/handlers/api';
 import { ValidateFunction } from 'ajv';
 import APIError from '../../../src/handlers/api_error';
-import { mockNext } from '../mock/utils';
+import { mockNext } from '../utils/mocks';
 import { Knex } from 'knex';
 
 const specialInput = { test: 'SPECIAL_INPUT' };

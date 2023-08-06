@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { myErrorHandler } from '../../../src/middleware/error_handler';
-import { mockNext } from '../mock/utils';
+import { mockNext } from '../utils/mocks';
 import APIError from '../../../src/handlers/api_error';
 
 describe('error_handler tests', () => {

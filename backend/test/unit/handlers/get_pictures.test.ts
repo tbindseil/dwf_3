@@ -1,5 +1,5 @@
 import { GetPictures } from '../../../src/handlers/get_pictures';
-import { Ajv, mockKnex } from '../mock/utils';
+import { Ajv, mockKnex } from '../utils/mocks';
 import { Picture, _schema } from 'dwf-3-models-tjb';
 
 jest.mock('dwf-3-models-tjb');

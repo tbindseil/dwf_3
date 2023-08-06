@@ -1,6 +1,6 @@
 import { PostPicture } from '../../../src/handlers/post_picture';
 import LocalPictureAccessor from '../../../src/picture_accessor/local_picture_accessor';
-import { Ajv, mockKnex } from '../mock/utils';
+import { Ajv, mockKnex } from '../utils/mocks';
 import { Picture, _schema } from 'dwf-3-models-tjb';
 import { QueryBuilder } from 'objection';
 
