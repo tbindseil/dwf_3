@@ -94,6 +94,9 @@ describe('happy case', () => {
             expect(receivedPictures.has(picture.id)).toBe(true);
         }
 
+        // now... i have to close
+        // and i guess i also think that canvas should both send the join_picture_request and the leave_picture_request
+
         socket.close();
 
         // these will be in the start listening to a picture flow
