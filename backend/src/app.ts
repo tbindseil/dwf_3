@@ -18,6 +18,7 @@ import {
     ServerToClientEvents,
     InterServerEvents,
     SocketData,
+    LeavePictureRequest,
 } from 'dwf-3-models-tjb';
 
 import { myErrorHandler } from './middleware/error_handler';
@@ -105,11 +106,22 @@ io.on(
             updateHandler(pixelUpdate, broadcastMediator, socket.id);
         });
 
+        socket.on(
+            'leave_picture_request',
+            (leavePictureRequest: LeavePictureRequest) => {
+                broadcastMediator.removeClient(
+                    leavePictureRequest.filename,
+                    socket
+                );
+            }
+        );
+
         socket.on('unsubscribe', (filename: string) => {
             console.log(
                 `socket unsubscribe. Socket id: ${socket.id} and filename: ${filename}`
             );
-            broadcastMediator.removeClient(filename, socket);
+            // now explicitly requested
+            // broadcastMediator.removeClient(filename, socket);
         });
     }
 );

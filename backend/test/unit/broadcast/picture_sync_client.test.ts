@@ -39,7 +39,8 @@ describe('PictureSyncClient Tests', () => {
     const pictureSyncClient = new PictureSyncClient(
         instanceQueue,
         mockPictureAccessor,
-        mockRaster
+        mockRaster,
+        defaultFilename
     );
 
     beforeEach(() => {
@@ -69,13 +70,17 @@ describe('PictureSyncClient Tests', () => {
             queue,
             mockPictureAccessor,
             mockRaster,
+            defaultFilename,
             30
         );
         pictureSyncClientWithRealQueue.handleUpdate(dummyPixelUpdate);
 
         await waitForMS(300);
 
-        expect(mockWriteRaster).toHaveBeenCalledWith(mockRaster);
+        expect(mockWriteRaster).toHaveBeenCalledWith(
+            mockRaster,
+            defaultFilename
+        );
         expect(mockWriteRaster).toHaveBeenCalledTimes(1);
 
         await waitForMS(300);

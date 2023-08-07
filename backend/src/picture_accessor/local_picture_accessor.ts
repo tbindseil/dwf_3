@@ -8,7 +8,6 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
     public static testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
-    public static rasterWriteFileName = 'written_from_raster.png';
 
     private readonly jimpAdapter: JimpAdapter;
     private readonly prototypeFileName: string;
@@ -91,16 +90,13 @@ export default class LocalPictureAccessor extends PictureAccessor {
         };
     }
 
-    public async writeRaster(raster: Raster): Promise<void> {
+    public async writeRaster(raster: Raster, filename: string): Promise<void> {
         const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
         await jimg.writeAsync(
-            path.join(
-                LocalPictureAccessor.testDirectory,
-                LocalPictureAccessor.rasterWriteFileName
-            )
+            path.join(LocalPictureAccessor.testDirectory, filename)
         );
     }
 

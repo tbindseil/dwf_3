@@ -11,6 +11,7 @@ import {
     SocketData,
     JoinPictureRequest,
     JoinPictureResponse,
+    LeavePictureRequest,
 } from './socket_models/socket_models';
 import _schema from './schema_validation/_schema';
 
@@ -31,5 +32,6 @@ export {
     SocketData,
     JoinPictureRequest,
     JoinPictureResponse,
+    LeavePictureRequest,
     _schema,
 };

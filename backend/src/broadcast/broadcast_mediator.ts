@@ -58,7 +58,12 @@ export default class BroadcastMediator {
             const m = new Map();
             m.set(
                 BroadcastMediator.PICTURE_SYNC_KEY,
-                new PictureSyncClient(new Queue(), this.pictureAccessor, raster)
+                new PictureSyncClient(
+                    new Queue(),
+                    this.pictureAccessor,
+                    raster,
+                    filename
+                )
             );
 
             this.filenameToClients.set(filename, {

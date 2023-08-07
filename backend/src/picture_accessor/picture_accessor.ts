@@ -13,7 +13,10 @@ export default abstract class PictureAccessor {
 
     public abstract getRaster(filename: string): Promise<JoinPictureResponse>;
 
-    public abstract writeRaster(raster: Raster): Promise<void>;
+    public abstract writeRaster(
+        raster: Raster,
+        filename: string
+    ): Promise<void>;
 
     public abstract createNewPicture_with_dimensions(
         width_supplied: number

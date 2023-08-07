@@ -88,7 +88,9 @@ describe('LocalPictureAccessor tests', () => {
 
         mockJimpAdapter.read.mockReturnValue(jimg);
 
-        const joinPictureResponse = await localPictureAccessor.getRaster(filename);
+        const joinPictureResponse = await localPictureAccessor.getRaster(
+            filename
+        );
 
         expect(joinPictureResponse).toEqual({
             width: jimg.bitmap.width,
@@ -98,6 +100,7 @@ describe('LocalPictureAccessor tests', () => {
     });
 
     it('writes the raster', async () => {
+        const filename = 'fn';
         const arrayBuffer = new ArrayBuffer(8);
         const view = new Uint8ClampedArray(arrayBuffer);
         for (let i = 0; i < 8; ++i) {
@@ -113,13 +116,10 @@ describe('LocalPictureAccessor tests', () => {
         };
         mockJimpAdapter.createJimp.mockReturnValue(mockJimg);
 
-        localPictureAccessor.writeRaster(rasterToWrite);
+        localPictureAccessor.writeRaster(rasterToWrite, filename);
 
         expect(mockJimg.writeAsync).toHaveBeenCalledWith(
-            path.join(
-                LocalPictureAccessor.testDirectory,
-                LocalPictureAccessor.rasterWriteFileName
-            )
+            path.join(LocalPictureAccessor.testDirectory, filename)
         );
     });
 

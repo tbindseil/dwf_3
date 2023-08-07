@@ -11,6 +11,8 @@ export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
   getCurrentPicture(): PictureDatabaseShape;
   getCurrentRaster(): Raster;
+  joinCurrentPicture(): void;
+  leaveCurrentPicture(): void;
   handleReceivedUpdate(pixelUpdate: PixelUpdate): void;
   handleUserUpdate(pixelUpdate: PixelUpdate): void;
   closeConnection(): void; // maybe the socket is best owned by the canvas
@@ -47,12 +49,6 @@ const CurrentPictureService = ({ children }: any) => {
 
     socket.removeListener('server_to_client_update');
     socket.on('server_to_client_update', currentPictureService.handleReceivedUpdate);
-
-    if (currentPicture) {
-      socket.emit('join_picture_request', {
-        filename: currentPicture.filename,
-      });
-    }
   };
 
   const currentPictureService = {
@@ -74,6 +70,24 @@ const CurrentPictureService = ({ children }: any) => {
     },
     getCurrentPicture(): PictureDatabaseShape {
       return currentPicture;
+    },
+    joinCurrentPicture(): void {
+      if (!currentPicture) {
+        console.error('attempting to join before setting current picture');
+        return;
+      }
+      socket.emit('join_picture_request', {
+        filename: currentPicture.filename,
+      });
+    },
+    leaveCurrentPicture(): void {
+      if (!currentPicture) {
+        console.error('attempting to leave before setting current picture');
+        return;
+      }
+      socket.emit('leave_picture_request', {
+        filename: currentPicture.filename,
+      });
     },
     getCurrentRaster(): Raster {
       return currentRaster;

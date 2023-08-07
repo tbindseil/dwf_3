@@ -9,6 +9,7 @@ import { Queue } from './queue';
 export class PictureSyncClient extends Client {
     private readonly pictureAccessor: PictureAccessor;
     private readonly raster: Raster;
+    private readonly filename: string;
     private dirty: boolean;
     private readonly writingInterval: NodeJS.Timer;
     private readonly queue: Queue;
@@ -17,6 +18,7 @@ export class PictureSyncClient extends Client {
         queue: Queue,
         pictureAccessor: PictureAccessor,
         raster: Raster,
+        filename: string,
         writeInterval: number = 30000
     ) {
         super();
@@ -25,11 +27,12 @@ export class PictureSyncClient extends Client {
         this.pictureAccessor = pictureAccessor;
         // no thread protection needed because its only ever being read
         this.raster = raster;
+        this.filename = filename;
         this.dirty = false;
 
         this.writingInterval = setInterval(() => {
             if (this.dirty) {
-                this.pictureAccessor.writeRaster(this.raster);
+                this.pictureAccessor.writeRaster(this.raster, this.filename);
                 this.dirty = false;
             }
         }, writeInterval);
@@ -54,6 +57,6 @@ export class PictureSyncClient extends Client {
         await this.queue.waitForCompletion();
 
         // and write just in case
-        this.pictureAccessor.writeRaster(this.raster);
+        this.pictureAccessor.writeRaster(this.raster, this.filename);
     }
 }

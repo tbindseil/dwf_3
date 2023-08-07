@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
 import { blotRasterToCanvas } from './utils';
 
+// TODO once on bringup of canvas, ask to join
+// and once on un bringup ask to leave
+
 function Canvas() {
   const currentPictureService = useCurrentPictureService();
   const picture = currentPictureService.getCurrentPicture();
