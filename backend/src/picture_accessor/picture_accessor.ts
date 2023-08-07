@@ -9,8 +9,6 @@ export default abstract class PictureAccessor {
 
     public abstract getFileSystem(): string;
 
-    public abstract getPicture(filename: string): Promise<Buffer>;
-
     public abstract getRaster(filename: string): Promise<JoinPictureResponse>;
 
     public abstract writeRaster(

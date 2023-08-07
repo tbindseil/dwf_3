@@ -7,8 +7,6 @@ import { JoinPictureResponse } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
-    public static testDirectory = '/Users/tj/Projects/dwf_3/pictures/test'; // TODO remove this
-
     private readonly jimpAdapter: JimpAdapter;
     private readonly prototypeFileName: string;
     private readonly baseDirectory: string;
@@ -31,10 +29,22 @@ export default class LocalPictureAccessor extends PictureAccessor {
     ): Promise<string> {
         const filename = generatePictureFilename(pictureName, createdBy);
         try {
+            console.log(
+                `TJTAG start copying to ${path.join(
+                    this.baseDirectory,
+                    filename
+                )}`
+            );
             await fs.promises.copyFile(
                 this.prototypeFileName,
                 path.join(this.baseDirectory, filename),
                 fs.constants.COPYFILE_EXCL
+            );
+            console.log(
+                `TJTAG end copying to ${path.join(
+                    this.baseDirectory,
+                    filename
+                )}`
             );
         } catch (error: unknown) {
             console.log(`issue creating new picture: ${JSON.stringify(error)}`);
@@ -70,19 +80,15 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return 'TODO';
     }
 
-    public async getPicture(filename: string): Promise<Buffer> {
-        return await fs.promises.readFile(
-            path.join(this.baseDirectory, filename)
-        );
-    }
-
     public async getRaster(filename: string): Promise<JoinPictureResponse> {
         const fullPath = path.join(this.baseDirectory, filename);
 
         // throws when fullPath doesn't exist, but jimp doesn't for some reason
         await fs.promises.stat(fullPath);
 
+        console.log(`TJTAG start reading of ${fullPath}`);
         const contents = await this.jimpAdapter.read(fullPath);
+        console.log(`TJTAG end reading of ${fullPath}`);
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,
@@ -95,8 +101,12 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
-        await jimg.writeAsync(
-            path.join(LocalPictureAccessor.testDirectory, filename)
+        console.log(
+            `TJTAG start writing of ${path.join(this.baseDirectory, filename)}`
+        );
+        await jimg.writeAsync(path.join(this.baseDirectory, filename));
+        console.log(
+            `TJTAG end writing of ${path.join(this.baseDirectory, filename)}`
         );
     }
 

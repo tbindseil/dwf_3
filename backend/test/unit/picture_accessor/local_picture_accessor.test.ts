@@ -67,21 +67,6 @@ describe('LocalPictureAccessor tests', () => {
         ).rejects.toThrow();
     });
 
-    it('gets the picture given the filename', async () => {
-        const data = 'DATA_FOR_FILE';
-        await fs.promises.writeFile(fullPathFilename, data);
-
-        const buff = await localPictureAccessor.getPicture(filename);
-
-        expect(buff).toEqual(Buffer.from(data));
-    });
-
-    it('throws when there is an issue reading the file', async () => {
-        await expect(
-            localPictureAccessor.getPicture(filename)
-        ).rejects.toThrow();
-    });
-
     it('gets the raster given the filename', async () => {
         await fs.promises.copyFile(testPrototype, fullPathFilename);
         const jimg = await Jimp.read(fullPathFilename);
@@ -119,7 +104,7 @@ describe('LocalPictureAccessor tests', () => {
         localPictureAccessor.writeRaster(rasterToWrite, filename);
 
         expect(mockJimg.writeAsync).toHaveBeenCalledWith(
-            path.join(LocalPictureAccessor.testDirectory, filename)
+            path.join(testBaseDirectory, filename)
         );
     });
 
