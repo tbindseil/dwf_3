@@ -101,6 +101,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
         jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
+        // TJTAG TODO it gets hung up here on integ tests
         console.log(
             `TJTAG start writing of ${path.join(this.baseDirectory, filename)}`
         );

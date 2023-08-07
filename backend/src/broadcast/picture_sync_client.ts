@@ -30,9 +30,15 @@ export class PictureSyncClient extends Client {
         this.filename = filename;
         this.dirty = false;
 
-        this.writingInterval = setInterval(() => {
+        this.writingInterval = setInterval(async () => {
             if (this.dirty) {
-                this.pictureAccessor.writeRaster(this.raster, this.filename);
+                console.log(
+                    `TJTAG writing from close and filename is: ${this.filename}`
+                );
+                await this.pictureAccessor.writeRaster(
+                    this.raster,
+                    this.filename
+                );
                 this.dirty = false;
             }
         }, writeInterval);
@@ -57,6 +63,9 @@ export class PictureSyncClient extends Client {
         await this.queue.waitForCompletion();
 
         // and write just in case
-        this.pictureAccessor.writeRaster(this.raster, this.filename);
+        console.log(
+            `TJTAG writing from close and filename is: ${this.filename}`
+        );
+        await this.pictureAccessor.writeRaster(this.raster, this.filename);
     }
 }

@@ -42,14 +42,20 @@ app.use(cors());
 // decode json request bodies
 app.use(express.json());
 
+// the connectionConfigWithoutDatabase thing
+// has a to do in api.test.ts
 const baseDirectory = '/Users/tj/Projects/dwf_3/pictures/user_created/';
+const configureableAdditionalDirectory =
+    process.env.ENV && process.env.ENV === 'TEST'
+        ? `${baseDirectory}test/`
+        : baseDirectory;
 const prototypeFileName =
     '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
 const jimpAdapter = new JimpAdapterImpl();
 const pictureAccessor = new LocalPictureAccessor(
     jimpAdapter,
     prototypeFileName,
-    baseDirectory
+    configureableAdditionalDirectory
 );
 
 const broadcastMediator = new BroadcastMediator(pictureAccessor);
@@ -94,12 +100,14 @@ io.on(
         socket.on(
             'join_picture_request',
             async (joinPictureRequest: JoinPictureRequest) => {
+                console.log('TJTAG start join picture request handler');
                 joinPictureRequestHandler(
                     joinPictureRequest,
                     broadcastMediator,
                     pictureAccessor,
                     socket
                 );
+                console.log('TJTAG end join picture request handler');
             }
         );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
@@ -109,10 +117,12 @@ io.on(
         socket.on(
             'leave_picture_request',
             (leavePictureRequest: LeavePictureRequest) => {
+                console.log('TJTAG start leave picture request handler');
                 broadcastMediator.removeClient(
                     leavePictureRequest.filename,
                     socket
                 );
+                console.log('TJTAG end leave picture request handler');
             }
         );
 

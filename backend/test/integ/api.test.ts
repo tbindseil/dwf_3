@@ -6,8 +6,10 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 // the actual program cant be running or there is a collision on the port
 // TODO use a new port, or more generally organize startup and ports and stuff
+// like an app config to state whether we are in test, integ test, dev, or prod
 io.listen(6543);
 const port = process.env.PORT || 8080;
+// maybe i want to run this in a separate process since node is single threaded
 server.listen(port, () => {
     // TODO wait until server is running
     console.log(`Listening on port ${port}`);
@@ -98,9 +100,14 @@ describe('happy case', () => {
 
             expect(receivedPictures.has(picture.id)).toBe(true);
 
+            // this isn't waited for...
             socket.emit('leave_picture_request', {
                 filename: picture.filename,
             });
+
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+
+            console.log(`TJTAG done waiting2 for id ${picture.id}`);
 
             console.log(`TJTAG done leaving for id ${picture.id}`);
         }

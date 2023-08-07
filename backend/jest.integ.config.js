@@ -7,4 +7,5 @@ module.exports = {
 
     globalSetup: '<rootDir>/test/integ/setup/global-setup.ts',
     globalTeardown: '<rootDir>/test/integ/setup/global-teardown.ts',
+    testTimeout: 15000,
 };

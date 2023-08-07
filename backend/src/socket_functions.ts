@@ -21,6 +21,10 @@ export async function joinPictureRequestHandler(
         SocketData
     >
 ): Promise<void> {
+    // whoa, gonna have to return the raster from the broadcast mediator
+    // which will involve coordination with the only known raster amongst the clients
+    // which is in the pictureSyncClient.  so that will need a way to ...
+    // or, the broadcast client keeps a new client that is in charge of this
     await broadcastMediator.addClient(joinPictureRequest.filename, socket);
     const joinPictureResponse = await pictureAccessor.getRaster(
         joinPictureRequest.filename

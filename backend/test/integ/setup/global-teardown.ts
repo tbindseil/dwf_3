@@ -5,7 +5,7 @@ import {
 import { removeAllPng } from './utils';
 
 module.exports = async () => {
-    removeAllPng();
+    await removeAllPng();
 
     try {
         const knexWithoutDatabase = makeKnexWithoutDatabase();
