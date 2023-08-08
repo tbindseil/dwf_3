@@ -105,8 +105,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
         //        jimg.bitmap.data = Buffer.from(raster.getBuffer());
         //        console.log(`TJTAG now, jimg.bitmap.data.length is: ${JSON.stringify(jimg.bitmap.data.length)}`);
 
-        const width = 100;
-        const height = 100;
+        const width = 5000;
+        const height = 5000;
         const jimg = this.jimpAdapter.createJimp(width, height);
         // console.log(`TJTAG jimg is: ${JSON.stringify(jimg)}`);
         const arrayBuffer = new ArrayBuffer(width * height * 4);
@@ -126,7 +126,14 @@ export default class LocalPictureAccessor extends PictureAccessor {
         // maybe thats the problem here, I am doing too much copying.
         //
         // 4 X 4 works
+        // 100 X 100 works
+        // 1000 X 1000 works but is def slow
+        // 10000 X 10000 doesn't work
         //
+        // so i guess the next thing to do is request pictures of a certain size
+        // then use small pics in test to get them to pass
+        // clean up
+        // join and leave in canvas frontend
         console.log(
             `TJTAG start writing of ${path.join(this.baseDirectory, filename)}`
         );
