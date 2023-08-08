@@ -105,7 +105,7 @@ describe('happy case', () => {
                 filename: picture.filename,
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             console.log(`TJTAG done waiting2 for id ${picture.id}`);
 
