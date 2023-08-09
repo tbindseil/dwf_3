@@ -25,27 +25,18 @@ export default class LocalPictureAccessor extends PictureAccessor {
 
     public async createNewPicture(
         pictureName: string,
-        createdBy: string
+        createdBy: string,
+        width: number,
+        height: number
     ): Promise<string> {
         const filename = generatePictureFilename(pictureName, createdBy);
         try {
-            console.log(
-                `TJTAG start copying to ${path.join(
-                    this.baseDirectory,
-                    filename
-                )}`
-            );
-            await fs.promises.copyFile(
-                this.prototypeFileName,
-                path.join(this.baseDirectory, filename),
-                fs.constants.COPYFILE_EXCL
-            );
-            console.log(
-                `TJTAG end copying to ${path.join(
-                    this.baseDirectory,
-                    filename
-                )}`
-            );
+            console.log('before new pic');
+            const jimg = this.jimpAdapter.createJimp(width, height);
+            const arrayBuffer = new ArrayBuffer(width * height * 4);
+            jimg.bitmap.data = Buffer.from(new Uint8ClampedArray(arrayBuffer));
+            await jimg.writeAsync(path.join(this.baseDirectory, filename));
+            console.log('end of new pic');
         } catch (error: unknown) {
             console.log(`issue creating new picture: ${JSON.stringify(error)}`);
             throw error;
@@ -105,8 +96,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
         //        jimg.bitmap.data = Buffer.from(raster.getBuffer());
         //        console.log(`TJTAG now, jimg.bitmap.data.length is: ${JSON.stringify(jimg.bitmap.data.length)}`);
 
-        const width = 5000;
-        const height = 5000;
+        const width = 100;
+        const height = 100;
         const jimg = this.jimpAdapter.createJimp(width, height);
         // console.log(`TJTAG jimg is: ${JSON.stringify(jimg)}`);
         const arrayBuffer = new ArrayBuffer(width * height * 4);

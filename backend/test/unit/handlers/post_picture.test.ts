@@ -13,7 +13,9 @@ const mockPicture = jest.mocked(Picture, true);
 describe('PostPicture Tests', () => {
     const name = 'name';
     const createdBy = 'createdBy';
-    const body = { name: name, createdBy: createdBy };
+    const width = 5;
+    const height = 5;
+    const body = { name, createdBy, width, height };
 
     const mockJimpAdapter = {
         createJimp: jest.fn(),
@@ -51,7 +53,12 @@ describe('PostPicture Tests', () => {
         await postPicture.process(body, mockKnex);
 
         expect(mockCreateNewPicture).toHaveBeenCalledTimes(1);
-        expect(mockCreateNewPicture).toHaveBeenCalledWith(name, createdBy);
+        expect(mockCreateNewPicture).toHaveBeenCalledWith(
+            name,
+            createdBy,
+            5,
+            5
+        );
     });
 
     it('calls db query when procesing', async () => {

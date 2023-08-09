@@ -32,7 +32,9 @@ export class PostPicture extends API<PostPictureInput, PostPictureOutput> {
         const filesystem = this.pictureAccessor.getFileSystem();
         const filename = await this.pictureAccessor.createNewPicture(
             name,
-            createdBy
+            createdBy,
+            input.width,
+            input.height
         );
 
         await Picture.query(knex).insert({

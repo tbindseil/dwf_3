@@ -23,6 +23,8 @@ describe('happy case', () => {
             createdBy: 'createdb1',
             filename: 'filenam1',
             filesystem: 'filesyste1',
+            width: 100,
+            height: 100,
         },
         {
             id: 2,
@@ -30,6 +32,8 @@ describe('happy case', () => {
             createdBy: 'createdb2',
             filename: 'filenam2',
             filesystem: 'filesyste2',
+            width: 100,
+            height: 100,
         },
         {
             id: 3,
@@ -37,6 +41,8 @@ describe('happy case', () => {
             createdBy: 'createdb3',
             filename: 'filenam3',
             filesystem: 'filesyste3',
+            width: 100,
+            height: 100,
         },
     ];
 
@@ -52,6 +58,8 @@ describe('happy case', () => {
             const payload: PostPictureInput = {
                 name: picture.name,
                 createdBy: picture.createdBy,
+                width: 100,
+                height: 100,
             };
             await request(server)
                 .post('/picture')

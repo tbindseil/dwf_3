@@ -38,7 +38,13 @@ const PictureService = ({ children }: any) => {
           method: 'POST',
           mode: 'cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ createdBy: input.createdBy, name: input.name }),
+          body: JSON.stringify({
+            createdBy: input.createdBy,
+            name: input.name,
+            // TODO add this to the interface
+            width: 1000,
+            height: 1000,
+          }),
         })
       ).json();
 

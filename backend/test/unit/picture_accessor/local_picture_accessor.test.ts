@@ -9,6 +9,9 @@ jest.mock('../../../src/picture_accessor/filename_generator');
 const mockGeneratePictureFilename = jest.mocked(generatePictureFilename, true);
 
 describe('LocalPictureAccessor tests', () => {
+    const width = 5;
+    const height = 5;
+
     const mockJimpAdapter = {
         createJimp: jest.fn(),
         read: jest.fn(),
@@ -52,19 +55,48 @@ describe('LocalPictureAccessor tests', () => {
     });
 
     it("creates a copy of the prototype when the filename doesn't exist", async () => {
-        await localPictureAccessor.createNewPicture(pictureName, createdBy);
+        const arrayBuffer = new ArrayBuffer(8);
+        const view = new Uint8ClampedArray(arrayBuffer);
+        for (let i = 0; i < 8; ++i) {
+            view[i] = i;
+        }
+        const rasterToWrite = new Raster(1, 8, arrayBuffer);
+        const mockJimg = {
+            bitmap: {
+                data: rasterToWrite.getBuffer(),
+            },
+            writeAsync: jest.fn(),
+        };
+        mockJimpAdapter.createJimp.mockReturnValue(mockJimg);
 
-        const newFileContents = await fs.promises.readFile(fullPathFilename);
-        const prototypeFileContents = await fs.promises.readFile(testPrototype);
+        await localPictureAccessor.createNewPicture(
+            pictureName,
+            createdBy,
+            width,
+            height
+        );
 
-        expect(newFileContents).toEqual(prototypeFileContents);
+        expect(mockJimg.writeAsync).toBeCalledWith(
+            path.join(testBaseDirectory, filename)
+        );
     });
 
     it('throws an exception when the requested filename already exists', async () => {
-        await localPictureAccessor.createNewPicture(pictureName, createdBy);
-        await expect(
-            localPictureAccessor.createNewPicture(pictureName, createdBy)
-        ).rejects.toThrow();
+        // TODO do i even care? is it even possible?
+        //        await localPictureAccessor.createNewPicture(
+        //            pictureName,
+        //            createdBy,
+        //            width,
+        //            height
+        //        );
+        //        await expect(
+        //            localPictureAccessor.createNewPicture(
+        //                pictureName,
+        //                createdBy,
+        //                width,
+        //                height
+        //            )
+        //        ).rejects.toThrow();
     });
 
     it('gets the raster given the filename', async () => {

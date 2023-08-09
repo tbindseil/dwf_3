@@ -4,7 +4,9 @@ import { Raster } from 'dwf-3-raster-tjb';
 export default abstract class PictureAccessor {
     public abstract createNewPicture(
         pictureName: string,
-        createdBy: string
+        createdBy: string,
+        width: number,
+        height: number
     ): Promise<string>;
 
     public abstract getFileSystem(): string;
