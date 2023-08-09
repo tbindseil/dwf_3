@@ -31,12 +31,10 @@ export default class LocalPictureAccessor extends PictureAccessor {
     ): Promise<string> {
         const filename = generatePictureFilename(pictureName, createdBy);
         try {
-            console.log('before new pic');
             const jimg = this.jimpAdapter.createJimp(width, height);
             const arrayBuffer = new ArrayBuffer(width * height * 4);
             jimg.bitmap.data = Buffer.from(new Uint8ClampedArray(arrayBuffer));
             await jimg.writeAsync(path.join(this.baseDirectory, filename));
-            console.log('end of new pic');
         } catch (error: unknown) {
             console.log(`issue creating new picture: ${JSON.stringify(error)}`);
             throw error;
@@ -77,9 +75,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
         // throws when fullPath doesn't exist, but jimp doesn't for some reason
         await fs.promises.stat(fullPath);
 
-        console.log(`TJTAG start reading of ${fullPath}`);
         const contents = await this.jimpAdapter.read(fullPath);
-        console.log(`TJTAG end reading of ${fullPath}`);
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,
@@ -88,50 +84,12 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     public async writeRaster(raster: Raster, filename: string): Promise<void> {
-        //        const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
-        //        // console.log(`TJTAG jimg is: ${JSON.stringify(jimg)}`);
-        //        console.log(`TJTAG jimg.bitmap.data.length is: ${jimg.bitmap.data.length}`);
-        //
-        //        // creates a new buffer
-        //        jimg.bitmap.data = Buffer.from(raster.getBuffer());
-        //        console.log(`TJTAG now, jimg.bitmap.data.length is: ${JSON.stringify(jimg.bitmap.data.length)}`);
+        const jimg = this.jimpAdapter.createJimp(raster.width, raster.height);
 
-        const width = 100;
-        const height = 100;
-        const jimg = this.jimpAdapter.createJimp(width, height);
-        // console.log(`TJTAG jimg is: ${JSON.stringify(jimg)}`);
-        const arrayBuffer = new ArrayBuffer(width * height * 4);
-
-        // const asArray = new Uint8ClampedArray(buffer);
         // creates a new buffer
-        jimg.bitmap.data = Buffer.from(new Uint8ClampedArray(arrayBuffer));
-        // console.log(`TJTAG now, jimg is: ${JSON.stringify(jimg)}`);
+        jimg.bitmap.data = Buffer.from(raster.getBuffer());
 
-        // TJTAG TODO it gets hung up here on integ tests
-        // I suspect this is brekaing
-        // maybe because I'm over simplifying the creation of the image
-        // so i want to print out (via tee)
-        // but need to use a smaller default file <- start here
-        //
-        // but if i do a small raster it will write
-        // maybe thats the problem here, I am doing too much copying.
-        //
-        // 4 X 4 works
-        // 100 X 100 works
-        // 1000 X 1000 works but is def slow
-        // 10000 X 10000 doesn't work
-        //
-        // so i guess the next thing to do is request pictures of a certain size
-        // then use small pics in test to get them to pass
-        // clean up
-        // join and leave in canvas frontend
-        console.log(
-            `TJTAG start writing of ${path.join(this.baseDirectory, filename)}`
-        );
         await jimg.writeAsync(path.join(this.baseDirectory, filename));
-        console.log(
-            `TJTAG end writing of ${path.join(this.baseDirectory, filename)}`
-        );
     }
 
     public getFileSystem(): string {

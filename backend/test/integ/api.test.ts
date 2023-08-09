@@ -83,7 +83,6 @@ describe('happy case', () => {
 
         // pictures.pictures.forEach(async (picture: PictureDatabaseShape) => {
         for (const picture of pictures.pictures) {
-            console.log(`TJTAG start loop for id ${picture.id}`);
             socket.removeListener('join_picture_response');
             socket.on(
                 'join_picture_response',
@@ -96,15 +95,11 @@ describe('happy case', () => {
                 }
             );
 
-            console.log(`TJTAG done setting up handlers for id ${picture.id}`);
-
             socket.emit('join_picture_request', {
                 filename: picture.filename,
             });
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            console.log(`TJTAG done waiting for id ${picture.id}`);
 
             expect(receivedPictures.has(picture.id)).toBe(true);
 
@@ -114,10 +109,6 @@ describe('happy case', () => {
             });
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            console.log(`TJTAG done waiting2 for id ${picture.id}`);
-
-            console.log(`TJTAG done leaving for id ${picture.id}`);
         }
 
         // now... i have to close
