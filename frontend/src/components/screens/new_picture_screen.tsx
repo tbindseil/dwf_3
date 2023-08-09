@@ -51,6 +51,8 @@ export function NewPictureScreen() {
             await pictureService.createPicture({
               createdBy: createdBy,
               name: pictureName,
+              width: 1000,
+              height: 1000,
             });
           } catch (error: unknown) {
             setError(true);

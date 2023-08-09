@@ -87,6 +87,8 @@ describe('NewPictureScreen tests', () => {
     expect(mockPictureService.createPicture).toBeCalledWith({
       createdBy: createdByInputVal,
       name: pictureNameInputVal,
+      width: 1000,
+      height: 1000,
     });
   });
 
