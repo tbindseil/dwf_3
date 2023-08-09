@@ -21,7 +21,6 @@ describe('PostPicture Tests', () => {
         createJimp: jest.fn(),
         read: jest.fn(),
     };
-    const prototypeFileName = 'prototypeFileName';
     const baseDirectory = 'baseDirectory';
     let mockLocalPictureAccessorInstance: LocalPictureAccessor;
 
@@ -34,7 +33,6 @@ describe('PostPicture Tests', () => {
         mockJimpAdapter.read.mockClear();
         mockLocalPictureAccessorInstance = new LocalPictureAccessor(
             mockJimpAdapter,
-            prototypeFileName,
             baseDirectory
         );
         postPicture = new PostPicture(mockLocalPictureAccessorInstance);

@@ -49,12 +49,9 @@ const configureableAdditionalDirectory =
     process.env.ENV && process.env.ENV === 'TEST'
         ? `${baseDirectory}test/`
         : baseDirectory;
-const prototypeFileName =
-    '/Users/tj/Projects/dwf_3/pictures/default/sample_1000_1619.png';
 const jimpAdapter = new JimpAdapterImpl();
 const pictureAccessor = new LocalPictureAccessor(
     jimpAdapter,
-    prototypeFileName,
     configureableAdditionalDirectory
 );
 

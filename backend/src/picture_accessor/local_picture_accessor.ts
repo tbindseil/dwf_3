@@ -8,18 +8,12 @@ import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
     private readonly jimpAdapter: JimpAdapter;
-    private readonly prototypeFileName: string;
     private readonly baseDirectory: string;
 
-    constructor(
-        jimpAdapter: JimpAdapter,
-        prototypeFileName: string,
-        baseDirectory: string
-    ) {
+    constructor(jimpAdapter: JimpAdapter, baseDirectory: string) {
         super();
 
         this.jimpAdapter = jimpAdapter;
-        this.prototypeFileName = prototypeFileName;
         this.baseDirectory = baseDirectory;
     }
 

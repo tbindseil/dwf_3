@@ -19,8 +19,6 @@ describe('LocalPictureAccessor tests', () => {
 
     const testBaseDirectory =
         '/Users/tj/Projects/dwf_3/test_pictures/user_created/';
-    const testPrototype =
-        '/Users/tj/Projects/dwf_3/test_pictures/default/solid_white.png';
 
     const pictureName = 'pictureName';
     const createdBy = 'createdBy';
@@ -37,7 +35,6 @@ describe('LocalPictureAccessor tests', () => {
 
     const localPictureAccessor = new LocalPictureAccessor(
         mockJimpAdapter,
-        testPrototype,
         testBaseDirectory
     );
 
@@ -54,7 +51,7 @@ describe('LocalPictureAccessor tests', () => {
         expect(filesystem).toEqual('LOCAL');
     });
 
-    it("creates a copy of the prototype when the filename doesn't exist", async () => {
+    it("creates a new picture when the filename doesn't exist", async () => {
         const arrayBuffer = new ArrayBuffer(8);
         const view = new Uint8ClampedArray(arrayBuffer);
         for (let i = 0; i < 8; ++i) {
@@ -100,6 +97,8 @@ describe('LocalPictureAccessor tests', () => {
     });
 
     it('gets the raster given the filename', async () => {
+        const testPrototype =
+            '/Users/tj/Projects/dwf_3/test_pictures/default/solid_white.png';
         await fs.promises.copyFile(testPrototype, fullPathFilename);
         const jimg = await Jimp.read(fullPathFilename);
 
