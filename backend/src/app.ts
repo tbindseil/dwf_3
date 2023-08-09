@@ -100,14 +100,12 @@ io.on(
         socket.on(
             'join_picture_request',
             async (joinPictureRequest: JoinPictureRequest) => {
-                console.log('TJTAG start join picture request handler');
                 joinPictureRequestHandler(
                     joinPictureRequest,
                     broadcastMediator,
                     pictureAccessor,
                     socket
                 );
-                console.log('TJTAG end join picture request handler');
             }
         );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
@@ -117,12 +115,10 @@ io.on(
         socket.on(
             'leave_picture_request',
             (leavePictureRequest: LeavePictureRequest) => {
-                console.log('TJTAG start leave picture request handler');
                 broadcastMediator.removeClient(
                     leavePictureRequest.filename,
                     socket
                 );
-                console.log('TJTAG end leave picture request handler');
             }
         );
 

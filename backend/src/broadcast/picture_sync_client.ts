@@ -4,8 +4,6 @@ import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { Queue } from './queue';
 
-// TJTAG tests for new stuff and see if it works in the web
-
 export class PictureSyncClient extends Client {
     private readonly pictureAccessor: PictureAccessor;
     private readonly raster: Raster;
@@ -32,9 +30,6 @@ export class PictureSyncClient extends Client {
 
         this.writingInterval = setInterval(async () => {
             if (this.dirty) {
-                console.log(
-                    `TJTAG writing from close and filename is: ${this.filename}`
-                );
                 await this.pictureAccessor.writeRaster(
                     this.raster,
                     this.filename
@@ -63,9 +58,6 @@ export class PictureSyncClient extends Client {
         await this.queue.waitForCompletion();
 
         // and write just in case
-        console.log(
-            `TJTAG writing from close and filename is: ${this.filename}`
-        );
         await this.pictureAccessor.writeRaster(this.raster, this.filename);
     }
 }
