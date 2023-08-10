@@ -70,6 +70,13 @@ export default class LocalPictureAccessor extends PictureAccessor {
         await fs.promises.stat(fullPath);
 
         const contents = await this.jimpAdapter.read(fullPath);
+        console.log(`TJTAG width is; ${contents.bitmap.width}`);
+        console.log(`TJTAG height is; ${contents.bitmap.height}`);
+        console.log(`TJTAG datalength is; ${contents.bitmap.data.length}`);
+        for (let i = 0; i < 64; ++i) {
+            console.log(`TJTAG - data[${i}] is: ${contents.bitmap.data[i]}`);
+            // TJTAG whoa data might be four times as long
+        }
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,

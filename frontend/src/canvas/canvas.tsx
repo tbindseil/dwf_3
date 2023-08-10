@@ -1,5 +1,5 @@
 import '../App.css';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
 import { blotRasterToCanvas } from './utils';
@@ -8,6 +8,9 @@ import { blotRasterToCanvas } from './utils';
 // and once on un bringup ask to leave
 
 function Canvas() {
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+
   const currentPictureService = useCurrentPictureService();
   const picture = currentPictureService.getCurrentPicture();
 
@@ -19,26 +22,27 @@ function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    currentPictureService.joinCurrentPicture();
     const interval = setInterval(() => {
       const raster = currentPictureService.getCurrentRaster();
-      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      if (!raster || raster.width === 0 || raster.height === 0) {
+        console.log('raster width or height is 0, not updating');
+        return;
+      }
 
+      setWidth(raster.width);
+      setHeight(raster.height);
+
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       blotRasterToCanvas(raster, canvas);
     }, 30);
-    return () => clearInterval(interval);
+    // TJTAG I think I just add the leaveCurrentPicture call here...
+    return () => {
+      clearInterval(interval);
+      currentPictureService.leaveCurrentPicture();
+    };
   }, []);
 
-  // TJTAG
-  // so what's next?
-  // settings? no , they belong to users
-  // so users is next...
-  // yikes that's a big one
-  // anything before that?
-  // yeah, actually respect the pictures
-  // so,
-  //  open the picture instead of just a random one - already done
-  //  save the picture as its updated
-  // I guess I still need to test current picture service...
   const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     // for now just gonna do white pixels
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
@@ -92,7 +96,13 @@ function Canvas() {
         </button>
       </p>
       <br />
-      <canvas id='canvas' ref={canvasRef} onClick={click}></canvas>
+      <canvas
+        id='canvas'
+        ref={canvasRef}
+        onClick={click}
+        width={Math.max(100, width)}
+        height={Math.max(100, height)}
+      ></canvas>
     </div>
   );
 }

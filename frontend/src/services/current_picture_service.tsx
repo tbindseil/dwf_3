@@ -58,8 +58,11 @@ const CurrentPictureService = ({ children }: any) => {
     },
     setCurrentRaster(joinPictureResponse: JoinPictureResponse): void {
       // TODO something is off, the width and height are right but the picture is too "short"
+
+      const asArray = new Uint8ClampedArray(joinPictureResponse.data);
+
       console.log(
-        `got join picture response, width is: ${joinPictureResponse.width} and height is : ${joinPictureResponse.height}`,
+        `TJTAG - got join picture response, datalength is ${asArray.length} and width is: ${joinPictureResponse.width} and height is : ${joinPictureResponse.height}`,
       );
       // this is private...
       currentRaster = new Raster(
@@ -76,6 +79,7 @@ const CurrentPictureService = ({ children }: any) => {
         console.error('attempting to join before setting current picture');
         return;
       }
+      console.log('TJTAG joining current picture');
       socket.emit('join_picture_request', {
         filename: currentPicture.filename,
       });
@@ -85,6 +89,7 @@ const CurrentPictureService = ({ children }: any) => {
         console.error('attempting to leave before setting current picture');
         return;
       }
+      console.log('TJTAG leaving current picture');
       socket.emit('leave_picture_request', {
         filename: currentPicture.filename,
       });
