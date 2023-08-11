@@ -1,0 +1,12 @@
+--ignore-dir=coverage
+--ignore-dir=node_modules
+--ignore-dir=raster/build
+--ignore-dir=models/build
+--ignore-dir=frontend/build
+--ignore-dir=backend/build
+--ignore-file=is:Session.vim
+--ignore-file=is:.gitignore
+--ignore-file=is:plan.txt
+--ignore-file=is:ackrc
+--ignore-file=is:README.md
+--ignore-file=is:.prettierrc.json

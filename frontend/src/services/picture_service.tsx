@@ -13,7 +13,6 @@ import Ajv from 'ajv';
 // 2. check out if we are still getting a bunch of (see TJTAgs)
 // 3. fuzzy finder for neovim
 // 3a. files
-// 3b. ack
 // 4. home button
 
 export interface IPictureService {

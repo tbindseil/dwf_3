@@ -11,3 +11,6 @@ to install the models package as a dependency to the raster package:
 cd <root_dir>/raster
 npm install ../models
 ```
+
+# misc
+ackrc picked up in home directory
