@@ -119,9 +119,13 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
-            throw new Error(
+            // this is happening due to a race conition where we leave immediately after joining
+            // that shouldn't happen, but if it does it leaves a socket unclean
+            // but the socket ultimately closes
+            console.error(
                 `unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
             );
+            return;
         }
 
         const trackedPicture = this.filenameToClients.get(filename);
@@ -129,9 +133,15 @@ export default class BroadcastMediator {
         if (trackedPicture) {
             const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
             if (!clientToDelete) {
-                throw new Error(
+                // same thing as above, except on second and on clients
+                //
+                // this is happening due to a race conition where we leave immediately after joining
+                // that shouldn't happen, but if it does it leaves a socket unclean
+                // but the socket ultimately closes
+                console.error(
                     `unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
                 );
+                return;
             }
 
             clientToDelete.close();

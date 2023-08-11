@@ -5,6 +5,7 @@ Test with: 'node test' from the <project_root>/backend dir
 |--> now i run with watch via `npm run test -- --watch`
 |--> and i run coverage with `npm run test -- --coverage`
 |--> but i can't do both at the same time
+|--> to run just one file do: npm run test -- -f broadcast_mediator
 
 to save database ddl as sql commands:
 Click on Tables -> Views Tables -> Select All tables in right window Right click selection -> Generate SQL" -> DDL
