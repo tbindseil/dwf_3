@@ -86,7 +86,6 @@ describe('Canvas tests', () => {
   });
 
   it('renders NewPictureScreen button', async () => {
-  screen.debug();
     const newPictureButton = screen.getByText('New Picture');
     expect(newPictureButton).toBeInTheDocument();
 

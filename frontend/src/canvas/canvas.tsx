@@ -19,7 +19,6 @@ function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    currentPictureService.joinCurrentPicture();
     const interval = setInterval(() => {
       const raster = currentPictureService.getCurrentRaster();
       if (!raster || raster.width === 0 || raster.height === 0) {
@@ -36,7 +35,6 @@ function Canvas() {
 
     return () => {
       clearInterval(interval);
-      currentPictureService.leaveCurrentPicture();
     };
   }, []);
 

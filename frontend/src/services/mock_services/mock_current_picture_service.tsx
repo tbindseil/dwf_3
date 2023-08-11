@@ -12,8 +12,6 @@ export const mockCurrentPictureService = {
   setCurrentPicture: jest.fn(),
   getCurrentPicture: jest.fn(),
   getCurrentRaster: jest.fn(),
-  joinCurrentPicture: jest.fn(),
-  leaveCurrentPicture: jest.fn(),
   handleUserUpdate: jest.fn(),
 };
 

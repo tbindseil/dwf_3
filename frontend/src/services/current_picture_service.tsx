@@ -11,8 +11,6 @@ export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
   getCurrentPicture(): PictureDatabaseShape;
   getCurrentRaster(): Raster;
-  joinCurrentPicture(): void;
-  leaveCurrentPicture(): void;
   handleUserUpdate(pixelUpdate: PixelUpdate): void;
 }
 
@@ -40,7 +38,15 @@ const CurrentPictureService = ({ children }: any) => {
 
   const currentPictureService = {
     setCurrentPicture(picture: PictureDatabaseShape): void {
+      // we are relying on the app closing, the socket getting cleaned periodically somehow?
+      // because we only leave when we join a new one
+      // I guess i could do it on pagehide..
+      // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
+      if (currentPicture !== picture) {
+        this.leaveCurrentPicture();
+      }
       currentPicture = picture;
+      this.joinCurrentPicture();
       setupListeners();
     },
     setCurrentRaster(joinPictureResponse: JoinPictureResponse): void {
@@ -55,10 +61,6 @@ const CurrentPictureService = ({ children }: any) => {
       return currentPicture;
     },
     joinCurrentPicture(): void {
-      if (!currentPicture) {
-        console.error('attempting to join before setting current picture');
-        return;
-      }
       socket.emit('join_picture_request', {
         filename: currentPicture.filename,
       });
