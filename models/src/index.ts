@@ -1,7 +1,6 @@
 import Picture, { PictureDatabaseShape } from './picture';
 import { GetPicturesInput, GetPicturesOutput } from './get_pictures';
 import { PostPictureInput, PostPictureOutput } from './post_picture';
-import { PostUpdateInput, PostUpdateOutput } from './post_update';
 import { Update } from './updates/update';
 import { PixelUpdate } from './updates/pixel_update';
 import {
@@ -22,8 +21,6 @@ export {
     GetPicturesOutput,
     PostPictureInput,
     PostPictureOutput,
-    PostUpdateInput,
-    PostUpdateOutput,
     Update,
     PixelUpdate,
     ClientToServerEvents,
