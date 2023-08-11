@@ -36,6 +36,3 @@ export interface JoinPictureResponse {
     height: number;
     data: ArrayBuffer;
 }
-
-// TJTAG TODO next is LeavePictureRequest/Response
-// may be a good time to switch to using id instead of filename

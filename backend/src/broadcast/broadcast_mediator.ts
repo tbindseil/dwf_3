@@ -48,6 +48,8 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
+            console.log('TJTAG start of if');
+            this.filenameToClients.forEach((value: TrackedPicture, key: string) => console.log(`TJTAG key: ${key} and value: ${value}`));
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const rasterObject = await this.pictureAccessor.getRaster(filename);
             const raster = new Raster(
@@ -70,6 +72,10 @@ export default class BroadcastMediator {
                 idToClientMap: m,
                 raster: raster,
             });
+            console.log('TJTAG just set');
+            this.filenameToClients.forEach((value: TrackedPicture, key: string) => console.log(`TJTAG key: ${key} and value: ${value}`));
+        } else {
+          console.log('ELSE???');
         }
 
         const clientMap = this.filenameToClients.get(filename);
@@ -83,6 +89,7 @@ export default class BroadcastMediator {
     // make sure its the broadcast client and remove that
     //
     // revisiting, this can be done much cleaner using the features of socket.io
+    // damn
     public removeClient(
         filename: string,
         socket: Socket<
@@ -97,12 +104,7 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
-            // TODO why did this (or the next one) get hit when using web page?
-            // throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
-            console.log(
-                `TJTAG - unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
-            );
-            return;
+          throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
         }
 
         const trackedPicture = this.filenameToClients.get(filename);
@@ -110,11 +112,7 @@ export default class BroadcastMediator {
         if (trackedPicture) {
             const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
             if (!clientToDelete) {
-                // throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
-                console.log(
-                    `TJTAG - unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
-                );
-                return;
+                throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
             }
 
             clientToDelete.close();

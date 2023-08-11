@@ -93,16 +93,22 @@ io.on(
             SocketData
         >
     ) => {
-        console.log(`io.on connection and socket.id is: ${socket.id}`);
+        console.log(`TJTAG - io.on connection and socket.id is: ${socket.id}`);
+        // TJTAG there is a race condition here,
+        // were not done joining when we get a leave
+        //
+        // tough one
         socket.on(
             'join_picture_request',
             async (joinPictureRequest: JoinPictureRequest) => {
-                joinPictureRequestHandler(
+              console.log('TJTAG start joinPictureRequest');
+                await joinPictureRequestHandler(
                     joinPictureRequest,
                     broadcastMediator,
                     pictureAccessor,
                     socket
                 );
+              console.log('TJTAG end joinPictureRequest');
             }
         );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
@@ -112,10 +118,12 @@ io.on(
         socket.on(
             'leave_picture_request',
             (leavePictureRequest: LeavePictureRequest) => {
+              console.log('TJTAG start leavePictureRequest');
                 broadcastMediator.removeClient(
                     leavePictureRequest.filename,
                     socket
                 );
+              console.log('TJTAG end leavePictureRequest');
             }
         );
 

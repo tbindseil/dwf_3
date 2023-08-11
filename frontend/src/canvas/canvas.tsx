@@ -23,7 +23,7 @@ function Canvas() {
     const interval = setInterval(() => {
       const raster = currentPictureService.getCurrentRaster();
       if (!raster || raster.width === 0 || raster.height === 0) {
-        console.log('raster width or height is 0, not updating');
+        // console.log('raster width or height is 0, not updating');
         return;
       }
 

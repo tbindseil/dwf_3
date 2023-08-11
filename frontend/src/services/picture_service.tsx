@@ -10,10 +10,8 @@ import ProvidedServices from './provided_services';
 import Ajv from 'ajv';
 
 // TJTAG
-// 2. check out if we are still getting a bunch of (see TJTAgs)
-// 3. fuzzy finder for neovim
-// 3a. files
-// 4. home button
+// 3. syncronize initial sync with updates that have happened since the last write
+// 4. can we reconnect successfully when the server goes down
 
 export interface IPictureService {
   createPicture(input: PostPictureInput): Promise<PostPictureOutput>;

@@ -68,6 +68,7 @@ const CurrentPictureService = ({ children }: any) => {
         console.error('attempting to leave before setting current picture');
         return;
       }
+        console.error('attempting to leave NOTNOTNOT before setting current picture');
       socket.emit('leave_picture_request', {
         filename: currentPicture.filename,
       });
