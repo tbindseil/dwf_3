@@ -60,11 +60,6 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
-            console.log('TJTAG start of if');
-            this.filenameToClients.forEach(
-                (value: TrackedPicture, key: string) =>
-                    console.log(`TJTAG key: ${key} and value: ${value}`)
-            );
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const m = new Map();
             m.set(
@@ -81,13 +76,6 @@ export default class BroadcastMediator {
                 idToClientMap: m,
                 raster: raster,
             });
-            console.log('TJTAG just set');
-            this.filenameToClients.forEach(
-                (value: TrackedPicture, key: string) =>
-                    console.log(`TJTAG key: ${key} and value: ${value}`)
-            );
-        } else {
-            console.log('ELSE???');
         }
 
         const clientMap = this.filenameToClients.get(filename);
