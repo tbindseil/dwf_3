@@ -9,7 +9,8 @@ import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
 import Ajv from 'ajv';
 
-// TJTAG
+// TJTAG main list
+// 2. race condition
 // 3. syncronize initial sync with updates that have happened since the last write
 // 4. can we reconnect successfully when the server goes down
 

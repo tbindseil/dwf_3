@@ -19,6 +19,11 @@ interface TrackedPicture {
     raster: Raster;
 }
 
+// TJTAG these actions all need to be syncrhonied, basically serialized
+// and that queue in psc makes things way harder..
+//
+//
+
 export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
 
@@ -47,16 +52,20 @@ export default class BroadcastMediator {
             `adding client, filename: ${filename} and socket id: ${socket.id}`
         );
 
+        const rasterObject = await this.pictureAccessor.getRaster(filename);
+        const raster = new Raster(
+            rasterObject.width,
+            rasterObject.height,
+            rasterObject.data
+        );
+
         if (!this.filenameToClients.has(filename)) {
             console.log('TJTAG start of if');
-            this.filenameToClients.forEach((value: TrackedPicture, key: string) => console.log(`TJTAG key: ${key} and value: ${value}`));
-            // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
-            const rasterObject = await this.pictureAccessor.getRaster(filename);
-            const raster = new Raster(
-                rasterObject.width,
-                rasterObject.height,
-                rasterObject.data
+            this.filenameToClients.forEach(
+                (value: TrackedPicture, key: string) =>
+                    console.log(`TJTAG key: ${key} and value: ${value}`)
             );
+            // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const m = new Map();
             m.set(
                 BroadcastMediator.PICTURE_SYNC_KEY,
@@ -73,15 +82,21 @@ export default class BroadcastMediator {
                 raster: raster,
             });
             console.log('TJTAG just set');
-            this.filenameToClients.forEach((value: TrackedPicture, key: string) => console.log(`TJTAG key: ${key} and value: ${value}`));
+            this.filenameToClients.forEach(
+                (value: TrackedPicture, key: string) =>
+                    console.log(`TJTAG key: ${key} and value: ${value}`)
+            );
         } else {
-          console.log('ELSE???');
+            console.log('ELSE???');
         }
 
         const clientMap = this.filenameToClients.get(filename);
         if (clientMap) {
             clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));
         }
+
+        // is this a deep copy?
+        socket.emit('join_picture_response', rasterObject);
     }
 
     // first, remove the client that is disconnecting
@@ -104,7 +119,9 @@ export default class BroadcastMediator {
         );
 
         if (!this.filenameToClients.has(filename)) {
-          throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
+            throw new Error(
+                `unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
+            );
         }
 
         const trackedPicture = this.filenameToClients.get(filename);
@@ -112,7 +129,9 @@ export default class BroadcastMediator {
         if (trackedPicture) {
             const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
             if (!clientToDelete) {
-                throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
+                throw new Error(
+                    `unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
+                );
             }
 
             clientToDelete.close();

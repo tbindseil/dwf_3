@@ -26,10 +26,6 @@ export async function joinPictureRequestHandler(
     // which is in the pictureSyncClient.  so that will need a way to ...
     // or, the broadcast client keeps a new client that is in charge of this
     await broadcastMediator.addClient(joinPictureRequest.filename, socket);
-    const joinPictureResponse = await pictureAccessor.getRaster(
-        joinPictureRequest.filename
-    ); // TODO this is happening way too much..
-    socket.emit('join_picture_response', joinPictureResponse);
 }
 
 export function updateHandler(

@@ -98,17 +98,17 @@ io.on(
         // were not done joining when we get a leave
         //
         // tough one
+        //
+        // so,
         socket.on(
             'join_picture_request',
             async (joinPictureRequest: JoinPictureRequest) => {
-              console.log('TJTAG start joinPictureRequest');
-                await joinPictureRequestHandler(
-                    joinPictureRequest,
-                    broadcastMediator,
-                    pictureAccessor,
+                console.log('TJTAG start joinPictureRequest');
+                await broadcastMediator.addClient(
+                    joinPictureRequest.filename,
                     socket
                 );
-              console.log('TJTAG end joinPictureRequest');
+                console.log('TJTAG end joinPictureRequest');
             }
         );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
@@ -118,12 +118,12 @@ io.on(
         socket.on(
             'leave_picture_request',
             (leavePictureRequest: LeavePictureRequest) => {
-              console.log('TJTAG start leavePictureRequest');
+                console.log('TJTAG start leavePictureRequest');
                 broadcastMediator.removeClient(
                     leavePictureRequest.filename,
                     socket
                 );
-              console.log('TJTAG end leavePictureRequest');
+                console.log('TJTAG end leavePictureRequest');
             }
         );
 
