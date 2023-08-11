@@ -139,11 +139,6 @@ describe('LocalPictureAccessor tests', () => {
         );
     });
 
-    it('did not implement createNewPicture_with_dimensions method', () => {
-        const ret = localPictureAccessor.createNewPicture_with_dimensions(1);
-        expect(ret).toEqual('TODO');
-    });
-
     it('throws when getRaster is called with a non existent file name', async () => {
         await expect(localPictureAccessor.getRaster('poopy')).rejects.toThrow();
     });

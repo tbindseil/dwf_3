@@ -39,33 +39,6 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return filename;
     }
 
-    public createNewPicture_with_dimensions(width_supplied: number): string {
-        //         const phi = (1 + Math.sqrt(5)) / 2; // roughly 1.618033988749894
-        //         const width = 1000;
-        //         const height = Math.ceil(width * phi);
-        //
-        //         const asArray = new Uint8ClampedArray(4 * width * height);
-        //         for (let i = 0; i < asArray.length; ++i) {
-        //             if (i % 4 === 3) {
-        //                 asArray[i] = 0xff;
-        //             }
-        //         }
-        //
-        //         const buffer = Buffer.from(asArray);
-        //
-        //         // Jimp.write(buffer);
-        //         // const jimg = new Jimp(width, height);
-        //         const jimg = this.jimpAdapter.createJimp(width, height);
-        //
-        //         jimg.bitmap.data = buffer;
-        //         const filename = `sample_${width}_${height}.png`;
-        //         jimg.write(path.join(LocalPictureAccessor.testDirectory, filename));
-        //
-        //         return filename;
-        width_supplied;
-        return 'TODO';
-    }
-
     public async getRaster(filename: string): Promise<JoinPictureResponse> {
         const fullPath = path.join(this.baseDirectory, filename);
 
@@ -73,13 +46,6 @@ export default class LocalPictureAccessor extends PictureAccessor {
         await fs.promises.stat(fullPath);
 
         const contents = await this.jimpAdapter.read(fullPath);
-        console.log(`TJTAG width is; ${contents.bitmap.width}`);
-        console.log(`TJTAG height is; ${contents.bitmap.height}`);
-        console.log(`TJTAG datalength is; ${contents.bitmap.data.length}`);
-        for (let i = 0; i < 64; ++i) {
-            console.log(`TJTAG - data[${i}] is: ${contents.bitmap.data[i]}`);
-            // TJTAG whoa data might be four times as long
-        }
         return {
             width: contents.bitmap.width,
             height: contents.bitmap.height,

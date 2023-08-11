@@ -270,6 +270,4 @@ describe('BroadcastMediator Tests', () => {
         const ret = broadcastMediator.listClients(defaultFilename);
         expect(ret.length).toEqual(0);
     });
-
-    // TODO test that clients are closed after removal
 });

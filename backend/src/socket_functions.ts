@@ -39,5 +39,3 @@ export function updateHandler(
 ): void {
     broadcastMediator.handleUpdate(pixelUpdate, sourceSocketId);
 }
-
-// TODO I think I am missing an unsubscribe

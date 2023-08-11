@@ -17,8 +17,4 @@ export default abstract class PictureAccessor {
         raster: Raster,
         filename: string
     ): Promise<void>;
-
-    public abstract createNewPicture_with_dimensions(
-        width_supplied: number
-    ): string;
 }

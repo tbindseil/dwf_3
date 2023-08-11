@@ -4,9 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
 import { blotRasterToCanvas } from './utils';
 
-// TODO once on bringup of canvas, ask to join
-// and once on un bringup ask to leave
-
 function Canvas() {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
@@ -36,7 +33,7 @@ function Canvas() {
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       blotRasterToCanvas(raster, canvas);
     }, 30);
-    // TJTAG I think I just add the leaveCurrentPicture call here...
+
     return () => {
       clearInterval(interval);
       currentPictureService.leaveCurrentPicture();

@@ -100,7 +100,7 @@ export default class BroadcastMediator {
             // TODO why did this (or the next one) get hit when using web page?
             // throw new Error(`unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`);
             console.log(
-                `unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
+                `TJTAG - unable to remove socket id ${socket.id} because client map for filename ${filename} doesn't exist`
             );
             return;
         }
@@ -112,7 +112,7 @@ export default class BroadcastMediator {
             if (!clientToDelete) {
                 // throw new Error(`unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`);
                 console.log(
-                    `unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
+                    `TJTAG - unable to remove socket id ${socket.id} because it doesn't exist in client map for filename ${filename}`
                 );
                 return;
             }
