@@ -6,7 +6,7 @@ import BroadcastMediator from './broadcast/broadcast_mediator';
 import LocalPictureAccessor from './picture_accessor/local_picture_accessor';
 import JimpAdapterImpl from './picture_accessor/jimp_adapter';
 
-import { GetPictures, PostPicture, PostUpdate } from './handlers/index';
+import { GetPictures, PostPicture } from './handlers/index';
 
 import {
     JoinPictureRequest,
@@ -61,9 +61,6 @@ app.get('/pictures', (req: Request, res: Response, next: NextFunction) => {
 });
 app.post('/picture', (req: Request, res: Response, next: NextFunction) => {
     new PostPicture(pictureAccessor).call(req, res, next);
-});
-app.post('/update', (req: Request, res: Response, next: NextFunction) => {
-    new PostUpdate().call(req, res, next);
 });
 
 app.use(myErrorHandler);
