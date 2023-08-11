@@ -10,9 +10,12 @@ import ProvidedServices from './provided_services';
 import Ajv from 'ajv';
 
 // TJTAG main list
-// 2. race condition
+// 2. race condition - this is ...
+// I think this is the double join caused by idk yet
 // 3. syncronize initial sync with updates that have happened since the last write
+// I think this^^ is done by getting a fresh raster on each addclient
 // 4. can we reconnect successfully when the server goes down
+// i think this is a no but don't really care right now
 
 export interface IPictureService {
   createPicture(input: PostPictureInput): Promise<PostPictureOutput>;
