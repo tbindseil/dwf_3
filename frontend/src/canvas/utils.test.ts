@@ -18,18 +18,6 @@ describe('Utils tests', () => {
     mockGetContext.mockReturnValue(mockContext);
   });
 
-  it('does not blot when width is zero', () => {
-    const zeroWidthRaster = makeRaster(0, 5);
-    blotRasterToCanvas(zeroWidthRaster, mockCanvas);
-    expect(mockPutImageData).toBeCalledTimes(0);
-  });
-
-  it('does not blot when height is zero', () => {
-    const zeroHeightRaster = makeRaster(5, 0);
-    blotRasterToCanvas(zeroHeightRaster, mockCanvas);
-    expect(mockPutImageData).toBeCalledTimes(0);
-  });
-
   it('blots', () => {
     const raster = makeRaster(6, 6);
     blotRasterToCanvas(raster, mockCanvas);

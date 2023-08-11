@@ -82,16 +82,6 @@ function Canvas() {
           New Picture
         </button>
       </p>
-      <p>
-        <button
-          onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            void event;
-            currentPictureService.checkSocketStatus();
-          }}
-        >
-          Check socket status
-        </button>
-      </p>
       <br />
       <canvas
         id='canvas'

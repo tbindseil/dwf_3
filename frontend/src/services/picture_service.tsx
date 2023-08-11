@@ -9,6 +9,13 @@ import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
 import Ajv from 'ajv';
 
+// TJTAG
+// 2. check out if we are still getting a bunch of (see TJTAgs)
+// 3. fuzzy finder for neovim
+// 3a. files
+// 3b. ack
+// 4. home button
+
 export interface IPictureService {
   createPicture(input: PostPictureInput): Promise<PostPictureOutput>;
   getPictures(input: GetPicturesInput): Promise<GetPicturesOutput>;

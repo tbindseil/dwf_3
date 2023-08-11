@@ -13,12 +13,7 @@ export interface ICurrentPictureService {
   getCurrentRaster(): Raster;
   joinCurrentPicture(): void;
   leaveCurrentPicture(): void;
-  handleReceivedUpdate(pixelUpdate: PixelUpdate): void;
   handleUserUpdate(pixelUpdate: PixelUpdate): void;
-  closeConnection(): void; // maybe the socket is best owned by the canvas
-  // or maybe, idk
-
-  checkSocketStatus(): void;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -35,15 +30,7 @@ const CurrentPictureService = ({ children }: any) => {
     setupListeners();
   });
 
-  // so, if we miss events,
-  // its bad obviously
-  // but the point was that in between some things happeninug we could miss events
-  //
-  // now thuis next paragraph is about
-  // the fact that I probably want to use rooms
-  // where the room corresponds to the picture being drawn
   const setupListeners = () => {
-    // setup raster handler AND start receiving updates, and request raster
     socket.removeListener('join_picture_response');
     socket.on('join_picture_response', currentPictureService.setCurrentRaster);
 
@@ -57,7 +44,7 @@ const CurrentPictureService = ({ children }: any) => {
       setupListeners();
     },
     setCurrentRaster(joinPictureResponse: JoinPictureResponse): void {
-      // this is private...
+      // this is private... ie not in the interface
       currentRaster = new Raster(
         joinPictureResponse.width,
         joinPictureResponse.height,
@@ -96,12 +83,6 @@ const CurrentPictureService = ({ children }: any) => {
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
       currentRaster.handlePixelUpdate(pixelUpdate);
       socket.emit('client_to_server_udpate', pixelUpdate);
-    },
-
-    checkSocketStatus(): void {
-      console.log(`disconnected is: ${socket.disconnected}`);
-      console.log(`connected is: ${socket.connected}`);
-      console.log(`active is: ${socket.active}`);
     },
   };
 
