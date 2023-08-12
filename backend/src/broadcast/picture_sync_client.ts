@@ -5,12 +5,14 @@ import { Raster } from 'dwf-3-raster-tjb';
 import { Queue } from './queue';
 
 export class PictureSyncClient extends Client {
+    private readonly queue: Queue;
     private readonly pictureAccessor: PictureAccessor;
     private readonly raster: Raster;
     private readonly filename: string;
-    private dirty: boolean;
+
     private readonly writingInterval: NodeJS.Timer;
-    private readonly queue: Queue;
+    private dirty: boolean;
+    private unwrittenWrites: PixelUpdate[];
 
     // two rasters
     // one is locked in and updates are tracked while they are applied to the other
@@ -55,26 +57,24 @@ export class PictureSyncClient extends Client {
 
         this.queue = queue;
         this.pictureAccessor = pictureAccessor;
-        // no thread protection needed because its only ever being read
+
         this.raster = raster;
         this.filename = filename;
         this.dirty = false;
+        this.unwrittenWrites = [];
 
         this.writingInterval = setInterval(async () => {
             if (this.dirty) {
-                await this.pictureAccessor.writeRaster(
-                    this.raster,
-                    this.filename
-                );
-                this.dirty = false;
+                await this.writeRaster();
             }
         }, writeInterval);
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate): void {
         this.queue.push(() => {
-            return new Promise((resolve, reject) => {
-                reject;
+            return new Promise((resolve) => {
+                // TODO what order should this be?
+                this.unwrittenWrites.push(pixelUpdate);
 
                 /* await if async */ this.raster.handlePixelUpdate(pixelUpdate);
                 this.dirty = true;
@@ -97,6 +97,20 @@ export class PictureSyncClient extends Client {
         await this.queue.waitForCompletion();
 
         // and write just in case
+        await this.writeRaster();
+    }
+
+    public async getLastWrittenRaster(): Promise<[Raster, PixelUpdate[]]> {
+        // TODO actually synchronize and eventually (it its a lot of time to make new ones)
+        await new Promise((r) => setTimeout(r, 100));
+        return [this.raster, this.unwrittenWrites];
+    }
+
+    private async writeRaster() {
+        // TODO lock raster
+        // i Think its a reader writer lock
         await this.pictureAccessor.writeRaster(this.raster, this.filename);
+        this.dirty = false;
+        this.unwrittenWrites = [];
     }
 }

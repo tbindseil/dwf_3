@@ -62,6 +62,10 @@ export class Queue {
 
         if (this.jobs.length > 0) {
             this.runJob();
+        } else {
+            // TODO this will be needed to sync the broadcast client???
+            // this.finishedCallback();
+            // otherwise I ahve to poll to know when to sync with broadcast client
         }
     }
 

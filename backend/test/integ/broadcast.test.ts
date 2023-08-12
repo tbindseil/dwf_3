@@ -5,7 +5,6 @@ import { io as io_package } from 'socket.io-client';
 
 import { PixelUpdate, PostPictureInput } from 'dwf-3-models-tjb';
 import { io, server } from '../../src/app';
-import path from 'path';
 
 const ENDPOINT = 'http://127.0.0.1:6543/';
 
@@ -97,6 +96,8 @@ describe('broadcast test', () => {
     })
 
     await Promise.all(clients);
+
+    // TODO verify that all clients received updates in the correct order
 
 
     // do we want to kick them all off?
