@@ -36,6 +36,7 @@ export class BroadcastClient extends Client {
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate): void {
+        // TODO switch installed handlers to avodi if
         if (this.clientSynced) {
             this.socket.emit('server_to_client_update', pixelUpdate);
         }

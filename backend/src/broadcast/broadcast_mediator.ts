@@ -92,6 +92,8 @@ export default class BroadcastMediator {
             });
         }
 
+        const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
+
         const clientMap = this.filenameToClients.get(filename);
         if (clientMap) {
             clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));

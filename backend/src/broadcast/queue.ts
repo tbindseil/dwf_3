@@ -1,10 +1,12 @@
 export type Job = () => Promise<void>;
 export class Queue {
     private readonly waitForCompletionIntervalMS: number;
+    private readonly finishedCallback: () => void;
     private readonly jobs: Job[];
 
-    public constructor(waitForCompletionIntervalMS: number = 1000) {
+    public constructor(finishedCallback?: () => void, waitForCompletionIntervalMS: number = 1000) {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
+        this.finishedCallback = finishedCallback ?? (() => {});
         this.jobs = [];
     }
 
@@ -63,9 +65,7 @@ export class Queue {
         if (this.jobs.length > 0) {
             this.runJob();
         } else {
-            // TODO this will be needed to sync the broadcast client???
-            // this.finishedCallback();
-            // otherwise I ahve to poll to know when to sync with broadcast client
+            this.finishedCallback();
         }
     }
 

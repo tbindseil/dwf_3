@@ -1,8 +1,7 @@
 import {Socket} from 'socket.io';
 import Client from './client';
-import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, Update, PixelUpdate, JoinPictureRequest, JoinPictureResponse } from 'dwf-3-models-tjb';
+import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, PixelUpdate } from 'dwf-3-models-tjb';
 import {Job, Queue} from './queue';
-import {BroadcastClient} from './broadcast_client';
 import {PictureSyncClient} from './picture_sync_client';
 
 // needs to:
@@ -17,7 +16,6 @@ export default class ClientInitalizationClient extends Client {
         InterServerEvents,
         SocketData
     >;
-    private readonly broadcastClient: BroadcastClient;
     private readonly clientSynced: boolean;
 
     constructor(
@@ -28,12 +26,10 @@ export default class ClientInitalizationClient extends Client {
             InterServerEvents,
             SocketData
         >,
-        broadcastClient: BroadcastClient,
     ) {
         super();
         this.queue = queue;
         this.socket = socket;
-        this.broadcastClient = broadcastClient;
         this.clientSynced = false;
     }
 
