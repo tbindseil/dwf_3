@@ -336,6 +336,7 @@ why is it one to one with broadcast clients?
 well there is not notion of adding a new client to a client
 so its easy to initialize it with a reference to the broadcast client that it will signal to
 
+if i use multiple rasters (like one per client while they are syncing) it could be a good opportunity for a flyweight pattern?  maybe... not sure wtf i was rmembering here
 
 
 

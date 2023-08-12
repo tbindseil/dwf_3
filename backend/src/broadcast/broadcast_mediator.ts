@@ -96,7 +96,6 @@ export default class BroadcastMediator {
         if (clientMap) {
             clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));
         }
-
     }
 
     public removeClient(
