@@ -368,6 +368,8 @@ I found out ArrayBuffer => Uint8ClampedArray is deep copy (see are_emit_args_dee
 what about the other way?
 this is happening in an unencapsulated way right now
 I need to figure out the other way, decide on a plan to iron that out, and then see if the question (are emit args deep copied?) is still relevant
+well, I figured out the other way
+its obviously a copy operation, arraybuffer constructor takes only number of bytes, so it doesn't even know of the copied data
 
 
 
