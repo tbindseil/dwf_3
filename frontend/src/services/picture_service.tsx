@@ -12,9 +12,12 @@ import Ajv from 'ajv';
 // TJTAG main list
 // 3. syncronize initial sync with updates that have happened since the last write
 // - I think this^^ is done by getting a fresh raster on each addclient
+    // TODO mechanism to know a new client will always receive all updates from after the raster is given to them
 // -- but its not because the raster hasn't been saved
 // 4. can we reconnect successfully when the server goes down
 // - no
+// 5. why doesn't prettier work in proj root?
+
 
 export interface IPictureService {
   createPicture(input: PostPictureInput): Promise<PostPictureOutput>;

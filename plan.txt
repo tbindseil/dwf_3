@@ -264,3 +264,112 @@ Ok, picking back up after 6 months at a new job
 i want to switch to express instead of my own
 i need to do:
 * 
+
+
+
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+
+Ok, I haven't kept up with this file, but I have kept up with the proj
+now, I am addressing the crux of the project up until this point
+I need to synchronize the BroadcastMediator...
+
+methods:
+addClient:
+* asynchronous in that it:
+* certainly reads the raster from localPictureAccesor for the first client
+* needs to supply the raster and any pending potentially, not sure how to do this yet
+removeClient
+* not marked as async, but it does yield control
+** when the last client is removed, and picture sync client is closed 
+*** it waits for the completion of its queue and then waits for the picture to be written
+handleUpdate
+* atomic (it doesn't yield control)
+periodicWriteQueue
+* writes every 30 seconds, instantiated and controlled by PictureSyncClient
+
+questions:
+* how many rasters are at play?
+
+
+things that can happen
+
+* add client_1 to new picture
+* add client_2 to already picture
+* add client_n to already picture
+* client_1 sends an update
+* client_2 sends an update
+* client_n sends an update
+* client_1 leaves
+* client_2 leaves
+* client_n leaves
+
+except thay can all happen in any order
+
+maybe i can write the tests first
+I think just reasoning these things out is enough for now
+
+whoops, I just started
+
+// for undo, a circular buffer as big as the raster
+// each buffer is just the blot of an update
+this doesn't make any sense at all
+
+// TODO should be able to invoke this multiple times simultaneously
+// note, numClients and numb updats will be ignored... shjould probably be a wrapper
+testsFromFile(previousUpdatesFilename?: string) {
+  let updates: Updates[][] = previousUpdatesFilename ? recoverUpdates(previousUpdatesFilename) : generateUpdates();
+  tests(updates)
+}
+
+testsFromRandom(numClients: number, numUpdates: Map<number, PixelUpdate>) {
+  let updates: Update[][] = [];
+  for (let i = 0; i < numClients; ++i) {
+    for (let j = 0; j < numUpdates.get(i); ++j) {
+      updates.push(makeRandomUpdate());
+    }
+  }
+  tests(updates);
+}
+
+tests(updates: Update[][]) {
+  writeToFile(JSON.stringify(updates), 'savedUpdates.json' + timestamp);
+
+  // do we want to kick them all off?
+  // naw, let that be part of the randomness for now
+  // TODO instead, more complicated, repeat them
+
+  // TODO await...
+}
+
+interface Update {
+  waitTimeMS = 
+  pixelUpdate
+}
+
+makeRandomUpdate(): Update {
+  waitTimeMS = 100 * Math.random();
+}
+
+...
+oh boy
+
+and the tests can call something that can be injected as well
+
+
+
+
+
+

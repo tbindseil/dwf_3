@@ -22,7 +22,20 @@ interface TrackedPicture {
 // TJTAG these actions all need to be syncrhonied, basically serialized
 // and that queue in psc makes things way harder..
 //
+// i mean the queue actually solves a purpose
 //
+// there's another note that outlines the utiltiy of the queue
+//
+// but I still need to figure out:
+//
+// TODO how are asynchronous socket event handlers dealt with?
+// - I think what is happening is the `await`s in the handlers
+// relinquish control, and then we have another event coming in
+// and doing things
+// -- so thats a problem
+
+// maybe i could do an initialization mediator
+// naw too much overlap
 
 export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
@@ -38,7 +51,6 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    // TODO mechanism to know a new client will always receive all updates from after the raster is given to them
     public async addClient(
         filename: string,
         socket: Socket<
@@ -52,14 +64,16 @@ export default class BroadcastMediator {
             `adding client, filename: ${filename} and socket id: ${socket.id}`
         );
 
-        const rasterObject = await this.pictureAccessor.getRaster(filename);
-        const raster = new Raster(
+
+        if (!this.filenameToClients.has(filename)) {
+
+          const rasterObject = await this.pictureAccessor.getRaster(filename);
+          const raster = new Raster(
             rasterObject.width,
             rasterObject.height,
             rasterObject.data
-        );
+          );
 
-        if (!this.filenameToClients.has(filename)) {
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const m = new Map();
             m.set(
@@ -87,12 +101,6 @@ export default class BroadcastMediator {
         socket.emit('join_picture_response', rasterObject);
     }
 
-    // first, remove the client that is disconnecting
-    // then, if only one client left,
-    // make sure its the broadcast client and remove that
-    //
-    // revisiting, this can be done much cleaner using the features of socket.io
-    // damn
     public removeClient(
         filename: string,
         socket: Socket<
@@ -154,7 +162,6 @@ export default class BroadcastMediator {
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
-        // i think this still gets fucked up with locking and stuff
         const filename = pixelUpdate.filename;
 
         const trackedPicture = this.filenameToClients.get(filename);

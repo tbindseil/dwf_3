@@ -34,6 +34,6 @@ export class BroadcastClient extends Client {
     }
 
     public close(): void {
-        // do nothing
+        this.socket._cleanup();
     }
 }

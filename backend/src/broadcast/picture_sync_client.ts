@@ -27,6 +27,22 @@ export class PictureSyncClient extends Client {
     // that tracks the raster and updates?
     //
     // why do i need the list of updates?
+    //
+    //
+    // all of this means i am still abusing the abstraction
+    // ie broadcast client doesn't have the ability to do any of this
+    //
+    // so maybe i need a new one?
+    //
+    // i mean i guess getraster would be the call but thats useless in the others,
+    // the same way that close is useless
+    // well close is actually good
+    // so what is this?
+    //
+    //
+    // TJTAG - ding ding ding
+    // spawn a new thing that first starts listening to new things, then reads the pic, then sends the pic, then sends each update one ata time util
+
 
     public constructor(
         queue: Queue,
