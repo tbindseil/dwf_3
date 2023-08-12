@@ -1,4 +1,3 @@
-import { JoinPictureResponse } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default abstract class PictureAccessor {
@@ -11,7 +10,7 @@ export default abstract class PictureAccessor {
 
     public abstract getFileSystem(): string;
 
-    public abstract getRaster(filename: string): Promise<JoinPictureResponse>;
+    public abstract getRaster(filename: string): Promise<Raster>;
 
     public abstract writeRaster(
         raster: Raster,

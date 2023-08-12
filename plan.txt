@@ -371,6 +371,10 @@ I need to figure out the other way, decide on a plan to iron that out, and then 
 well, I figured out the other way
 its obviously a copy operation, arraybuffer constructor takes only number of bytes, so it doesn't even know of the copied data
 
+so since a 4000000 (4 * 1000 * 1000) size Uint8ClampedArray is deep copied to a buffer in ~2ms, I don't think its even necessary to worry
+about where emit args are deep copied
+
+Instead I think that I can just copy it from psc when creating cic
 
 
 

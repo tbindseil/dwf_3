@@ -37,7 +37,8 @@ export default class ClientInitalizationClient extends Client {
     public async initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
         // I think I have to copy it while its locked
         // its not a copy, maybe psc provides it as a copy
-        const [lastWrittenRaster, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
+
+        const [lastWrittenRasterCopy, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
 
         // setup the queue with the pending updates from the last time this copy of the raster was written
         // and setup the queue to syncrhonize this and the associated broadcast client for the same socket
@@ -53,7 +54,7 @@ export default class ClientInitalizationClient extends Client {
         // then the rest of the updates will  be emitted
         // while that is going on, new updates are enqueued
         // until finally all are processed and the broadcast client starts emitting updates
-        this.socket.emit('join_picture_response', lastWrittenRaster.toJoinPictureResponse());
+        this.socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
 
         // see i just moved the problem
         // now i want to read it here but its invalid without knowing what updates haven't happened

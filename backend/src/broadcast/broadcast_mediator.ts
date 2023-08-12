@@ -10,14 +10,12 @@ import {
     ServerToClientEvents,
     SocketData,
 } from 'dwf-3-models-tjb';
-import { Raster } from 'dwf-3-raster-tjb';
 import { Socket } from 'socket.io';
 import { Queue } from './queue';
 import ClientInitalizationClient from './client_initialization_client';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
-    raster: Raster; // TODO I don't htink i need this anymore
     pictureSyncClient: PictureSyncClient;
 }
 
@@ -69,18 +67,21 @@ export default class BroadcastMediator {
 
         if (!this.filenameToClients.has(filename)) {
 
-            const rasterObject = await this.pictureAccessor.getRaster(filename);
-            const raster = new Raster(
-                rasterObject.width,
-                rasterObject.height,
-                rasterObject.data
-            );
+            // actually, by the same logic as below, this should be after setting up the clients
+            // but the picture sync client needs the raster!
+            // TODO, instead of giving the raster to the picturesyncclient on consturction
+            // lets have that happen via the cic
+//            const rasterObject = await this.pictureAccessor.getRaster(filename);
+//            const raster = new Raster(
+//                rasterObject.width,
+//                rasterObject.height,
+//                rasterObject.data
+//            );
 
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const pictureSyncClient = new PictureSyncClient(
                 new Queue(),
                 this.pictureAccessor,
-                raster,
                 filename
             );
             const m = new Map();
@@ -91,7 +92,6 @@ export default class BroadcastMediator {
 
             this.filenameToClients.set(filename, {
                 idToClientMap: m,
-                raster: raster,
                 pictureSyncClient: pictureSyncClient
             });
         }
@@ -108,6 +108,11 @@ export default class BroadcastMediator {
             trackedClient.idToClientMap.set(socket.id, clientInitalizationClient);
 
             // I think I want to only relinquish control AFTER setting the client map up to receive future events
+            if (trackedClient.idToClientMap.size === 3) {
+                // then this is the first client added, and we need to initialize the psc
+                await pictureSyncClient.initialize();
+            }
+
             await clientInitalizationClient.initialize(broadcastClient, pictureSyncClient);
         }
     }

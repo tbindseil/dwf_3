@@ -31,18 +31,18 @@ export class BroadcastClient extends Client {
         this.clientSynced = false;
     }
 
-    public notifySynchronized() {
-        this.clientSynced = true;
-    }
-
-    public handleUpdate(pixelUpdate: PixelUpdate): void {
+    public override handleUpdate(pixelUpdate: PixelUpdate): void {
         // TODO switch installed handlers to avodi if
         if (this.clientSynced) {
             this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }
 
-    public close(): void {
+    public override close(): void {
         this.socket._cleanup();
+    }
+
+    public notifySynchronized() {
+        this.clientSynced = true;
     }
 }

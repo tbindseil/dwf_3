@@ -3,7 +3,6 @@ import generatePictureFilename from './filename_generator';
 import JimpAdapter from './jimp_adapter';
 import * as fs from 'fs';
 import path from 'path';
-import { JoinPictureResponse } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
 export default class LocalPictureAccessor extends PictureAccessor {
@@ -39,18 +38,19 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return filename;
     }
 
-    public async getRaster(filename: string): Promise<JoinPictureResponse> {
+    // TODO why does this return JoinPictureResponse
+    public async getRaster(filename: string): Promise<Raster> {
         const fullPath = path.join(this.baseDirectory, filename);
 
         // throws when fullPath doesn't exist, but jimp doesn't for some reason
         await fs.promises.stat(fullPath);
 
         const contents = await this.jimpAdapter.read(fullPath);
-        return {
-            width: contents.bitmap.width,
-            height: contents.bitmap.height,
-            data: contents.bitmap.data,
-        };
+        return new Raster(
+            contents.bitmap.width,
+            contents.bitmap.height,
+            contents.bitmap.data,
+        );
     }
 
     public async writeRaster(raster: Raster, filename: string): Promise<void> {
