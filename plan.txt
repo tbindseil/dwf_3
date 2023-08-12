@@ -364,6 +364,11 @@ well, to answer the original question, its not an asynchronous function so it mu
 I need to test this
 or i could assume its not and copy the contents
 
+I found out ArrayBuffer => Uint8ClampedArray is deep copy (see are_emit_args_deep_copied branch for experiment)
+what about the other way?
+this is happening in an unencapsulated way right now
+I need to figure out the other way, decide on a plan to iron that out, and then see if the question (are emit args deep copied?) is still relevant
+
 
 
 
