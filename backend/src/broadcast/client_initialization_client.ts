@@ -5,10 +5,7 @@ import {Job, Queue} from './queue';
 import {PictureSyncClient} from './picture_sync_client';
 import {BroadcastClient} from './broadcast_client';
 
-// TODO should this go in thet broadcast client?
-// then, I can make close work
-
-// needs to:
+// this:
 // 1. send picture at a known point
 // 2. save and send any updates that happen while that is happening
 // 3. once complete, signal to the broadcast client that it can start sending
@@ -38,12 +35,10 @@ export default class ClientInitalizationClient extends Client {
     }
 
     public async initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
-        // I think I have to copy it while its locked
-        // its not a copy, maybe psc provides it as a copy
-
         const [lastWrittenRasterCopy, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
 
         // setup the queue with the pending updates from the last time this copy of the raster was written
+        // (and therefore updates that don't exist on our copy of the raster)
         // and setup the queue to syncrhonize this and the associated broadcast client for the same socket
         this.queue.push(this.waitForClientToRecieveInitialRaster);
         pendingUpdates.forEach(u => this.handleUpdate(u));
@@ -57,29 +52,16 @@ export default class ClientInitalizationClient extends Client {
         // then the rest of the updates will  be emitted
         // while that is going on, new updates are enqueued
         // until finally all are processed and the broadcast client starts emitting updates
+        // that switch (the queue's finishedCallback), never relinquishes control, so it is atomic
+        // and therefore, the next update will certainly come in and be emitted immediately by the broadcastClient
         this.socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
-
-        // see i just moved the problem
-        // now i want to read it here but its invalid without knowing what updates haven't happened
-        // but...
-        // i am breaking the client level of abstraction here wrt to broadcast client
-        // so maybe I could break the abstraction here wrt to psc
-        //
-        // if abstraction is broken,
-        // I can ask psc for the raster at a point with all its enqueued updates
-        //
-        // then, I can use send that raster, upon completion (TODO notify picture received)
-        // I can start sending the queued updates
-        //
-        // once those are complete,
-        // I signal to broadcast client to sync it up
-        //
-        // all of htis has to happen very carefully
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate): void {
         if (this.clientSynced) {
-            this.queue.push(() => new Promise(resolve => this.socket.emit('server_to_client_update', pixelUpdate)) )
+            // TODO can probably remove below, but not sure how the omitted arg will behave
+            // this.queue.push(() => new Promise(resolve => this.socket.emit('server_to_client_update', pixelUpdate)) )
+            this.queue.push(() => new Promise(() => this.socket.emit('server_to_client_update', pixelUpdate)) )
         }
     }
 

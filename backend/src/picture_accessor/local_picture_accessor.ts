@@ -38,7 +38,6 @@ export default class LocalPictureAccessor extends PictureAccessor {
         return filename;
     }
 
-    // TODO why does this return JoinPictureResponse
     public async getRaster(filename: string): Promise<Raster> {
         const fullPath = path.join(this.baseDirectory, filename);
 

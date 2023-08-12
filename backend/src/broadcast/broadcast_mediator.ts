@@ -34,6 +34,11 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
+    // first, we setup the new clients in the TrackedPicture map,
+    // then we do asynchronous setup things
+    // that way, if the picture gets an update while the async stuff is happening
+    // we will be able to still pass the new update to the clients registering in
+    // this iteration of the function.
     public async addClient(
         filename: string,
         socket: Socket<

@@ -117,7 +117,7 @@ export class PictureSyncClient extends Client {
     private async writeRaster() {
         // TODO lock raster
         // well, I htink I could actually get away without locking
-        // instead, just drop something in the queue
+        // instead, just drop something in the queue (on the interval!)
 
         // i Think its a reader writer lock
         if (this.raster) {
