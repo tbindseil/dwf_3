@@ -86,6 +86,8 @@ export default class ClientInitalizationClient extends Client {
     private readonly waitForClientToRecieveInitialRaster: Job = async (): Promise<void> => {
         // i think this is a semaphore
         // TODO this is obviously a placeholder
+        // apparently this is built in to socket.io as acknowledgements:
+        // https://socket.io/docs/v3/emitting-events/#acknowledgements
         await new Promise((r) => setTimeout(r, 1000));
     }
 }

@@ -65,6 +65,16 @@ app.post('/picture', (req: Request, res: Response, next: NextFunction) => {
 
 app.use(myErrorHandler);
 
+// might want to ultimately use websockets first
+// by default, it is http long polling if available, then websockets
+// https://socket.io/docs/v3/server-initialization/#transports
+// https://socket.io/docs/v3/client-initialization/#transports
+//
+// maybe not tho?
+// https://socket.io/docs/v3/how-it-works/#Upgrade-mechanism
+//
+//
+// probably not actually
 export const server: http.Server = http.createServer(app);
 
 export const io = new Server<

@@ -98,6 +98,7 @@ describe('broadcast test', () => {
     await Promise.all(clients);
 
     // TODO verify that all clients received updates in the correct order
+    // https://socket.io/docs/v4/load-testing/
 
 
     // do we want to kick them all off?

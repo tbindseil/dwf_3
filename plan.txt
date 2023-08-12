@@ -348,7 +348,21 @@ ok, so i sorta implemented a client initialiaztion client
 
 now i need to synchronize access to the raster
 
+can i use a raster registry?
+or some kind of object to organize this?
 
+I think I need to understand what happes to the arguments of emit
+
+well, not necessarily the question at hand, but order is maintained when emitting event
+... as long as websocket transport is used,
+which is secondary and can be set to primary,
+but would have some drawbacks
+see note in backend/src/app.ts
+
+
+well, to answer the original question, its not an asynchronous function so it must be?
+I need to test this
+or i could assume its not and copy the contents
 
 
 

@@ -97,15 +97,18 @@ export default class BroadcastMediator {
         }
 
 
-        const clientMap = this.filenameToClients.get(filename);
-        if (clientMap) {
-            const pictureSyncClient = clientMap?.pictureSyncClient;
+        const trackedClient = this.filenameToClients.get(filename);
+        if (trackedClient) {
+            const pictureSyncClient = trackedClient.pictureSyncClient;
 
             const broadcastClient = new BroadcastClient(socket);
             const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
-            clientInitalizationClient.initialize(pictureSyncClient);
 
-            clientMap.idToClientMap.set(socket.id, broadcastClient);
+            trackedClient.idToClientMap.set(socket.id, broadcastClient);
+            trackedClient.idToClientMap.set(socket.id, clientInitalizationClient);
+
+            // I think I want to only relinquish control AFTER setting the client map up to receive future events
+            await clientInitalizationClient.initialize(broadcastClient, pictureSyncClient);
         }
     }
 
