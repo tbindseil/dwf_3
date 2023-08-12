@@ -35,7 +35,7 @@ export default class ClientInitalizationClient extends Client {
     }
 
     public async initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
-        const [lastWrittenRasterCopy, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
+        const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
 
         // setup the queue with the pending updates from the last time this copy of the raster was written
         // (and therefore updates that don't exist on our copy of the raster)

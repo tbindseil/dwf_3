@@ -13,39 +13,7 @@ export class PictureSyncClient extends Client {
 
     private writingInterval?: NodeJS.Timer;
     private dirty: boolean;
-    private unwrittenWrites: PixelUpdate[];
-
-    // two rasters
-    // one is locked in and updates are tracked while they are applied to the other
-    // then, when a new client is registered, broadcast mediator gets the tracked updates and sends them to the new client
-    // upon the writing of the updated raster,
-    //  it becomes the new locked raster,
-    //  the tracked updates are cleared,
-    //  and the old raster is synced (this can be either with a copy or by applying the tracked updates)
-    //
-    // well i think i can do it with just the one
-    // no, i actually cant cause i have to be able to supply the list of updates since write
-    // or,
-    // i have a dedicatred update sync client
-    // that tracks the raster and updates?
-    //
-    // why do i need the list of updates?
-    //
-    //
-    // all of this means i am still abusing the abstraction
-    // ie broadcast client doesn't have the ability to do any of this
-    //
-    // so maybe i need a new one?
-    //
-    // i mean i guess getraster would be the call but thats useless in the others,
-    // the same way that close is useless
-    // well close is actually good
-    // so what is this?
-    //
-    //
-    // TJTAG - ding ding ding
-    // spawn a new thing that first starts listening to new things, then reads the pic, then sends the pic, then sends each update one ata time util
-
+    private unwrittenUpdates: PixelUpdate[];
 
     public constructor(
         queue: Queue,
@@ -59,14 +27,14 @@ export class PictureSyncClient extends Client {
 
         this.filename = filename;
         this.dirty = false;
-        this.unwrittenWrites = [];
+        this.unwrittenUpdates = [];
     }
 
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
         this.queue.push(() => {
             return new Promise((resolve) => {
                 // TODO what order should this be?
-                this.unwrittenWrites.push(pixelUpdate);
+                this.unwrittenUpdates.push(pixelUpdate);
 
                 if (this.currentRaster) {
                     /* await if async */ this.currentRaster.handlePixelUpdate(pixelUpdate);
@@ -77,21 +45,11 @@ export class PictureSyncClient extends Client {
         });
     }
 
-    // it seems like we wanna have one raster
-    // no reading it more than once just keep it updated
-    // sadly th queue seems dumb now,
-    // no, its good to quickly get teh updates out to users and slowly digest them here
-    // so whether we initial start a user with old and send a bunch of updates or not, i think
-    // its better to not, give them a fresh one
-
     public override async close(): Promise<void> {
         clearInterval(this.writingInterval);
 
-        // now once we run out, add the handler to do the final write
+        this.unqueueWriteRaster();
         await this.queue.waitForCompletion();
-
-        // and write just in case
-        await this.writeRaster();
     }
 
     public async initialize(writeInterval: number = 30000): Promise<void> {
@@ -100,34 +58,33 @@ export class PictureSyncClient extends Client {
 
         this.writingInterval = setInterval(async () => {
             if (this.dirty) {
-                await this.writeRaster();
+                this.unqueueWriteRaster();
             }
         }, writeInterval);
     }
 
-    // TODO this won't be the last time the raster was written as is implied by the wayt the updates are tracked!
-    // will need to double buffer or something along those lines
-    public async getLastWrittenRaster(): Promise<[Raster, PixelUpdate[]]> {
-        // TODO actually synchronize and eventually (it its a lot of time to make new ones)
-        // its not a lot of time to make a new one, maybe best to just copy and save the lastWrittenRaster
-        if (!this.currentRaster) {
+    // the last written raster is only copied to synchronously,
+    // so we don't have to worry about it changing while we are copying it
+    public getLastWrittenRasterCopy(): [Raster, PixelUpdate[]] {
+        if (!this.lastWrittenRaster) {
             throw Error('getLastWrittenRaster called before raster initialized');
         }
-        await new Promise((r) => setTimeout(r, 100));
-        return [this.currentRaster, this.unwrittenWrites];
+        return [this.lastWrittenRaster.copy(), this.unwrittenUpdates];
     }
 
-    private async writeRaster() {
-        // well, I htink I could actually get away without locking
-        // instead, just drop something in the queue (on the interval!)
-
+    // the reason this enqueues its work is to ensure that it happens serially with any
+    // of the writing that is done with the handling of updates
+    private unqueueWriteRaster() {
         if (this.currentRaster) {
             this.queue.push(() => {
                 return new Promise(async (resolve) => {
                     await this.pictureAccessor.writeRaster(this.currentRaster!, this.filename);
+
+                    // all the below (notably the replacement of lastWrittenRaster and the clearing
+                    // of unwrittenUpdates) all happen synchronously
                     this.lastWrittenRaster = this.currentRaster!.copy();
                     this.dirty = false;
-                    this.unwrittenWrites = [];
+                    this.unwrittenUpdates = [];
                     resolve();
                 });
             });
@@ -140,3 +97,5 @@ export class PictureSyncClient extends Client {
         // and at that point, we don't even need to copy
         // TODO htat's a mindblower
         // honestly more of a consideration for simplification after thigns are more stable
+//
+// after making hte planned changes, it is no longer async, but I didn't do any of the consequential code changes yet
