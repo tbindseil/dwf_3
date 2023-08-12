@@ -100,6 +100,8 @@ export class PictureSyncClient extends Client {
         await this.writeRaster();
     }
 
+    // TODO this won't be the last time the raster was written as is implied by the wayt the updates are tracked!
+    // will need to double buffer or something along those lines
     public async getLastWrittenRaster(): Promise<[Raster, PixelUpdate[]]> {
         // TODO actually synchronize and eventually (it its a lot of time to make new ones)
         await new Promise((r) => setTimeout(r, 100));

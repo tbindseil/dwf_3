@@ -3,6 +3,7 @@ import Client from './client';
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, PixelUpdate } from 'dwf-3-models-tjb';
 import {Job, Queue} from './queue';
 import {PictureSyncClient} from './picture_sync_client';
+import {BroadcastClient} from './broadcast_client';
 
 // needs to:
 // 1. send picture at a known point
@@ -16,7 +17,7 @@ export default class ClientInitalizationClient extends Client {
         InterServerEvents,
         SocketData
     >;
-    private readonly clientSynced: boolean;
+    private clientSynced: boolean;
 
     constructor(
         queue: Queue,
@@ -33,12 +34,25 @@ export default class ClientInitalizationClient extends Client {
         this.clientSynced = false;
     }
 
-    public async initialize(pictureSyncClient: PictureSyncClient) {
+    public async initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
         // I think I have to copy it while its locked
         // its not a copy, maybe psc provides it as a copy
         const [lastWrittenRaster, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
+
+        // setup the queue with the pending updates from the last time this copy of the raster was written
+        // and setup the queue to syncrhonize this and the associated broadcast client for the same socket
         this.queue.push(this.waitForClientToRecieveInitialRaster);
         pendingUpdates.forEach(u => this.handleUpdate(u));
+        this.queue.setFinishedCallback(() => {
+            this.clientSynced = true;
+            broadcastClient.notifySynchronized();
+        });
+
+        // give the client the last written raster
+        // the client will respond, that will allow the first job in the queue (waitForClientToRecieveInitialRaster) to complete
+        // then the rest of the updates will  be emitted
+        // while that is going on, new updates are enqueued
+        // until finally all are processed and the broadcast client starts emitting updates
         this.socket.emit('join_picture_response', lastWrittenRaster.toJoinPictureResponse());
 
         // see i just moved the problem

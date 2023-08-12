@@ -13,10 +13,12 @@ import {
 import { Raster } from 'dwf-3-raster-tjb';
 import { Socket } from 'socket.io';
 import { Queue } from './queue';
+import ClientInitalizationClient from './client_initialization_client';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
     raster: Raster; // TODO I don't htink i need this anymore
+    pictureSyncClient: PictureSyncClient;
 }
 
 // TJTAG these actions all need to be syncrhonied, basically serialized
@@ -54,10 +56,10 @@ export default class BroadcastMediator {
     public async addClient(
         filename: string,
         socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
+        ClientToServerEvents,
+        ServerToClientEvents,
+        InterServerEvents,
+        SocketData
         >
     ): Promise<void> {
         console.log(
@@ -75,28 +77,35 @@ export default class BroadcastMediator {
             );
 
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
+            const pictureSyncClient = new PictureSyncClient(
+                new Queue(),
+                this.pictureAccessor,
+                raster,
+                filename
+            );
             const m = new Map();
             m.set(
                 BroadcastMediator.PICTURE_SYNC_KEY,
-                new PictureSyncClient(
-                    new Queue(),
-                    this.pictureAccessor,
-                    raster,
-                    filename
-                )
+                pictureSyncClient
             );
 
             this.filenameToClients.set(filename, {
                 idToClientMap: m,
                 raster: raster,
+                pictureSyncClient: pictureSyncClient
             });
         }
 
-        const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
 
         const clientMap = this.filenameToClients.get(filename);
         if (clientMap) {
-            clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));
+            const pictureSyncClient = clientMap?.pictureSyncClient;
+
+            const broadcastClient = new BroadcastClient(socket);
+            const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
+            clientInitalizationClient.initialize(pictureSyncClient);
+
+            clientMap.idToClientMap.set(socket.id, broadcastClient);
         }
     }
 

@@ -1,12 +1,12 @@
 export type Job = () => Promise<void>;
 export class Queue {
     private readonly waitForCompletionIntervalMS: number;
-    private readonly finishedCallback: () => void;
+    private finishedCallback: () => void;
     private readonly jobs: Job[];
 
-    public constructor(finishedCallback?: () => void, waitForCompletionIntervalMS: number = 1000) {
+    public constructor(waitForCompletionIntervalMS: number = 1000) {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
-        this.finishedCallback = finishedCallback ?? (() => {});
+        this.finishedCallback = (() => {});
         this.jobs = [];
     }
 
@@ -26,6 +26,14 @@ export class Queue {
         while (this.jobs.length > 0) {
             await this.delay(this.waitForCompletionIntervalMS);
         }
+    }
+
+    public setFinishedCallback(cb: () => void) {
+        this.finishedCallback = cb;
+    }
+
+    public clearFinishedCallback() {
+        this.finishedCallback = () => {};
     }
 
     private start(): void {
