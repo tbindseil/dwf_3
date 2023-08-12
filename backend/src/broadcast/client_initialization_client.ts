@@ -44,7 +44,6 @@ export default class ClientInitalizationClient extends Client {
         this.queue.push(this.waitForClientToRecieveInitialRaster);
         pendingUpdates.forEach(u => this.handleUpdate(u));
         this.socket.emit('join_picture_response', lastWrittenRaster.toJoinPictureResponse());
-        const jpr: JoinPictureResponse
 
         // see i just moved the problem
         // now i want to read it here but its invalid without knowing what updates haven't happened
@@ -68,11 +67,10 @@ export default class ClientInitalizationClient extends Client {
         if (this.clientSynced) {
             this.queue.push(() => new Promise(resolve => this.socket.emit('server_to_client_update', pixelUpdate)) )
         }
-        console.log('here');
     }
 
     public close(): void {
-        console.log('close');
+        console.log('todo cancel remaining jobs if not synced');
     }
 
     private readonly waitForClientToRecieveInitialRaster: Job = async (): Promise<void> => {
