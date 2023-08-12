@@ -16,7 +16,7 @@ import { Queue } from './queue';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
-    raster: Raster;
+    raster: Raster; // TODO I don't htink i need this anymore
 }
 
 // TJTAG these actions all need to be syncrhonied, basically serialized

@@ -342,6 +342,13 @@ if i use multiple rasters (like one per client while they are syncing) it could 
 
 
 
+=====
+
+ok, so i sorta implemented a client initialiaztion client
+
+now i need to synchronize access to the raster
+
+
 
 
 
