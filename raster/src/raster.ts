@@ -1,5 +1,6 @@
-import { PixelUpdate } from "dwf-3-models-tjb";
+import { JoinPictureResponse, PixelUpdate } from "dwf-3-models-tjb";
 
+// TODO test this one
 export class Raster {
   public readonly width: number;
   public readonly height: number;
@@ -55,5 +56,14 @@ export class Raster {
         );
       }
     }
+  }
+
+  // TODO make a precedent for this
+  public toJoinPictureResponse(): JoinPictureResponse {
+        return {
+            width: this.width,
+            height: this.height,
+            data: this.asArray
+        }
   }
 }

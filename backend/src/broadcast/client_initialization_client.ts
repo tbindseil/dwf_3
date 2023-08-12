@@ -1,7 +1,7 @@
 import {Socket} from 'socket.io';
 import Client from './client';
-import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, Update, PixelUpdate } from 'dwf-3-models-tjb';
-import {Queue} from './queue';
+import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, Update, PixelUpdate, JoinPictureRequest, JoinPictureResponse } from 'dwf-3-models-tjb';
+import {Job, Queue} from './queue';
 import {BroadcastClient} from './broadcast_client';
 import {PictureSyncClient} from './picture_sync_client';
 
@@ -29,18 +29,22 @@ export default class ClientInitalizationClient extends Client {
             SocketData
         >,
         broadcastClient: BroadcastClient,
-        pictureSyncClient: PictureSyncClient
     ) {
         super();
         this.queue = queue;
         this.socket = socket;
         this.broadcastClient = broadcastClient;
         this.clientSynced = false;
+    }
 
+    public async initialize(pictureSyncClient: PictureSyncClient) {
         // I think I have to copy it while its locked
-        const [lastWrittenRaster, pendingUpdates] = pictureSyncClient.getLastWrittenRaster();
-        this.queue.push(waitForClientToRecieveInitialRaster());
+        // its not a copy, maybe psc provides it as a copy
+        const [lastWrittenRaster, pendingUpdates] = await pictureSyncClient.getLastWrittenRaster();
+        this.queue.push(this.waitForClientToRecieveInitialRaster);
         pendingUpdates.forEach(u => this.handleUpdate(u));
+        this.socket.emit('join_picture_response', lastWrittenRaster.toJoinPictureResponse());
+        const jpr: JoinPictureResponse
 
         // see i just moved the problem
         // now i want to read it here but its invalid without knowing what updates haven't happened
@@ -69,5 +73,11 @@ export default class ClientInitalizationClient extends Client {
 
     public close(): void {
         console.log('close');
+    }
+
+    private readonly waitForClientToRecieveInitialRaster: Job = async (): Promise<void> => {
+        // i think this is a semaphore
+        // TODO this is obviously a placeholder
+        await new Promise((r) => setTimeout(r, 1000));
     }
 }
