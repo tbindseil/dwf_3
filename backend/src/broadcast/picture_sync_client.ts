@@ -7,7 +7,8 @@ import { Queue } from './queue';
 export class PictureSyncClient extends Client {
     private readonly queue: Queue;
     private readonly pictureAccessor: PictureAccessor;
-    private raster?: Raster;
+    private currentRaster?: Raster;
+    private lastWrittenRaster?: Raster;
     private readonly filename: string;
 
     private writingInterval?: NodeJS.Timer;
@@ -67,8 +68,8 @@ export class PictureSyncClient extends Client {
                 // TODO what order should this be?
                 this.unwrittenWrites.push(pixelUpdate);
 
-                if (this.raster) {
-                    /* await if async */ this.raster.handlePixelUpdate(pixelUpdate);
+                if (this.currentRaster) {
+                    /* await if async */ this.currentRaster.handlePixelUpdate(pixelUpdate);
                 }
                 this.dirty = true;
                 resolve();
@@ -94,7 +95,8 @@ export class PictureSyncClient extends Client {
     }
 
     public async initialize(writeInterval: number = 30000): Promise<void> {
-        this.raster = await this.pictureAccessor.getRaster(this.filename);
+        this.currentRaster = await this.pictureAccessor.getRaster(this.filename);
+        this.lastWrittenRaster = this.currentRaster.copy();
 
         this.writingInterval = setInterval(async () => {
             if (this.dirty) {
@@ -107,23 +109,34 @@ export class PictureSyncClient extends Client {
     // will need to double buffer or something along those lines
     public async getLastWrittenRaster(): Promise<[Raster, PixelUpdate[]]> {
         // TODO actually synchronize and eventually (it its a lot of time to make new ones)
-        if (!this.raster) {
+        // its not a lot of time to make a new one, maybe best to just copy and save the lastWrittenRaster
+        if (!this.currentRaster) {
             throw Error('getLastWrittenRaster called before raster initialized');
         }
         await new Promise((r) => setTimeout(r, 100));
-        return [this.raster, this.unwrittenWrites];
+        return [this.currentRaster, this.unwrittenWrites];
     }
 
     private async writeRaster() {
-        // TODO lock raster
         // well, I htink I could actually get away without locking
         // instead, just drop something in the queue (on the interval!)
 
-        // i Think its a reader writer lock
-        if (this.raster) {
-            await this.pictureAccessor.writeRaster(this.raster, this.filename);
-            this.dirty = false;
-            this.unwrittenWrites = [];
+        if (this.currentRaster) {
+            this.queue.push(() => {
+                return new Promise(async (resolve) => {
+                    await this.pictureAccessor.writeRaster(this.currentRaster!, this.filename);
+                    this.lastWrittenRaster = this.currentRaster!.copy();
+                    this.dirty = false;
+                    this.unwrittenWrites = [];
+                    resolve();
+                });
+            });
         }
     }
 }
+
+        // whoa, if getLastWrittenRaster becomes no longer async, I think things get a lot simpler
+        // and I think that happens when we keep two rasters and can copy to ret value without relinquishing control
+        // and at that point, we don't even need to copy
+        // TODO htat's a mindblower
+        // honestly more of a consideration for simplification after thigns are more stable

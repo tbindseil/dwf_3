@@ -48,6 +48,15 @@ export class Raster {
     return ret;
   }
 
+  public copy(): Raster {
+    const copiedBuffer = new Uint8ClampedArray(this.asArray.length);
+    for (let i = 0; i < copiedBuffer.length; ++i) {
+      copiedBuffer[i] = this.asArray[i];
+    }
+    return new Raster(this.width, this.height, copiedBuffer);
+  }
+
+
   public printBufferDifference(saved: Uint8ClampedArray) {
     for (let i = 0; i < saved.length; ++i) {
       if (saved[i] !== this.asArray[i]) {
