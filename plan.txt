@@ -304,121 +304,55 @@ questions:
 * how many rasters are at play?
 
 
-things that can happen
-
-* add client_1 to new picture
-* add client_2 to already picture
-* add client_n to already picture
-* client_1 sends an update
-* client_2 sends an update
-* client_n sends an update
-* client_1 leaves
-* client_2 leaves
-* client_n leaves
-
-except thay can all happen in any order
-
-maybe i can write the tests first
 I think just reasoning these things out is enough for now
 
-whoops, I just started
+so what (asynchronous activity) absolutely has to happen?
+1. read the raster upon adding first client
+2. updating the raster when updates are received
+3. writing the raster
 
-// for undo, a circular buffer as big as the raster
-// each buffer is just the blot of an update
-this doesn't make any sense at all
+right now, 2, 3 happen asynchronously to the raster that is initially read (ie the data isn't duplicated)
+and, the raster is actually held onto by the mediator, a relic from when the mediator wrote
+so there is only one raster that is active right now
 
-// TODO should be able to invoke this multiple times simultaneously
-// note, numClients and numb updats will be ignored... shjould probably be a wrapper
-testsFromFile(previousUpdatesFilename?: string) {
-  let updates: Updates[][] = previousUpdatesFilename ? recoverUpdates(previousUpdatesFilename) : generateUpdates();
-  tests(updates)
-}
+And I have access to it from the mediator
+but, I don't want to do it from there, the mediator is in charge of broadcasting, not client initialization
+so, I could even initialize the client initialization client
+or i could do that within the broadcast client
 
-testsFromRandom(numClients: number, numUpdates: Map<number, PixelUpdate>) {
-  let updates: Update[][] = [];
-  for (let i = 0; i < numClients; ++i) {
-    for (let j = 0; j < numUpdates.get(i); ++j) {
-      updates.push(makeRandomUpdate());
-    }
-  }
-  tests(updates);
-}
+its also important to remember that even the readable copy isn't viable (without tracking updates) because it is only written every so often
 
-tests(updates: Update[][]) {
-  // write first incase we crash
-  writeToFile(JSON.stringify(updates), 'savedUpdates.json' + timestamp);
+I kinda wanna isolate the raster used within psc
 
-  const clients = Promise<void>[];
-  updates.forEach(updates => {
-    clients.push(spawnClient(updates));
-  }
+then i could have a "current raster"
+* updated in a locked fashion via a queue
+* while at the same time, it can be sent to new clients
+* and when it is sent to new clients, its locked, and updates are queued
+* and maybe it can signal to the broadcast client for the changeover
 
-  Promise.awaitAll(clients);
+why is the above a client? it handles updates and closes...
 
-  // TODO await...
+why is it one to one with broadcast clients?
+well there is not notion of adding a new client to a client
+so its easy to initialize it with a reference to the broadcast client that it will signal to
 
 
-  // do we want to kick them all off?
-  // naw, let that be part of the randomness for now
-  // TODO instead, more complicated, repeat them
-}
 
-import { io } from 'socket.io-client';
-const ENDPOINT = 'http://127.0.0.1:6543/';
 
-connectAsClient() {
-  return io(ENDPOINT);
-}
 
-async spawnClient(updates: Update[]): Promise<void> {
-  const socket = connectAsClient()
 
-  console.log(`spawning client with socketId: ${socket.id}`);
 
-  // need to forloop to serialize these
-  for (let i = 0; i < updates.lenth; ++i) {
-    let u = updates[i];
-    socket.emit('client_to_server_udpate', u.pixelUpdate);
-    await delay(u.waitTimeMS);
-  }
 
-  // TODO is this the right call?
-  socket.close();
-}
 
-interface Update {
-  waitTimeMS: number;
-  pixelUpdate: PixelUpdate;
-}
 
-makeRandomUpdate(): Update {
-  const waitTimeMS = randomNumberBetweenZeroAnd(100);
-  const pixelUpdate = {
-    x: randomNumberBetweenZeroAnd(PICTURE_WIDTH),
-    y: randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-    red: randomNumberBetweenZeroAnd(255),
-    green: randomNumberBetweenZeroAnd(255),
-    blue: randomNumberBetweenZeroAnd(255)
-  }
 
-  return {
-    waitTimeMS,
-    pixelUpdate
-  };
-}
 
-randomNumberBetweenZeroAnd(high: number): number {
-  return Math.floor(high * Math.random());
-}
 
-delay(ms: number) {
-    await new Promise((r) => setTimeout(r, ms));
-}
 
-...
-oh boy
 
-and the tests can call something that can be injected as well
+
+
+
 
 
 

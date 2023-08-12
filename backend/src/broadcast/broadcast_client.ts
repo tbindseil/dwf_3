@@ -15,6 +15,7 @@ export class BroadcastClient extends Client {
         InterServerEvents,
         SocketData
     >;
+    private clientSynced: boolean;
 
     constructor(
         socket: Socket<
@@ -27,10 +28,17 @@ export class BroadcastClient extends Client {
         super();
 
         this.socket = socket;
+        this.clientSynced = false;
+    }
+
+    public notifySynchronized() {
+        this.clientSynced = true;
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate): void {
-        this.socket.emit('server_to_client_update', pixelUpdate);
+        if (this.clientSynced) {
+            this.socket.emit('server_to_client_update', pixelUpdate);
+        }
     }
 
     public close(): void {

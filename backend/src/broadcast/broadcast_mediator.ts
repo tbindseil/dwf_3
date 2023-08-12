@@ -67,12 +67,12 @@ export default class BroadcastMediator {
 
         if (!this.filenameToClients.has(filename)) {
 
-          const rasterObject = await this.pictureAccessor.getRaster(filename);
-          const raster = new Raster(
-            rasterObject.width,
-            rasterObject.height,
-            rasterObject.data
-          );
+            const rasterObject = await this.pictureAccessor.getRaster(filename);
+            const raster = new Raster(
+                rasterObject.width,
+                rasterObject.height,
+                rasterObject.data
+            );
 
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const m = new Map();
@@ -97,8 +97,6 @@ export default class BroadcastMediator {
             clientMap.idToClientMap.set(socket.id, new BroadcastClient(socket));
         }
 
-        // is this a deep copy?
-        socket.emit('join_picture_response', rasterObject);
     }
 
     public removeClient(
