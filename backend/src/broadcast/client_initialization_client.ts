@@ -5,6 +5,9 @@ import {Job, Queue} from './queue';
 import {PictureSyncClient} from './picture_sync_client';
 import {BroadcastClient} from './broadcast_client';
 
+// TODO should this go in thet broadcast client?
+// then, I can make close work
+
 // needs to:
 // 1. send picture at a known point
 // 2. save and send any updates that happen while that is happening
@@ -81,7 +84,8 @@ export default class ClientInitalizationClient extends Client {
     }
 
     public close(): void {
-        console.log('todo cancel remaining jobs if not synced');
+        this.queue.clearFinishedCallback();
+        this.queue.cancelRemainingJobs();
     }
 
     private readonly waitForClientToRecieveInitialRaster: Job = async (): Promise<void> => {

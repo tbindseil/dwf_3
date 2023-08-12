@@ -36,6 +36,10 @@ export class Queue {
         this.finishedCallback = () => {};
     }
 
+    public cancelRemainingJobs() {
+        this.jobs.filter(() => false);
+    }
+
     private start(): void {
         /* c8 ignore start */
         if (this.jobs.length !== 1) {

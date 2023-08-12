@@ -19,26 +19,9 @@ interface TrackedPicture {
     pictureSyncClient: PictureSyncClient;
 }
 
-// TJTAG these actions all need to be syncrhonied, basically serialized
-// and that queue in psc makes things way harder..
-//
-// i mean the queue actually solves a purpose
-//
-// there's another note that outlines the utiltiy of the queue
-//
-// but I still need to figure out:
-//
-// TODO how are asynchronous socket event handlers dealt with?
-// - I think what is happening is the `await`s in the handlers
-// relinquish control, and then we have another event coming in
-// and doing things
-// -- so thats a problem
-
-// maybe i could do an initialization mediator
-// naw too much overlap
-
 export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
+    private static readonly CLIENT_INIT_KEY = 'CLIENT_INIT_KEY';
 
     private readonly pictureAccessor: PictureAccessor;
 
@@ -66,18 +49,6 @@ export default class BroadcastMediator {
 
 
         if (!this.filenameToClients.has(filename)) {
-
-            // actually, by the same logic as below, this should be after setting up the clients
-            // but the picture sync client needs the raster!
-            // TODO, instead of giving the raster to the picturesyncclient on consturction
-            // lets have that happen via the cic
-//            const rasterObject = await this.pictureAccessor.getRaster(filename);
-//            const raster = new Raster(
-//                rasterObject.width,
-//                rasterObject.height,
-//                rasterObject.data
-//            );
-
             // hmmm, seems like we would also have to create a new file if this doesnt exist, or probably throw
             const pictureSyncClient = new PictureSyncClient(
                 new Queue(),
@@ -105,7 +76,7 @@ export default class BroadcastMediator {
             const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
 
             trackedClient.idToClientMap.set(socket.id, broadcastClient);
-            trackedClient.idToClientMap.set(socket.id, clientInitalizationClient);
+            trackedClient.idToClientMap.set(`${BroadcastMediator.CLIENT_INIT_KEY}_${socket.id}`, clientInitalizationClient);
 
             // I think I want to only relinquish control AFTER setting the client map up to receive future events
             if (trackedClient.idToClientMap.size === 3) {
@@ -144,7 +115,8 @@ export default class BroadcastMediator {
 
         if (trackedPicture) {
             const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
-            if (!clientToDelete) {
+            const clientInitClientToDelete = trackedPicture.idToClientMap.get(BroadcastMediator.CLIENT_INIT_KEY);
+            if (!clientToDelete || !clientInitClientToDelete) {
                 // same thing as above, except on second and on clients
                 //
                 // this is happening due to a race conition where we leave immediately after joining
@@ -157,8 +129,10 @@ export default class BroadcastMediator {
             }
 
             clientToDelete.close();
+            clientInitClientToDelete.close();
             const idToClientMap = trackedPicture.idToClientMap;
             idToClientMap.delete(socket.id);
+            idToClientMap.delete(`${BroadcastMediator.CLIENT_INIT_KEY}_${socket.id}`);
 
             if (Array.from(idToClientMap.keys()).length === 1) {
                 const pictureSyncClient = idToClientMap.get(
