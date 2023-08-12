@@ -5,6 +5,7 @@ import { io as io_package } from 'socket.io-client';
 
 import { PixelUpdate, PostPictureInput } from 'dwf-3-models-tjb';
 import { io, server } from '../../src/app';
+import path from 'path';
 
 const ENDPOINT = 'http://127.0.0.1:6543/';
 
@@ -16,6 +17,7 @@ interface Update {
   pixelUpdate: PixelUpdate;
 }
 
+// TODO this needs to be dried out
 io.listen(6543);
 const port = process.env.PORT || 8080;
 // maybe i want to run this in a separate process since node is single threaded
@@ -65,10 +67,11 @@ describe('broadcast test', () => {
     await testsFromRandom(numClients, numUpdates);
   });
 
-  const testsFromFile = (previousUpdatesFilename?: string) => {
-    let updates: Update[][] = [] // recoverUpdates(previousUpdatesFilename);
-    // do it in here
-    tests(updates)
+  const testsFromFile = async (previousUpdatesFilename: string) => {
+    // unverified
+    const recoveredUpdatesStr = await fs.promises.readFile(previousUpdatesFilename);
+    const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
+    tests(recoveredUpdates);
   }
 
   const testsFromRandom = async (numClients: number, numUpdates: number[]) => {
@@ -84,6 +87,7 @@ describe('broadcast test', () => {
 
   const tests = async (updates: Update[][]) => {
     // write first incase we crash
+    // unverified
     const createdAt = new Date().toString().replaceAll(' ', '__');
     await fs.promises.writeFile(`savedTestUpdates_${createdAt}`, JSON.stringify(updates));
 
