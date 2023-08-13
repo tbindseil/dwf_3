@@ -514,6 +514,8 @@ bm.handleUpdate(fromSock, update) {
 
 
 
+i think the psuedo code solution above is way clearer
+
 
 
 
