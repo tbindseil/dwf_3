@@ -18,6 +18,7 @@ export default class ClientInitalizationClient extends Client {
         SocketData
     >;
     private clientSynced: boolean;
+    private readonly
 
     constructor(
         queue: Queue,
@@ -40,12 +41,32 @@ export default class ClientInitalizationClient extends Client {
         // setup the queue with the pending updates from the last time this copy of the raster was written
         // (and therefore updates that don't exist on our copy of the raster)
         // and setup the queue to syncrhonize this and the associated broadcast client for the same socket
-        this.queue.push(this.waitForClientToRecieveInitialRaster);
+        const resolvePictureReceived = () => { console.log('resovlePictureReceived') };
+        const pictureReceivedPromise: Promise<void> = new Promise(resolvePictureReceived);
+        this.queue.push(async (): Promise<void> => {
+            const retPromise = new Promise<void>((resolve) => {
+                console.log("saving resolve");
+                // this.pictureReceivedResolve = resolve;
+                //
+                // wait do i even need to do this???
+                // as in, do i even need to wait for the picture to be received if i know
+                // that updates are sequentialized?
+                // and i guess i need to know that no updates could get emitted before the picture is emitted
+                //
+                // maybe i could enqueue the emit of hte joiun picture request
+            });
+        });
+
+        // this is all pretty fast and maybe could even be done without a queue
         pendingUpdates.forEach(u => this.handleUpdate(u));
+        // and and and @!!!!!!@@@@!!!! the bm addclient will await before this, giving 
+        // things a chance to get added before these are added
+        // so maybe i have to enqueue, and do these manually, and then start the queue
         this.queue.setFinishedCallback(() => {
             this.clientSynced = true;
             broadcastClient.notifySynchronized();
         });
+
 
         // give the client the last written raster
         // the client will respond, that will allow the first job in the queue (waitForClientToRecieveInitialRaster) to complete
@@ -54,7 +75,9 @@ export default class ClientInitalizationClient extends Client {
         // until finally all are processed and the broadcast client starts emitting updates
         // that switch (the queue's finishedCallback), never relinquishes control, so it is atomic
         // and therefore, the next update will certainly come in and be emitted immediately by the broadcastClient
-        this.socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
+        this.socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse(), () => {
+            pictureReceivedPromise.resolve()
+        });
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate): void {
