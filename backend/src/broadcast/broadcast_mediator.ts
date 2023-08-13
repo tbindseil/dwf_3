@@ -73,9 +73,15 @@ export default class BroadcastMediator {
 
         const trackedClient = this.filenameToClients.get(filename);
         if (trackedClient) {
+            const pictureSyncClient = trackedClient.pictureSyncClient;
             const broadcastClient = new BroadcastClient(socket);
-            // its like right here
-            // i need to add and request synchronization in the same block
+
+            // now that broadcast client is registered in the map, it will start receiving (and buffering)
+            // updates. In addition, pictureSyncClient will enqueue a task to send the raster at a known
+            // point to the broadcast client. The broadcast client will then (once the psc task is run) send
+            // that raster out, send out all buffered updates, and then switch modes to start immediately
+            // broadcasting updates instead of buffering them.
+            pictureSyncClient.synchronizeBroadcastClientInitialization(broadcastClient);
             trackedClient.idToClientMap.set(socket.id, broadcastClient);
         }
     }
