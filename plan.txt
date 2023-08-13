@@ -377,6 +377,35 @@ about where emit args are deep copied
 Instead I think that I can just copy it from psc when creating cic
 
 
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+
+
+alright, lets convince myself this works/makes sense:
+
+1. client_1 joins
+2. tracked picture is created, psc client is added, and then psc is initialized. psc relinquishes control at this point.
+3a. client_2 joins - just 3b (psc initialization finishes) because we skip creation of psc after client_1 joins
+3b. psc initialization finishes
+3bi. broadcast client (for client_1) is created and added to map. Also, syncrhonization with psc is requested
+3bj. update occurs - i don't think this is possible with just client_1 with the restriction that we can't draw until we have the picture. but it could happen with client_X joining, its buffered into psc's work queue, and guaranteed to be add to raster before synchronization, because synchrnoization happens in the same queue. Since the associated broadcast client isn't added to map yet, it won't buffer the update, so we don't have to worry about it being done twice.
+3bi1. syncrhonization occurs. This means psc sends bc the raster at a snapshot. That snapshot is the raster already updated with all updates that have happened up until syncrhonization was requested. Since syncrhonization is requested and bc starts buffering at the same time, we know all subsequent updates are buffered. These subsequent updates are also in the psc queue. then, bc will send the (copied) raster and all buffered updates. Lastly, it switches modes and starts immediately emitting updates instead of buffering them.
+3bi2. update occurs - its buffered by bc and ultimately send out, in order, when syncrhonization occurs
+3bi3. client_N joins - go to client_2 joins
+3c. client_X sends update - impossible, it won't have the picture TODO do this in 
+3d. client_1 leaves - this is a synchrous response. everythign is removed and closed and we start over, ie back to 1
 
 
 

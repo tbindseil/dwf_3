@@ -84,6 +84,7 @@ const CurrentPictureService = ({ children }: any) => {
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
+      // TODO can't send until join picture response received
       currentRaster.handlePixelUpdate(pixelUpdate);
       socket.emit('client_to_server_udpate', pixelUpdate);
     },

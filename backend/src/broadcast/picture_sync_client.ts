@@ -22,7 +22,7 @@ export class PictureSyncClient extends Client {
     // all operations involving the raster should be enqueued to ensure isolation and serialization
     private readonly queue: Queue;
     private readonly pictureAccessor: PictureAccessor;
-    private currentRaster?: Raster;
+    private raster?: Raster;
     private readonly filename: string;
 
     private writingInterval?: NodeJS.Timer;
@@ -46,8 +46,8 @@ export class PictureSyncClient extends Client {
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
         this.queue.push(() => {
             return new Promise(async (resolve) => {
-                if (this.currentRaster) {
-                    /* await if async */ this.currentRaster.handlePixelUpdate(pixelUpdate);
+                if (this.raster) {
+                    /* await if async */ this.raster.handlePixelUpdate(pixelUpdate);
                 }
                 this.dirty = true;
                 resolve();
@@ -63,7 +63,7 @@ export class PictureSyncClient extends Client {
     }
 
     public async initialize(): Promise<void> {
-        this.currentRaster = await this.pictureAccessor.getRaster(this.filename);
+        this.raster = await this.pictureAccessor.getRaster(this.filename);
 
         this.writingInterval = setInterval(() => {
             if (this.dirty) {
@@ -75,7 +75,7 @@ export class PictureSyncClient extends Client {
     public synchronizeBroadcastClientInitialization(broadcastClient: BroadcastClient): void {
         this.queue.push(() => {
             return new Promise(async (resolve) => {
-                const currentRasterCopy = this.currentRaster!.copy();
+                const currentRasterCopy = this.raster!.copy();
                 broadcastClient.synchronize(currentRasterCopy);
                 resolve();
             });
@@ -83,10 +83,10 @@ export class PictureSyncClient extends Client {
     }
 
     private unqueueWriteRaster() {
-        if (this.currentRaster) {
+        if (this.raster) {
             this.queue.push(() => {
                 return new Promise(async (resolve) => {
-                    await this.pictureAccessor.writeRaster(this.currentRaster!, this.filename);
+                    await this.pictureAccessor.writeRaster(this.raster!, this.filename);
                     this.dirty = false;
                     resolve();
                 });
