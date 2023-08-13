@@ -408,6 +408,109 @@ alright, lets convince myself this works/makes sense:
 3d. client_1 leaves - this is a synchrous response. everythign is removed and closed and we start over, ie back to 1
 
 
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+
+ah man, another way to do this would be to have one queue in bm
+make it a priority queue
+then, enqueue all things there
+
+picture sync events get prio 1 because we want clients to be able to start up as fast as possible
+broadcast update events get 2
+write picture events get 3
+
+
+what do these look like?
+
+bm has a priority queue
+which is actually a map<number, Job[]>
+priority -> ordered jobs
+
+then, when looking for the next job, we just go 1-3 and get the first job in the first list we find
+
+otherwise queue is the same
+
+man i think its still hard to send the raster, unless its owned by bm
+ok, so bm owns the raster
+
+REMOVE_CLIENT_PRIORITY = 4
+/// Hmm, how to schedule the removal of clients such that it is optimal (ie if add client is there, we put remove client first, and then somehow know to skip adding client)
+/// ^^^ this is an optimization that can be done once we have a working test harness
+// I think the way to do it would be to save (memoize) a map of client to a list of updates
+// then do queue .cancel job(update)? hmm that leaves something to do as well
+
+bm.constructor() => {
+    startInterval(30seconds, () => {
+        // except this is really like a routine that can be installed once the 
+        // the scheduling of this needs to be scrutinized
+        // this could result in them building up, and repeating
+        // well i guess repeating is handled by the dirty flag
+        for (tp in trackedPictures) {
+            queue.push(3, async () => {
+                if (tp.raster && tp.dirty) {
+                    await this.pictureAccessor.writeRaster(raster, filename)
+                }
+            });
+        }
+    });
+}
+
+bm.addclient (socket) => {
+    queue.push(1, async () => {
+        trackedPictures[filename].clientMap.add(socket)
+        if (!this.trackedPictures[filename].raster) {
+            this.trackedPictures[filename].raster = await this.pictureAccessor.getRaster(filename);
+        }
+        const copiedRaster = this.trackedPictures[filename].raster.copy()
+        socket.emit('join_picture_response', copiedRaster);
+    });
+}
+
+bm.removeClient (socket) => {
+    queue.push(REMOVE_CLIENT_PRIORITY, async () => {
+        trackedPicture[filename].clientMap.remove(socket)
+        if (trackedPictures.clientMap.length === 0) {
+            // enqueue write raster?
+            // I don't think I even need to do that
+            // any subsequent writes
+            // if I delete the tracked picture here I do need to do it
+            // because tracked picture is iterated over to schedule writes
+            scheduleWrite(trackedPicture[filename].raster and .dirty)
+            trackedPicgtures.remove(filename)
+        }
+    });
+}
+
+// WARNING this will bind hte dirty
+bm.scheduleUpdate (raster, dirty) => {
+    queue.push(3, async () => {
+        if (raster && dirty) {
+            await this.pictureAccessor.writeRaster(raster, filename)
+        }
+    });
+}
+
+bm.handleUpdate(fromSock, update) {
+    queue.push(2, async () => {
+        trackedPicture[filename].clientMap.forEach(c => {
+            if (c.socket !== fromSocket) {
+                c.handleUpdate(u)
+            }
+        });
+    });
+}
 
 
 
