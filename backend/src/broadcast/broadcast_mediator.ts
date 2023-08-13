@@ -32,11 +32,6 @@ export default class BroadcastMediator {
         this.pictureAccessor = pictureAccessor;
     }
 
-    // first, we setup the new clients in the TrackedPicture map,
-    // then we do asynchronous setup things
-    // that way, if the picture gets an update while the async stuff is happening
-    // we will be able to still pass the new update to the clients registering in
-    // this iteration of the function.
     public async addClient(
         filename: string,
         socket: Socket<
@@ -68,34 +63,20 @@ export default class BroadcastMediator {
                 idToClientMap: m,
                 pictureSyncClient: pictureSyncClient
             });
-        }
 
+            // Picturesync is the only thing registered in the map (to receive updates).
+            // It is important that broadcast client isn't registered yet.
+            // BroadcastClient will start receiving updates (buffering them initially)
+            // only once it requests syncrhonization with psc
+            await pictureSyncClient.initialize();
+        }
 
         const trackedClient = this.filenameToClients.get(filename);
         if (trackedClient) {
-            const pictureSyncClient = trackedClient.pictureSyncClient;
-
             const broadcastClient = new BroadcastClient(socket);
-
+            // its like right here
+            // i need to add and request synchronization in the same block
             trackedClient.idToClientMap.set(socket.id, broadcastClient);
-
-            // I think I want to only relinquish control AFTER setting the client map up to receive future events
-            if (trackedClient.idToClientMap.size === 3) {
-                // then this is the first client added, and we need to initialize the psc
-                await pictureSyncClient.initialize();
-            }
-
-            // this is needed becasue we can receive updates while the psc is initializing above
-            // the psc buffers those, and can provide us with a snapshot of the raster and the updates that
-            // have been received but havent been applied. then, we send the snapshot and all pending updates
-            // and get broadcast client to start receiving new udpates, all without awaiting
-            //
-            // this could also be accomplished by not adding the broadcastClient to the map until we finish these
-            // pending updates
-            //            const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
-            //            socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
-            //            pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
-            //            broadcastClient.notifySynchronized();
         }
     }
 

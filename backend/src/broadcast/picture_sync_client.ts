@@ -5,6 +5,18 @@ import { Raster } from 'dwf-3-raster-tjb';
 import { Queue } from './queue';
 import {BroadcastClient} from './broadcast_client';
 
+// ok, now time to define this thing
+//
+// when it receives an update, it enqueues a Queue.Job, ie an asynchronous function that is definitely going to run serially and in order.
+// This job just updates the raster.
+//
+// In addition, every so often (writeIntervalMS), it will enqueue a job that writes the entire raster. Since this is in the same queue,
+// we know it will run in isolation from the updates to the raster. It also doesn't matter if updates come after because another
+// write will be enqueued eventually thanks to the timer nature.
+//
+// Lastly, when shutdown (close for now), it enqueues one final write.
+//
+// I still don't really know where (file or order) synchronizeBroadcastClientInitialization goes
 export class PictureSyncClient extends Client {
     private readonly queue: Queue;
     private readonly pictureAccessor: PictureAccessor;
