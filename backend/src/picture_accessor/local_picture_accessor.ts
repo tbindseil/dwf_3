@@ -27,6 +27,8 @@ export default class LocalPictureAccessor extends PictureAccessor {
             const jimg = this.jimpAdapter.createJimp(width, height);
             const arrayBuffer = new ArrayBuffer(width * height * 4);
             jimg.bitmap.data = Buffer.from(new Uint8ClampedArray(arrayBuffer));
+
+            // set alpha to max for opagueness
             for (let i = 3; i < width * height * 4; i += 4) {
                 jimg.bitmap.data[i] = 255;
             }

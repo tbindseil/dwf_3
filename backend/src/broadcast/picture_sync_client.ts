@@ -82,6 +82,11 @@ export class PictureSyncClient extends Client {
                 // 1. ignore updates until initialized (the updates will happen to the raster in psc)
                 // 2. once the syncrhonization is requested (via this action), broadcast client can start to hold on to updates
                 // 3. upon bc.synchronize, all held updates are sent after the raster, these updates should be the same as what is currently enqueued in this psc queue
+
+                // and then I think I said somehwere else that we could not add the broadcast client to the map until after
+                // picture sync client is initialized, then we only need two states
+                // 1. initial raster not sent
+                // 2. initial raster sent
             });
         });
     }
