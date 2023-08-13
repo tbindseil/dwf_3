@@ -92,10 +92,10 @@ export default class BroadcastMediator {
             //
             // this could also be accomplished by not adding the broadcastClient to the map until we finish these
             // pending updates
-            const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
-            socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
-            pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
-            broadcastClient.notifySynchronized();
+            //            const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
+            //            socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
+            //            pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
+            //            broadcastClient.notifySynchronized();
         }
     }
 

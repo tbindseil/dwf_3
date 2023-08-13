@@ -7,6 +7,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from 'dwf-3-models-tjb';
+import {Raster} from 'dwf-3-raster-tjb';
 
 export class BroadcastClient extends Client {
     private readonly socket: Socket<
@@ -15,7 +16,7 @@ export class BroadcastClient extends Client {
         InterServerEvents,
         SocketData
     >;
-    private clientSynced: boolean;
+    private initialRasterSent: boolean;
 
     constructor(
         socket: Socket<
@@ -28,12 +29,12 @@ export class BroadcastClient extends Client {
         super();
 
         this.socket = socket;
-        this.clientSynced = false;
+        this.initialRasterSent = false;
     }
 
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
         // TODO switch installed handlers to avodi if
-        if (this.clientSynced) {
+        if (this.initialRasterSent) {
             this.socket.emit('server_to_client_update', pixelUpdate);
         }
     }
@@ -42,7 +43,8 @@ export class BroadcastClient extends Client {
         this.socket._cleanup();
     }
 
-    public notifySynchronized() {
-        this.clientSynced = true;
+    public synchronize(copiedRaster: Raster) {
+        this.socket.emit('join_picture_response', copiedRaster.toJoinPictureResponse());
+        this.initialRasterSent = true;
     }
 }

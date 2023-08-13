@@ -3,39 +3,35 @@ import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import { Queue } from './queue';
+import {BroadcastClient} from './broadcast_client';
 
 export class PictureSyncClient extends Client {
     private readonly queue: Queue;
     private readonly pictureAccessor: PictureAccessor;
     private currentRaster?: Raster;
-    private lastWrittenRaster?: Raster;
     private readonly filename: string;
 
     private writingInterval?: NodeJS.Timer;
-    private dirty: boolean;
-    private unwrittenUpdates: PixelUpdate[];
+    private readonly writeIntervalMS: number;
+    private dirty = false;
 
     public constructor(
         queue: Queue,
         pictureAccessor: PictureAccessor,
         filename: string,
+        writeIntervalMS: number = 30000
     ) {
         super();
 
         this.queue = queue;
         this.pictureAccessor = pictureAccessor;
-
         this.filename = filename;
-        this.dirty = false;
-        this.unwrittenUpdates = [];
+        this.writeIntervalMS = writeIntervalMS;
     }
 
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
         this.queue.push(() => {
-            return new Promise((resolve) => {
-                // TODO what order should this be?
-                this.unwrittenUpdates.push(pixelUpdate);
-
+            return new Promise(async (resolve) => {
                 if (this.currentRaster) {
                     /* await if async */ this.currentRaster.handlePixelUpdate(pixelUpdate);
                 }
@@ -52,24 +48,42 @@ export class PictureSyncClient extends Client {
         await this.queue.waitForCompletion();
     }
 
-    public async initialize(writeInterval: number = 30000): Promise<void> {
+    public async initialize(): Promise<void> {
         this.currentRaster = await this.pictureAccessor.getRaster(this.filename);
-        this.lastWrittenRaster = this.currentRaster.copy();
 
-        this.writingInterval = setInterval(async () => {
+        this.writingInterval = setInterval(() => {
             if (this.dirty) {
                 this.unqueueWriteRaster();
             }
-        }, writeInterval);
+        }, this.writeIntervalMS);
     }
 
-    // the last written raster is only copied to synchronously,
-    // so we don't have to worry about it changing while we are copying it
-    public getLastWrittenRasterCopy(): [Raster, PixelUpdate[]] {
-        if (!this.lastWrittenRaster) {
-            throw Error('getLastWrittenRaster called before raster initialized');
-        }
-        return [this.lastWrittenRaster.copy(), this.unwrittenUpdates];
+    public synchronizeBroadcastClientInitialization(broadcastClient: BroadcastClient): void {
+        // enqueueing this ensures that the raster won't be touched while we are copying it
+        this.queue.push(() => {
+            return new Promise(async (resolve) => {
+                const currentRasterCopy = this.currentRaster!.copy();
+
+                // TODO could this be brought up to client interface as initialize
+                // but the arguments of initialize for this and broadcastClient are pretty different
+                //
+                // in order to get around this, all broadcast clients could be constructed with a reference
+                // to the picture sync client
+                // then, we could call initialize on them when they are created with no arg
+                // and we can move the timeout are in psc's initialize to the constructor
+
+                broadcastClient.synchronize(currentRasterCopy);
+                resolve();
+
+                // this is all good and dandy except we still don't account for updates that are enqueued as jobs
+                // those would've been ignored by broadcast client and aren't on the raster yet when it is copied
+                //
+                // one solution could be to have 3 states in bc. This way, it can
+                // 1. ignore updates until initialized (the updates will happen to the raster in psc)
+                // 2. once the syncrhonization is requested (via this action), broadcast client can start to hold on to updates
+                // 3. upon bc.synchronize, all held updates are sent after the raster, these updates should be the same as what is currently enqueued in this psc queue
+            });
+        });
     }
 
     // the reason this enqueues its work is to ensure that it happens serially with any
@@ -79,12 +93,7 @@ export class PictureSyncClient extends Client {
             this.queue.push(() => {
                 return new Promise(async (resolve) => {
                     await this.pictureAccessor.writeRaster(this.currentRaster!, this.filename);
-
-                    // all the below (notably the replacement of lastWrittenRaster and the clearing
-                    // of unwrittenUpdates) all happen synchronously
-                    this.lastWrittenRaster = this.currentRaster!.copy();
                     this.dirty = false;
-                    this.unwrittenUpdates = [];
                     resolve();
                 });
             });
