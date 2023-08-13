@@ -99,3 +99,15 @@ export class PictureSyncClient extends Client {
         // honestly more of a consideration for simplification after thigns are more stable
 //
 // after making hte planned changes, it is no longer async, but I didn't do any of the consequential code changes yet
+//
+//
+//
+//
+//  it seemse that the above was consequential, enough to remove the cic altogether!
+//  now, the last thing that remains to both be solved and be considered is what to do about the await
+//  in the write raster
+//  1. does it work as described?
+//  2. could a lock eliminate the need for a second raster?
+//  2a. here we mean a simple mutex lock in order to ensure only one func can do its thing
+//  3. on the other hand (of hte lock idea) is utilize the enqueue methodology
+//  4. maybe we could enqueue an event that synchronizes the broadcast client

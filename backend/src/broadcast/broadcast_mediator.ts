@@ -12,7 +12,6 @@ import {
 } from 'dwf-3-models-tjb';
 import { Socket } from 'socket.io';
 import { Queue } from './queue';
-import ClientInitalizationClient from './client_initialization_client';
 
 interface TrackedPicture {
     idToClientMap: Map<string, Client>;
@@ -21,7 +20,6 @@ interface TrackedPicture {
 
 export default class BroadcastMediator {
     private static readonly PICTURE_SYNC_KEY = 'PICTURE_SYNC_KEY';
-    private static readonly CLIENT_INIT_KEY = 'CLIENT_INIT_KEY';
 
     private readonly pictureAccessor: PictureAccessor;
 
@@ -78,10 +76,8 @@ export default class BroadcastMediator {
             const pictureSyncClient = trackedClient.pictureSyncClient;
 
             const broadcastClient = new BroadcastClient(socket);
-            const clientInitalizationClient = new ClientInitalizationClient(new Queue(), socket);
 
             trackedClient.idToClientMap.set(socket.id, broadcastClient);
-            trackedClient.idToClientMap.set(`${BroadcastMediator.CLIENT_INIT_KEY}_${socket.id}`, clientInitalizationClient);
 
             // I think I want to only relinquish control AFTER setting the client map up to receive future events
             if (trackedClient.idToClientMap.size === 3) {
@@ -89,7 +85,17 @@ export default class BroadcastMediator {
                 await pictureSyncClient.initialize();
             }
 
-            await clientInitalizationClient.initialize(broadcastClient, pictureSyncClient);
+            // this is needed becasue we can receive updates while the psc is initializing above
+            // the psc buffers those, and can provide us with a snapshot of the raster and the updates that
+            // have been received but havent been applied. then, we send the snapshot and all pending updates
+            // and get broadcast client to start receiving new udpates, all without awaiting
+            //
+            // this could also be accomplished by not adding the broadcastClient to the map until we finish these
+            // pending updates
+            const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
+            socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
+            pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
+            broadcastClient.notifySynchronized();
         }
     }
 
@@ -120,8 +126,7 @@ export default class BroadcastMediator {
 
         if (trackedPicture) {
             const clientToDelete = trackedPicture.idToClientMap.get(socket.id);
-            const clientInitClientToDelete = trackedPicture.idToClientMap.get(BroadcastMediator.CLIENT_INIT_KEY);
-            if (!clientToDelete || !clientInitClientToDelete) {
+            if (!clientToDelete) {
                 // same thing as above, except on second and on clients
                 //
                 // this is happening due to a race conition where we leave immediately after joining
@@ -134,10 +139,8 @@ export default class BroadcastMediator {
             }
 
             clientToDelete.close();
-            clientInitClientToDelete.close();
             const idToClientMap = trackedPicture.idToClientMap;
             idToClientMap.delete(socket.id);
-            idToClientMap.delete(`${BroadcastMediator.CLIENT_INIT_KEY}_${socket.id}`);
 
             if (Array.from(idToClientMap.keys()).length === 1) {
                 const pictureSyncClient = idToClientMap.get(

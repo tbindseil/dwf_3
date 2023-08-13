@@ -5,6 +5,7 @@ import {PictureSyncClient} from './picture_sync_client';
 import {BroadcastClient} from './broadcast_client';
 
 // this:
+// note, the updates under scrutinty are definitely duplicated
 // 1. query for a snapshot of the raster, in addition to all updates that have happened since that snap shot (wait! will this also include the updates this is supposed to help with?) TODO
 // 2. then send the raster snapshot to new client
 // 3. then send updates that had already occured to the picture between known point and initializing (these are potentially duplicated)
@@ -18,8 +19,6 @@ export default class ClientInitalizationClient extends Client {
         InterServerEvents,
         SocketData
     >;
-    private readonly bufferedRecievedUpdates: PixelUpdate[] = [];
-    private clientSynced = false;
 
     constructor(
         socket: Socket<
@@ -34,24 +33,14 @@ export default class ClientInitalizationClient extends Client {
     }
 
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
-        if (this.clientSynced) {
-            this.bufferedRecievedUpdates.push(pixelUpdate);
-        }
+        // do nothing
     }
 
     public override close(): void {
         // do nothing
     }
 
-    public async initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
-        const [lastWrittenRasterCopy, pendingUpdates] = pictureSyncClient.getLastWrittenRasterCopy();
-
-        this.socket.emit('join_picture_response', lastWrittenRasterCopy.toJoinPictureResponse());
-
-        pendingUpdates.forEach(u => this.socket.emit('server_to_client_update', u));
-        this.bufferedRecievedUpdates.forEach(u => this.socket.emit('server_to_client_update', u));
-
-        this.clientSynced = true;
-        broadcastClient.notifySynchronized();
+    // really, this could probably happen in add client
+    public initialize(broadcastClient: BroadcastClient, pictureSyncClient: PictureSyncClient) {
     }
 }
