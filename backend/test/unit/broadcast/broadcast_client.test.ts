@@ -8,13 +8,15 @@ import {
 import { BroadcastClient } from '../../../src/broadcast/broadcast_client';
 import { Socket } from 'socket.io';
 
-describe('BroadcastClient Tests', () => {
+describe('TJTAG BroadcastClient Tests', () => {
     const defaultFilename = 'filename';
 
     const mockEmit = jest.fn();
+    const mockCleanup = jest.fn();
     const mockSocket = {
         emit: mockEmit,
         id: 'mockSocketID',
+        _cleanup: mockCleanup
     } as unknown as Socket<
         ClientToServerEvents,
         ServerToClientEvents,
@@ -41,7 +43,8 @@ describe('BroadcastClient Tests', () => {
         );
     });
 
-    it('does nothing on close', () => {
+    it('closes socket on close', () => {
         broadcastClient.close();
+        expect(mockCleanup).toBeCalled();
     });
 });
