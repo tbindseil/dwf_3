@@ -16,7 +16,7 @@ export class Queue {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
         this.jobs = new Map();
 
-        for (let i = Priority.ONE; i < Priority.MAX; ++i) {
+        for (let i = Priority.ONE; i <= Priority.MAX; ++i) {
             this.jobs.set(i, []);
         }
     }
@@ -25,8 +25,6 @@ export class Queue {
         const jobList = this.jobs.get(priority);
         if (jobList) {
             jobList.push(job);
-        } else {
-            throw Error(`invalid priority: ${priority}`);
         }
 
         // ok, so we know that jobs is only shortened by runJob
@@ -66,7 +64,7 @@ export class Queue {
 
     private async runJobs(): Promise<void> {
         while (this.getNumberOfJobs() > 0) {
-            for (let i = Priority.ONE; i < Priority.MAX; ++i) {
+            for (let i = Priority.ONE; i <= Priority.MAX; ++i) {
                 const currentPriorityJobs = this.jobs.get(i);
                 if (currentPriorityJobs) {
                     if (currentPriorityJobs.length > 0) {
