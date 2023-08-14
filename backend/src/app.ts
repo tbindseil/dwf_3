@@ -103,14 +103,14 @@ io.on(
         socket.on(
             'join_picture_request',
             async (joinPictureRequest: JoinPictureRequest) => {
-                await broadcastMediator.addClient(
+                broadcastMediator.addClient(
                     joinPictureRequest.filename,
                     socket
                 );
             }
         );
         socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
-            broadcastMediator.handleUpdate(pixelUpdate, socket.id);
+            broadcastMediator.broadcastUpdate(pixelUpdate, socket.id);
         });
 
         socket.on(

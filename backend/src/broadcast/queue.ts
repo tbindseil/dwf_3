@@ -1,13 +1,16 @@
 export type Job = () => Promise<void>;
 
+// I wonder if this could be more
+// flexible, pass in levels of priority
+// save as member var
+// use in for loops
 // one is the highest priority
 export enum Priority {
     ONE = 1,
     TWO = 2,
     THREE = 3,
     FOUR = 4,
-    FIVE = 5,
-    MAX = FIVE
+    MAX = FOUR
 }
 
 export class Queue {
