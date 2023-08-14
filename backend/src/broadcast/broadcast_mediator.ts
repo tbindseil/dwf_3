@@ -17,6 +17,7 @@ interface TrackedPicture {
     idToClientMap: Map<string, Client>;
     dirty: boolean;
     raster?: Raster;
+    queue: Queue;
 
     // these are updates that have been broadcast but haven't been applied to the local copy of the raster
     pendingUpdates: PixelUpdate[];
@@ -24,8 +25,6 @@ interface TrackedPicture {
 
 export default class BroadcastMediator {
     private readonly pictureAccessor: PictureAccessor;
-    private readonly queue: Queue;
-    private readonly _writeInterval: NodeJS.Timer;
 
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
     private readonly trackedPictures = new Map<string, TrackedPicture>();
@@ -37,15 +36,14 @@ export default class BroadcastMediator {
     private readonly WRITE_RASTER_PRIORITY = Priority.FIVE;
 
 
-    constructor(pictureAccessor: PictureAccessor, queue: Queue) {
+    constructor(pictureAccessor: PictureAccessor) {
         this.pictureAccessor = pictureAccessor;
-        this.queue = queue;
 
         let laps = 0;
-        this._writeInterval = setInterval(() => {
+        setInterval(() => {
             ++laps;
             this.trackedPictures.forEach((_tp, filename) => {
-                // every 128 we do a high prio one
+                // every so often we do a high prio one
                 // if we didn't do that, a very active picture
                 // could have its write delayed indefinitely
                 this.scheduleWrite(filename, this.shouldDoHighPriorityWrite(laps) ? this.HIGH_PRIORITY_WRITE_RASTER : this.WRITE_RASTER_PRIORITY);
@@ -58,26 +56,28 @@ export default class BroadcastMediator {
     }
 
     public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
-        const trackedPicture = this.trackedPictures.get(filename);
-        if (!trackedPicture) {
-            this.trackedPictures.set(filename, { idToClientMap: new Map(), dirty: false, pendingUpdates: [] });
+        if (!this.trackedPictures.has(filename)) {
+            this.trackedPictures.set(filename, { idToClientMap: new Map(), dirty: false, pendingUpdates: [], queue: new Queue() });
         }
 
-        this.queue.push(this.ADD_CLIENT_PRIORITY, async () => {
-            const trackedPicture = this.trackedPictures.get(filename);
-            if (trackedPicture) {
-                trackedPicture.idToClientMap.set(socket.id, new BroadcastClient(socket));
+        const trackedPicture = this.trackedPictures.get(filename);
+        if (trackedPicture) {
+            trackedPicture.queue.push(this.ADD_CLIENT_PRIORITY, async () => {
+                const trackedPicture_again = this.trackedPictures.get(filename);
+                if (trackedPicture_again) {
+                    trackedPicture_again.idToClientMap.set(socket.id, new BroadcastClient(socket));
 
-                // cold start
-                if (!trackedPicture.raster) {
-                    trackedPicture.raster = await this.pictureAccessor.getRaster(filename);
+                    // cold start
+                    if (!trackedPicture_again.raster) {
+                        trackedPicture_again.raster = await this.pictureAccessor.getRaster(filename);
+                    }
+
+                    const copiedRaster = trackedPicture_again.raster.copy()
+                    socket.emit('join_picture_response', copiedRaster.toJoinPictureResponse());
+                    trackedPicture_again.pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
                 }
-
-                const copiedRaster = trackedPicture.raster.copy()
-                socket.emit('join_picture_response', copiedRaster.toJoinPictureResponse());
-                trackedPicture.pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
-            }
-        });
+            });
+        }
     }
 
     public removeClient(
@@ -99,45 +99,46 @@ export default class BroadcastMediator {
     }
 
     public broadcastUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
-        this.queue.push(this.BROADCAST_UPDATE_PRIORITY, async () => {
-            const trackedPicture = this.trackedPictures.get(pixelUpdate.filename);
-            if (trackedPicture) {
-                trackedPicture.idToClientMap.forEach(
-                    (client: Client, socketId: string) => {
-                        if (socketId != sourceSocketId) {
-                            client.handleUpdate(pixelUpdate);
-                        }
-                    }
-                );
-            }
-        });
-
-        // TODO need to sort out these priorities, in my water park
-        this.queue.push(this.UPDATE_LOCAL_RASTER_PRIORITY, async () => {
-            const trackedPicture = this.trackedPictures.get(pixelUpdate.filename);
-            if (trackedPicture && trackedPicture.raster) {
-                trackedPicture.raster.handlePixelUpdate(pixelUpdate);
-                trackedPicture.pendingUpdates.shift();
-                // the result of shift should be the same as pixelUpdate
-                // the pendingUpdates is to keep track of them for use elsewhere, not here
-            }
-        });
-
         const trackedPicture = this.trackedPictures.get(pixelUpdate.filename);
         if (trackedPicture) {
+            trackedPicture.queue.push(this.BROADCAST_UPDATE_PRIORITY, async () => {
+                const trackedPicture_again = this.trackedPictures.get(pixelUpdate.filename);
+                if (trackedPicture_again) {
+                    trackedPicture_again.idToClientMap.forEach(
+                        (client: Client, socketId: string) => {
+                            if (socketId != sourceSocketId) {
+                                client.handleUpdate(pixelUpdate);
+                            }
+                        }
+                    );
+                }
+            });
+
+            trackedPicture.queue.push(this.UPDATE_LOCAL_RASTER_PRIORITY, async () => {
+                const trackedPicture_again = this.trackedPictures.get(pixelUpdate.filename);
+                if (trackedPicture_again && trackedPicture_again.raster) {
+                    trackedPicture_again.raster.handlePixelUpdate(pixelUpdate);
+                    trackedPicture_again.pendingUpdates.shift();
+                    // the result of shift should be the same as pixelUpdate
+                    // the pendingUpdates is to keep track of them for use elsewhere, not here
+                }
+            });
+
             trackedPicture.pendingUpdates.push(pixelUpdate);
         }
     }
 
-    // WARNING this will bind hte dirty
     private scheduleWrite(filename: string, priority: Priority) {
         // it could be dirty by the time we get to it,
         // so check then
-        this.queue.push(priority, async () => {
-            const trackedPicture = this.trackedPictures.get(filename);
-            if (trackedPicture && trackedPicture.raster && trackedPicture.dirty) {
-                await this.pictureAccessor.writeRaster(trackedPicture.raster, filename)
-            }
-        });
+        const trackedPicture = this.trackedPictures.get(filename);
+        if (trackedPicture) {
+            trackedPicture.queue.push(priority, async () => {
+                const trackedPicture_again = this.trackedPictures.get(filename);
+                if (trackedPicture_again && trackedPicture_again.raster && trackedPicture_again.dirty) {
+                    await this.pictureAccessor.writeRaster(trackedPicture_again.raster, filename)
+                }
+            });
+        }
     }
 }
