@@ -11,20 +11,10 @@ import {
 } from 'dwf-3-models-tjb';
 import { Socket } from 'socket.io';
 import { Priority, Queue } from './queue';
-import {Raster} from 'dwf-3-raster-tjb';
-
-interface TrackedPicture {
-    idToClientMap: Map<string, Client>;
-    dirty: boolean;
-    raster?: Raster;
-
-    // these are updates that have been broadcast but haven't been applied to the local copy of the raster
-    pendingUpdates: PixelUpdate[];
-}
+import {TrackedPicture} from './tracked_picture';
 
 export default class BroadcastMediator {
     private readonly pictureAccessor: PictureAccessor;
-    private readonly queue: Queue;
     private readonly _writeInterval: NodeJS.Timer;
 
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
@@ -37,9 +27,8 @@ export default class BroadcastMediator {
     private readonly WRITE_RASTER_PRIORITY = Priority.FIVE;
 
 
-    constructor(pictureAccessor: PictureAccessor, queue: Queue) {
+    constructor(pictureAccessor: PictureAccessor) {
         this.pictureAccessor = pictureAccessor;
-        this.queue = queue;
 
         let laps = 0;
         this._writeInterval = setInterval(() => {
@@ -60,7 +49,7 @@ export default class BroadcastMediator {
     public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
         const trackedPicture = this.trackedPictures.get(filename);
         if (!trackedPicture) {
-            this.trackedPictures.set(filename, { idToClientMap: new Map(), dirty: false, pendingUpdates: [] });
+            this.trackedPictures.set(filename, new TrackedPicture(new Queue()));
         }
 
         this.queue.push(this.ADD_CLIENT_PRIORITY, async () => {
