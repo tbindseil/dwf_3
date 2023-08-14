@@ -30,25 +30,31 @@ export default class BroadcastMediator {
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
     private readonly trackedPictures = new Map<string, TrackedPicture>();
 
-    private readonly ADD_CLIENT_PRIORITY = Priority.ONE;
-    private readonly BROADCAST_UPDATE_PRIORITY = Priority.TWO;
-    private readonly UPDATE_LOCAL_RASTER_PRIORITY = Priority.THREE;
-    private readonly WRITE_RASTER_PRIORITY = Priority.FOUR;
+    private readonly HIGH_PRIORITY_WRITE_RASTER = Priority.ONE;
+    private readonly ADD_CLIENT_PRIORITY = Priority.TWO;
+    private readonly BROADCAST_UPDATE_PRIORITY = Priority.THREE;
+    private readonly UPDATE_LOCAL_RASTER_PRIORITY = Priority.FOUR;
+    private readonly WRITE_RASTER_PRIORITY = Priority.FIVE;
 
 
     constructor(pictureAccessor: PictureAccessor, queue: Queue) {
         this.pictureAccessor = pictureAccessor;
         this.queue = queue;
 
+        let laps = 0;
         this._writeInterval = setInterval(() => {
-            this.trackedPictures.forEach((tp, filename) => {
-                queue.push(this.WRITE_RASTER_PRIORITY, async () => {
-                    if (tp.raster && tp.dirty) {
-                        await this.pictureAccessor.writeRaster(tp.raster, filename)
-                    }
-                });
+            ++laps;
+            this.trackedPictures.forEach((_tp, filename) => {
+                // every 128 we do a high prio one
+                // if we didn't do that, a very active picture
+                // could have its write delayed indefinitely
+                this.scheduleWrite(filename, this.shouldDoHighPriorityWrite(laps) ? this.HIGH_PRIORITY_WRITE_RASTER : this.WRITE_RASTER_PRIORITY);
             });
         }, 30000);
+    }
+
+    private shouldDoHighPriorityWrite(laps: number): boolean {
+        return laps % 128 === 0;
     }
 
     public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
@@ -87,8 +93,7 @@ export default class BroadcastMediator {
         if (trackedPicture) {
             trackedPicture.idToClientMap.delete(socket.id);
             if (trackedPicture.idToClientMap.size === 0) {
-                this.scheduleWrite(filename, trackedPicture.dirty, trackedPicture.raster),
-                this.trackedPictures.delete(filename);
+                this.scheduleWrite(filename, this.WRITE_RASTER_PRIORITY);
             }
         }
     }
@@ -125,10 +130,13 @@ export default class BroadcastMediator {
     }
 
     // WARNING this will bind hte dirty
-    private scheduleWrite(filename: string, dirty: boolean, raster?: Raster) {
-        this.queue.push(this.WRITE_RASTER_PRIORITY, async () => {
-            if (raster && dirty) {
-                await this.pictureAccessor.writeRaster(raster, filename)
+    private scheduleWrite(filename: string, priority: Priority) {
+        // it could be dirty by the time we get to it,
+        // so check then
+        this.queue.push(priority, async () => {
+            const trackedPicture = this.trackedPictures.get(filename);
+            if (trackedPicture && trackedPicture.raster && trackedPicture.dirty) {
+                await this.pictureAccessor.writeRaster(trackedPicture.raster, filename)
             }
         });
     }
