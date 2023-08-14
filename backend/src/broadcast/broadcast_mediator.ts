@@ -31,9 +31,10 @@ export default class BroadcastMediator {
 
     private readonly HIGH_PRIORITY_WRITE_RASTER = Priority.ONE;
     private readonly ADD_CLIENT_PRIORITY = Priority.TWO;
-    private readonly BROADCAST_UPDATE_PRIORITY = Priority.THREE;
-    private readonly UPDATE_LOCAL_RASTER_PRIORITY = Priority.FOUR;
-    private readonly WRITE_RASTER_PRIORITY = Priority.FIVE;
+    private readonly REMOVE_CLIENT_PRIORITY = Priority.THREE;
+    private readonly BROADCAST_UPDATE_PRIORITY = Priority.FOUR;
+    private readonly UPDATE_LOCAL_RASTER_PRIORITY = Priority.FIVE;
+    private readonly WRITE_RASTER_PRIORITY = Priority.SIX;
 
 
     constructor(pictureAccessor: PictureAccessor) {
@@ -46,6 +47,8 @@ export default class BroadcastMediator {
                 // every so often we do a high prio one
                 // if we didn't do that, a very active picture
                 // could have its write delayed indefinitely
+                //
+                // an active picture's queue could overflow
                 this.scheduleWrite(filename, this.shouldDoHighPriorityWrite(laps) ? this.HIGH_PRIORITY_WRITE_RASTER : this.WRITE_RASTER_PRIORITY);
             });
         }, 30000);
@@ -91,10 +94,9 @@ export default class BroadcastMediator {
     ) {
         const trackedPicture = this.trackedPictures.get(filename);
         if (trackedPicture) {
-            trackedPicture.idToClientMap.delete(socket.id);
-            if (trackedPicture.idToClientMap.size === 0) {
-                this.scheduleWrite(filename, this.WRITE_RASTER_PRIORITY);
-            }
+            trackedPicture.queue.push(this.REMOVE_CLIENT_PRIORITY, async () => {
+                trackedPicture.idToClientMap.delete(socket.id);
+            });
         }
     }
 
@@ -137,6 +139,14 @@ export default class BroadcastMediator {
                 const trackedPicture_again = this.trackedPictures.get(filename);
                 if (trackedPicture_again && trackedPicture_again.raster && trackedPicture_again.dirty) {
                     await this.pictureAccessor.writeRaster(trackedPicture_again.raster, filename)
+
+
+                    // if we write and there are no clients, can we delete, yes
+                    // no clients means noone can send updates
+                    // write means there were no more local picture update events
+                    if (trackedPicture.idToClientMap.size === 0) {
+                        this.trackedPictures.delete(filename);
+                    }
                 }
             });
         }
