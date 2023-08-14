@@ -451,6 +451,11 @@ REMOVE_CLIENT_PRIORITY = 4
 // I think the way to do it would be to save (memoize) a map of client to a list of updates
 // then do queue .cancel job(update)? hmm that leaves something to do as well
 
+//        this.writingInterval = setInterval(() => {
+//            if (this.dirty) {
+//                this.unqueueWriteRaster();
+//            }
+//        }, this.writeIntervalMS);
 bm.constructor() => {
     startInterval(30seconds, () => {
         // except this is really like a routine that can be installed once the 

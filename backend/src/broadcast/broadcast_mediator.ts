@@ -22,6 +22,7 @@ interface TrackedPicture {
 export default class BroadcastMediator {
     private readonly pictureAccessor: PictureAccessor;
     private readonly queue: Queue;
+    private readonly _writeInterval: NodeJS.Timer;
 
     // this maps filename to all clients, where each client has a unique socket id to fetch instantly
     private readonly trackedPictures = new Map<string, TrackedPicture>();
@@ -29,6 +30,16 @@ export default class BroadcastMediator {
     constructor(pictureAccessor: PictureAccessor, queue: Queue) {
         this.pictureAccessor = pictureAccessor;
         this.queue = queue;
+
+        this._writeInterval = setInterval(() => {
+            this.trackedPictures.forEach((tp, filename) => {
+                queue.push(Priority.THREE, async () => {
+                    if (tp.raster && tp.dirty) {
+                        await this.pictureAccessor.writeRaster(tp.raster, filename)
+                    }
+                });
+            });
+        }, 30000);
     }
 
     public addClient(filename: string, socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) {
