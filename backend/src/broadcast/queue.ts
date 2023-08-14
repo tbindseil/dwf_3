@@ -1,83 +1,93 @@
 export type Job = () => Promise<void>;
+
+// one is the highest priority
+export enum Priority {
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    MAX = 3
+}
+
 export class Queue {
     private readonly waitForCompletionIntervalMS: number;
-    private finishedCallback: () => void;
-    private readonly jobs: Job[];
+    private readonly jobs: Map<Priority, Job[]>;
 
     public constructor(waitForCompletionIntervalMS: number = 1000) {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
-        this.finishedCallback = (() => {});
-        this.jobs = [];
+        this.jobs = new Map();
+
+        for (let i = Priority.ONE; i < Priority.MAX; ++i) {
+            this.jobs.set(i, []);
+        }
     }
 
-    public push(job: Job): void {
-        this.jobs.push(job);
+    public push(priority: Priority, job: Job): void {
+        const jobList = this.jobs.get(priority);
+        if (jobList) {
+            jobList.push(job);
+        } else {
+            throw Error(`invalid priority: ${priority}`);
+        }
+
         // ok, so we know that jobs is only shortened by runJob
         // and that only shortens explicitly after a job is done
         // that can't happen inbetween pushing above and starting below
         // so we know the condition (length === 1) is always indicative that we are restarting
-
-        if (this.jobs.length === 1) {
+        // if (this.jobs.length === 1) {
+        if (this.getNumberOfJobs() === 1) {
             this.start();
         }
     }
 
     public async waitForCompletion(): Promise<void> {
-        while (this.jobs.length > 0) {
+        while (this.getNumberOfJobs() > 0) {
             await this.delay(this.waitForCompletionIntervalMS);
         }
     }
 
-    public setFinishedCallback(cb: () => void) {
-        this.finishedCallback = cb;
-    }
-
-    public clearFinishedCallback() {
-        this.finishedCallback = () => {};
-    }
-
-    public cancelRemainingJobs() {
-        this.jobs.filter(() => false);
+    private getNumberOfJobs(): number {
+        let numberOfJobs = 0;
+        this.jobs.forEach(jobs => numberOfJobs += jobs.length);
+        return numberOfJobs;
     }
 
     private start(): void {
         /* c8 ignore start */
-        if (this.jobs.length !== 1) {
+        if (this.getNumberOfJobs() !== 1) {
             console.error(
-                `queue started with non-one jobs. this.jobs.length is: ${this.jobs.length}`
+                `queue started with non-one jobs. this.getNumberOfJobs is: ${this.getNumberOfJobs()}`
             );
             return;
         }
         /* c8 ignore stop */
 
-        this.runJob();
+        this.runJobs();
     }
 
-    private async runJob(): Promise<void> {
-        // need to peek here I think
-        // basically, if we dequeue the last job and its a long running job
-        // that will run asynchronously
-        // and then we could enqueue a new job, start, dequeue that,
-        const nextJob = this.jobs.at(0);
+    private async runJobs(): Promise<void> {
+        while (this.getNumberOfJobs() > 0) {
+            for (let i = Priority.ONE; i < Priority.MAX; ++i) {
+                const currentPriorityJobs = this.jobs.get(i);
+                if (currentPriorityJobs) {
+                    if (currentPriorityJobs.length > 0) {
+                        const nextJob = currentPriorityJobs.at(0);
 
-        /* c8 ignore start */
-        if (!nextJob) {
-            console.error('nextJob undefined');
-            return;
-        }
-        /* c8 ignore stop */
+                        /* c8 ignore start */
+                        if (!nextJob) {
+                            console.error('nextJob undefined');
+                            return;
+                        }
+                        /* c8 ignore stop */
 
-        await nextJob();
+                        await nextJob();
 
-        this.jobs.shift();
-        // ok, so what if we dequeue to get 0, then we finish
-        // ok, so what if we dequeue to get 1, then we run it
-        // there is no more release of control
+                        currentPriorityJobs.shift();
 
-        if (this.jobs.length > 0) {
-            this.runJob();
-        } else {
-            this.finishedCallback();
+                        // break out of for loop to pick the highest available job as the next job
+                        break;
+                    }
+                }
+            }
         }
     }
 
