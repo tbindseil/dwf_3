@@ -2,7 +2,7 @@ import Client from './client';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { PixelUpdate } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
-import { Queue } from './queue';
+import { Priority, Queue } from './queue';
 import {BroadcastClient} from './broadcast_client';
 
 // ok, now time to define this thing
@@ -44,7 +44,7 @@ export class PictureSyncClient extends Client {
     }
 
     public override handleUpdate(pixelUpdate: PixelUpdate): void {
-        this.queue.push(() => {
+        this.queue.push(Priority.ONE, () => {
             return new Promise(async (resolve) => {
                 if (this.raster) {
                     /* await if async */ this.raster.handlePixelUpdate(pixelUpdate);
@@ -73,10 +73,10 @@ export class PictureSyncClient extends Client {
     }
 
     public synchronizeBroadcastClientInitialization(broadcastClient: BroadcastClient): void {
-        this.queue.push(() => {
+        this.queue.push(Priority.ONE, () => {
             return new Promise(async (resolve) => {
                 const currentRasterCopy = this.raster!.copy();
-                broadcastClient.synchronize(currentRasterCopy);
+                // broadcastClient.synchronize(currentRasterCopy);
                 resolve();
             });
         });
@@ -84,7 +84,7 @@ export class PictureSyncClient extends Client {
 
     private unqueueWriteRaster() {
         if (this.raster) {
-            this.queue.push(() => {
+            this.queue.push(Priority.ONE, () => {
                 return new Promise(async (resolve) => {
                     await this.pictureAccessor.writeRaster(this.raster!, this.filename);
                     this.dirty = false;
