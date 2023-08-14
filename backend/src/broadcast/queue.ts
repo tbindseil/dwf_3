@@ -6,7 +6,8 @@ export enum Priority {
     TWO = 2,
     THREE = 3,
     FOUR = 4,
-    MAX = FOUR
+    FIVE = 5,
+    MAX = FIVE
 }
 
 export class Queue {

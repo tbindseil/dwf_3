@@ -82,6 +82,53 @@ export default class BroadcastMediator {
         // nope because writes always go last
         // this.queue.push(this.REMOVE_CLIENT_PRIORITY, async () => {
 
+        // I think what this boils down to is:
+        // is this raster still available if the tp is deleted?
+        // if so, what do i think about hot starts / cold starts?
+        //
+        // well on the way home i figured it out
+        //
+        // first, one queue per trackedPicture
+        // second remove happens synchronously in that it 
+        //
+        // just need a high prio write and a low prio write
+        // obviously the high prio right happens very infrequently
+        // this is in order to mitigate that a frequently updated picture
+        // would never get to a low priority write op
+        //
+        // once all this is done, how much can be reduced to using the features of socket io? (ie rooms)
+
+        // wait whos updating the raster???
+        // did I just completely miss the whole thing?
+        // am i losing my mind?
+        //
+        // I think i did forget to do that 
+        // whoops lol
+        // as a demonstration of the superiority of htis method,
+        // i will simply enqueue something that updates the tp's raster
+        //
+        // damn, back to that same problem of synchronizing the updates
+        //
+        // two copies of the raster?
+        // no... we have to keep both up to date
+        //
+        // what this boils down to is...
+        //
+        // or each tp could enqueue an update and dequeue when the update is written
+        //
+        // I think that's the way
+        //
+        //
+        // so raster is with tp
+        //
+        // broadcast update (todo rename) will send to all
+        // AND
+        // add to the queue of undrawnUpdates
+        //
+        // then we take the 
+        //
+        //  i know what to do
+
         const trackedPicture = this.trackedPictures.get(filename);
         if (trackedPicture) {
             trackedPicture.idToClientMap.delete(socket.id);
@@ -97,15 +144,6 @@ export default class BroadcastMediator {
         }
     }
 
-    // WARNING this will bind hte dirty
-    public scheduleWrite(filename: string, dirty: boolean, raster?: Raster) {
-        this.queue.push(Priority.THREE, async () => {
-            if (raster && dirty) {
-                await this.pictureAccessor.writeRaster(raster, filename)
-            }
-        });
-    }
-
     public handleUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
         this.queue.push(Priority.TWO, async () => {
             const trackedPicture = this.trackedPictures.get(pixelUpdate.filename);
@@ -117,6 +155,19 @@ export default class BroadcastMediator {
                         }
                     }
                 );
+            }
+        });
+        // TODO need to sort out these priorities, in my water park
+        this.queue.push(Priority.THREE, async () => {
+            const trackedPicture.writeRaster
+        });
+    }
+
+    // WARNING this will bind hte dirty
+    private scheduleWrite(filename: string, dirty: boolean, raster?: Raster) {
+        this.queue.push(Priority.THREE, async () => {
+            if (raster && dirty) {
+                await this.pictureAccessor.writeRaster(raster, filename)
             }
         });
     }
