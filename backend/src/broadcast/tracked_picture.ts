@@ -1,19 +1,11 @@
-import Client from './client';
 import { Priority, Queue } from './queue';
 import { Raster } from 'dwf-3-raster-tjb';
-import {
-    ClientToServerEvents,
-    InterServerEvents,
-    PixelUpdate,
-    ServerToClientEvents,
-    SocketData,
-} from 'dwf-3-models-tjb';
+import { PixelUpdate } from 'dwf-3-models-tjb';
 import PictureAccessor from '../picture_accessor/picture_accessor';
-import { Socket } from 'socket.io';
 import { BroadcastClient } from './broadcast_client';
 
 export class TrackedPicture {
-    private readonly idToClientMap: Map<string, Client> = new Map();
+    private readonly idToClientMap: Map<string, BroadcastClient> = new Map();
     private readonly workQueue: Queue;
     private readonly pictureAccessor: PictureAccessor;
     private readonly filename: string;
@@ -56,15 +48,11 @@ export class TrackedPicture {
 
     public enqueueAddClient(
         priority: Priority,
-        socket: Socket<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
+        socketId: string,
+        broadcastClient: BroadcastClient
     ) {
         this.workQueue.push(priority, async () => {
-            this.idToClientMap.set(socket.id, new BroadcastClient(socket));
+            this.idToClientMap.set(socketId, broadcastClient);
 
             // cold start
             if (!this.raster) {
@@ -76,13 +64,8 @@ export class TrackedPicture {
             const copiedRaster = this.raster.copy();
             // maybe move this into broadcast_client
             // and pass that in? that way it can be added to the map
-            socket.emit(
-                'join_picture_response',
-                copiedRaster.toJoinPictureResponse()
-            );
-            this.pendingUpdates.forEach((u) =>
-                socket.emit('server_to_client_update', u)
-            );
+            broadcastClient.initializeRaster(copiedRaster);
+            this.pendingUpdates.forEach((u) => broadcastClient.handleUpdate(u));
         });
     }
 
@@ -98,11 +81,13 @@ export class TrackedPicture {
         sourceSocketId: string
     ) {
         this.workQueue.push(priority, async () => {
-            this.idToClientMap.forEach((client: Client, socketId: string) => {
-                if (socketId != sourceSocketId) {
-                    client.handleUpdate(pixelUpdate);
+            this.idToClientMap.forEach(
+                (client: BroadcastClient, socketId: string) => {
+                    if (socketId != sourceSocketId) {
+                        client.handleUpdate(pixelUpdate);
+                    }
                 }
-            });
+            );
 
             this.pendingUpdates.push(pixelUpdate);
         });

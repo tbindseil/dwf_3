@@ -1,5 +1,4 @@
 import { Socket } from 'socket.io';
-import Client from './client';
 import {
     ClientToServerEvents,
     InterServerEvents,
@@ -7,8 +6,9 @@ import {
     ServerToClientEvents,
     SocketData,
 } from 'dwf-3-models-tjb';
+import { Raster } from 'dwf-3-raster-tjb';
 
-export class BroadcastClient extends Client {
+export class BroadcastClient {
     private readonly socket: Socket<
         ClientToServerEvents,
         ServerToClientEvents,
@@ -24,16 +24,21 @@ export class BroadcastClient extends Client {
             SocketData
         >
     ) {
-        super();
-
         this.socket = socket;
     }
 
-    public override handleUpdate(pixelUpdate: PixelUpdate): void {
+    public initializeRaster(raster: Raster): void {
+        this.socket.emit(
+            'join_picture_response',
+            raster.toJoinPictureResponse()
+        );
+    }
+
+    public handleUpdate(pixelUpdate: PixelUpdate): void {
         this.socket.emit('server_to_client_update', pixelUpdate);
     }
 
-    public override close(): void {
+    public close(): void {
         this.socket._cleanup();
     }
 }

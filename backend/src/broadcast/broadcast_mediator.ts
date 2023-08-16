@@ -9,6 +9,7 @@ import {
 import { Socket } from 'socket.io';
 import { Priority, Queue } from './queue';
 import { TrackedPicture } from './tracked_picture';
+import { BroadcastClient } from './broadcast_client';
 
 export default class BroadcastMediator {
     private readonly pictureAccessor: PictureAccessor;
@@ -80,7 +81,12 @@ export default class BroadcastMediator {
 
         const trackedPicture = this.trackedPictures.get(filename);
         if (trackedPicture) {
-            trackedPicture.enqueueAddClient(this.ADD_CLIENT_PRIORITY, socket);
+            const broadcastClient = new BroadcastClient(socket);
+            trackedPicture.enqueueAddClient(
+                this.ADD_CLIENT_PRIORITY,
+                socket.id,
+                broadcastClient
+            );
         }
     }
 
