@@ -121,6 +121,7 @@ export default class BroadcastMediator {
                 if (trackedPicture_again && trackedPicture_again.raster) {
                     trackedPicture_again.raster.handlePixelUpdate(pixelUpdate);
                     trackedPicture_again.pendingUpdates.shift();
+                    trackedPicture_again.dirty = true;
                     // the result of shift should be the same as pixelUpdate
                     // the pendingUpdates is to keep track of them for use elsewhere, not here
                 }
@@ -139,6 +140,7 @@ export default class BroadcastMediator {
                 const trackedPicture_again = this.trackedPictures.get(filename);
                 if (trackedPicture_again && trackedPicture_again.raster && trackedPicture_again.dirty) {
                     await this.pictureAccessor.writeRaster(trackedPicture_again.raster, filename)
+                    trackedPicture_again.dirty = false;
 
 
                     // if we write and there are no clients, can we delete, yes
