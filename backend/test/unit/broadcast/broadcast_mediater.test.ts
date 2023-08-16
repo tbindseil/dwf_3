@@ -285,3 +285,29 @@ describe('BroadcastMediator Tests', () => {
         expect(ret.length).toEqual(0);
     });
 });
+
+
+// ok, so what does it do?
+//
+// 1.
+// starts a timer on start
+// the timer writes the raster once in a hwhile
+// and even less frequency writes at a higher priority
+//
+// 2.
+// addsclients by 
+// setting up the tp when first client
+// enqueueing a start client function
+//
+// 3. 
+// removes client by
+// enqueuing a remove client operation
+//
+// 4.
+// broadcasts by
+// enqueueing a broadcast operation
+// enqueueing a local raster update operation
+//
+// it looks kinda whack to do this as standalone operation functions
+// but having them as members on the tracked picture might be good
+//

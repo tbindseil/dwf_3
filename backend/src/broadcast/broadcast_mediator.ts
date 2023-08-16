@@ -89,6 +89,7 @@ export default class BroadcastMediator {
                     }
 
                     const copiedRaster = trackedPicture_again.raster.copy()
+                    // maybe move this into broadcast_client
                     socket.emit('join_picture_response', copiedRaster.toJoinPictureResponse());
                     trackedPicture_again.pendingUpdates.forEach(u => socket.emit('server_to_client_update', u));
                 }
@@ -127,6 +128,8 @@ export default class BroadcastMediator {
                         }
                     );
                 }
+
+                trackedPicture.pendingUpdates.push(pixelUpdate);
             });
 
             trackedPicture.queue.push(this.UPDATE_LOCAL_RASTER_PRIORITY, async () => {
@@ -139,8 +142,6 @@ export default class BroadcastMediator {
                     // the pendingUpdates is to keep track of them for use elsewhere, not here
                 }
             });
-
-            trackedPicture.pendingUpdates.push(pixelUpdate);
         }
     }
 
@@ -160,6 +161,8 @@ export default class BroadcastMediator {
                     // no clients means noone can send updates
                     // write means there were no more local picture update events
                     if (trackedPicture.idToClientMap.size === 0) {
+                        // this will cause problems with putting these operations 
+                        // in a trackedpicture object
                         this.trackedPictures.delete(filename);
                     }
                 }
