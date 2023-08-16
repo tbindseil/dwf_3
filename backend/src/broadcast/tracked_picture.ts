@@ -33,15 +33,13 @@ export class TrackedPicture {
                 );
                 this.dirty = false;
 
-                // if we write and there are no clients, can we delete, yes
+                // if we write and there are no clients, release the raster
                 // no clients means noone can send updates
-                // write means there were no more local picture update events
-                //                if (trackedPicture.idToClientMap.size === 0) {
-                //                    // this will cause problems with putting these operations
-                //                    // in a trackedpicture object
-                //                    this.trackedPictures.delete(filename);
-                //                TODO this needs to move
-                //                }
+                // write priority (determined by BroadcastMediator) means
+                // there were no more local picture update events
+                if (this.idToClientMap.size === 0) {
+                    this.raster = undefined;
+                }
             }
         });
     }
@@ -62,8 +60,6 @@ export class TrackedPicture {
             }
 
             const copiedRaster = this.raster.copy();
-            // maybe move this into broadcast_client
-            // and pass that in? that way it can be added to the map
             broadcastClient.initializeRaster(copiedRaster);
             this.pendingUpdates.forEach((u) => broadcastClient.handleUpdate(u));
         });
@@ -107,27 +103,8 @@ export class TrackedPicture {
             }
         });
     }
-}
 
-// 1.
-// starts a timer on start
-// the timer writes the raster once in a hwhile
-// and even less frequency writes at a higher priority
-//
-// 2.
-// addsclients by
-// setting up the tp when first client
-// enqueueing a start client function
-//
-// 3.
-// removes client by
-// enqueuing a remove client operation
-//
-// 4.
-// broadcasts by
-// enqueueing a broadcast operation
-// enqueueing a local raster update operation
-//
-// it looks kinda whack to do this as standalone operation functions
-// but having them as members on the tracked picture might be good
-//
+    public stopped(): boolean {
+        return !this.raster && this.idToClientMap.size == 0;
+    }
+}

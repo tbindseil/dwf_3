@@ -30,7 +30,7 @@ export default class BroadcastMediator {
         let laps = 0;
         setInterval(() => {
             ++laps;
-            this.trackedPictures.forEach((_tp, filename) => {
+            this.trackedPictures.forEach((trackedPicture, filename) => {
                 // every so often we do a high prio one
                 // if we didn't do that, a very active picture
                 // could have its write delayed indefinitely
@@ -49,12 +49,16 @@ export default class BroadcastMediator {
                 // 3. schedule them way less frequently?
                 //
                 // as in maybe only schedule them for high prio here
-                this.scheduleWrite(
-                    filename,
-                    this.shouldDoHighPriorityWrite(laps)
-                        ? this.HIGH_PRIORITY_WRITE_RASTER
-                        : this.WRITE_RASTER_PRIORITY
-                );
+
+                if (trackedPicture.stopped()) {
+                    this.trackedPictures.delete(filename);
+                } else {
+                    trackedPicture.enqueueWriteOperation(
+                        this.shouldDoHighPriorityWrite(laps)
+                            ? this.HIGH_PRIORITY_WRITE_RASTER
+                            : this.WRITE_RASTER_PRIORITY
+                    );
+                }
             });
         }, 30000);
     }
@@ -126,9 +130,5 @@ export default class BroadcastMediator {
     private scheduleWrite(filename: string, priority: Priority) {
         // it could be dirty by the time we get to it,
         // so check then
-        const trackedPicture = this.trackedPictures.get(filename);
-        if (trackedPicture) {
-            trackedPicture.enqueueWriteOperation(priority);
-        }
     }
 }
