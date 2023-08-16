@@ -49,6 +49,19 @@ export default class BroadcastMediator {
                 // could have its write delayed indefinitely
                 //
                 // an active picture's queue could overflow
+                // options:
+                // 1. jobs get an id, which is returned
+                // then the job status can be retrieved
+                // if the trackedPitcture.writeJob status is pending,
+                // we don't schedule the write
+                //
+                // 2. use dirty more aggresively, as in use it  to mean there
+                // are writes in the queue. then i could potentially use it here
+                // this could still result in too many writes though
+                //
+                // 3. schedule them way less frequently?
+                //
+                // as in maybe only schedule them for high prio here
                 this.scheduleWrite(filename, this.shouldDoHighPriorityWrite(laps) ? this.HIGH_PRIORITY_WRITE_RASTER : this.WRITE_RASTER_PRIORITY);
             });
         }, 30000);
