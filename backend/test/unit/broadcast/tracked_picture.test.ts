@@ -9,12 +9,28 @@ describe('TJTAG TrackedPicture Tests', () => {
     const priority = Priority.ONE;
     const socketId = 'socketId';
     const copiedRaster = 'copiedRaster';
+    const pixelUpdate = {
+        filename: filename,
+        createdBy: 'tj',
+        x: 4,
+        y: 20,
+        red: 255,
+        green: 255,
+        blue: 255,
+    };
 
-    const mockHandleUpdate = jest.fn();
-    const mockInitializeRaster = jest.fn();
-    const mockBroadcastClient = {
-        handleUpdate: mockHandleUpdate,
-        initializeRaster: mockInitializeRaster,
+    const mockHandleUpdate1 = jest.fn();
+    const mockInitializeRaster1 = jest.fn();
+    const mockBroadcastClient1 = {
+        handleUpdate: mockHandleUpdate1,
+        initializeRaster: mockInitializeRaster1,
+    } as unknown as BroadcastClient;
+
+    const mockHandleUpdate2 = jest.fn();
+    const mockInitializeRaster2 = jest.fn();
+    const mockBroadcastClient2 = {
+        handleUpdate: mockHandleUpdate2,
+        initializeRaster: mockInitializeRaster2,
     } as unknown as BroadcastClient;
 
     const mockCopy = jest.fn();
@@ -40,8 +56,11 @@ describe('TJTAG TrackedPicture Tests', () => {
     let trackedPicture: TrackedPicture;
 
     beforeEach(() => {
-        mockHandleUpdate.mockClear();
-        mockInitializeRaster.mockClear();
+        mockHandleUpdate1.mockClear();
+        mockInitializeRaster1.mockClear();
+
+        mockHandleUpdate2.mockClear();
+        mockInitializeRaster2.mockClear();
 
         mockCopy.mockClear();
         mockCopy.mockReturnValue(copiedRaster);
@@ -77,36 +96,60 @@ describe('TJTAG TrackedPicture Tests', () => {
     });
 
     it('reads the raster when first client is added', async () => {
-        trackedPicture.enqueueAddClient(
-            priority,
-            socketId,
-            mockBroadcastClient
-        );
+        await addClient();
 
         expect(mockPush).toBeCalledTimes(1);
 
-        await pushedJob();
-
         expect(mockGetRaster).toHaveBeenCalledWith(filename);
-        expect(mockInitializeRaster).toHaveBeenCalledWith(copiedRaster);
+        expect(mockInitializeRaster1).toHaveBeenCalledWith(copiedRaster);
     });
 
     it('reads the raster when first client is added', async () => {
-        trackedPicture.enqueueAddClient(
-            priority,
-            socketId,
-            mockBroadcastClient
-        );
-        await pushedJob();
-
-        trackedPicture.enqueueAddClient(
-            priority,
-            socketId,
-            mockBroadcastClient
-        );
-        await pushedJob();
+        await addClient();
+        await addClient();
 
         expect(mockGetRaster).toHaveBeenCalledTimes(1);
-        expect(mockInitializeRaster).toHaveBeenCalledTimes(2);
+        expect(mockInitializeRaster1).toHaveBeenCalledTimes(2);
     });
+
+    it('sends pending updates to new client', async () => {
+        await addClient();
+
+        await sendUpdate();
+        await sendUpdate();
+
+        mockInitializeRaster1.mockClear();
+        mockHandleUpdate1.mockClear();
+
+        await addClient();
+        expect(mockInitializeRaster1).toHaveBeenCalledTimes(1);
+        expect(mockHandleUpdate1).toHaveBeenCalledTimes(2);
+    });
+
+    it('adds clients to the map', async () => {
+        await addClient(mockBroadcastClient1);
+        await addClient(mockBroadcastClient2);
+
+        mockHandleUpdate1.mockClear();
+        mockHandleUpdate2.mockClear();
+
+        await sendUpdate();
+        await sendUpdate();
+
+        expect(mockHandleUpdate1).toHaveBeenCalledTimes(2);
+        expect(mockHandleUpdate2).toHaveBeenCalledTimes(2);
+    });
+
+    const addClient = async (broadcastClient = mockBroadcastClient1) => {
+        trackedPicture.enqueueAddClient(priority, socketId, broadcastClient);
+        await pushedJob();
+    };
+
+    // ok, TJTAG, these are getting skipped cause of matching socketid
+    // thats probs why it was in broadcast client, thats easy
+    // and i can probably turn the clients into a set instead of a map
+    const sendUpdate = async () => {
+        trackedPicture.enqueueBroadcastUpdate(priority, pixelUpdate, socketId);
+        await pushedJob();
+    };
 });
