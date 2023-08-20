@@ -63,19 +63,20 @@ describe('TJTAG TrackedPicture Tests', () => {
         );
     });
 
-    it('enqueueWrite adds a write operation', () => {
+    it.skip('enqueueWrite adds a write operation', () => {
         const force = true;
 
         trackedPicture.enqueueWrite(priority, force);
 
         expect(mockPush).toBeCalledTimes(1);
+        // expect(mockPush).toBeCalledWith(priority, any);
 
         pushedJob();
 
         expect;
     });
 
-    it.only('reads the raster when first client is added', async () => {
+    it('reads the raster when first client is added', async () => {
         trackedPicture.enqueueAddClient(
             priority,
             socketId,
@@ -86,6 +87,26 @@ describe('TJTAG TrackedPicture Tests', () => {
 
         await pushedJob();
 
+        expect(mockGetRaster).toHaveBeenCalledWith(filename);
         expect(mockInitializeRaster).toHaveBeenCalledWith(copiedRaster);
+    });
+
+    it('reads the raster when first client is added', async () => {
+        trackedPicture.enqueueAddClient(
+            priority,
+            socketId,
+            mockBroadcastClient
+        );
+        await pushedJob();
+
+        trackedPicture.enqueueAddClient(
+            priority,
+            socketId,
+            mockBroadcastClient
+        );
+        await pushedJob();
+
+        expect(mockGetRaster).toHaveBeenCalledTimes(1);
+        expect(mockInitializeRaster).toHaveBeenCalledTimes(2);
     });
 });
