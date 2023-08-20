@@ -53,7 +53,7 @@ export default class BroadcastMediator {
                 if (trackedPicture.stopped()) {
                     this.trackedPictures.delete(filename);
                 } else {
-                    trackedPicture.enqueueWriteOperation(
+                    trackedPicture.enqueueWrite(
                         this.shouldDoHighPriorityWrite(laps)
                             ? this.HIGH_PRIORITY_WRITE_RASTER
                             : this.WRITE_RASTER_PRIORITY

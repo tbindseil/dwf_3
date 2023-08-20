@@ -24,7 +24,7 @@ export class TrackedPicture {
         this.filename = filename;
     }
 
-    public enqueueWriteOperation(priority: Priority) {
+    public enqueueWrite(priority: Priority) {
         this.workQueue.push(priority, async () => {
             if (this.raster && this.dirty) {
                 await this.pictureAccessor.writeRaster(
