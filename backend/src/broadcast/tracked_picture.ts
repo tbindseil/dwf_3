@@ -10,6 +10,7 @@ export class TrackedPicture {
     private readonly pictureAccessor: PictureAccessor;
     private readonly filename: string;
     private dirty: boolean = false;
+    private writeEnqueued = false;
     private raster?: Raster;
 
     // these are updates that have been broadcast but haven't been applied to the local copy of the raster
@@ -24,14 +25,27 @@ export class TrackedPicture {
         this.filename = filename;
     }
 
-    public enqueueWrite(priority: Priority) {
+    public enqueueWrite(priority: Priority, force = false) {
+        // if force is true
+        // then not true is false and we continue
+        // if write enqueued is true
+        // not write enqueued is false and we have to evaluate force
+        // if write enqueued is false
+        // not write enqueued is true
+        // and we bypass
+        if (!(force || !this.writeEnqueued)) {
+            return;
+        }
+
         this.workQueue.push(priority, async () => {
             if (this.raster && this.dirty) {
                 await this.pictureAccessor.writeRaster(
                     this.raster,
                     this.filename
                 );
+
                 this.dirty = false;
+                this.writeEnqueued = false;
 
                 // if we write and there are no clients, release the raster
                 // no clients means noone can send updates
@@ -42,6 +56,8 @@ export class TrackedPicture {
                 }
             }
         });
+
+        this.writeEnqueued = true;
     }
 
     public enqueueAddClient(

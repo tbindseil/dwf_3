@@ -53,10 +53,13 @@ export default class BroadcastMediator {
                 if (trackedPicture.stopped()) {
                     this.trackedPictures.delete(filename);
                 } else {
+                    const highPriorityWrite =
+                        this.shouldDoHighPriorityWrite(laps);
                     trackedPicture.enqueueWrite(
-                        this.shouldDoHighPriorityWrite(laps)
+                        highPriorityWrite
                             ? this.HIGH_PRIORITY_WRITE_RASTER
-                            : this.WRITE_RASTER_PRIORITY
+                            : this.WRITE_RASTER_PRIORITY,
+                        highPriorityWrite
                     );
                 }
             });
