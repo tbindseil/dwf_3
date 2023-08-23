@@ -77,7 +77,11 @@ export class TrackedPicture {
 
             const copiedRaster = this.raster.copy();
             broadcastClient.initializeRaster(copiedRaster);
-            this.pendingUpdates.forEach((u) => broadcastClient.handleUpdate(u));
+
+            // this one is just getting added, hence the arbitrary non matching socketid
+            this.pendingUpdates.forEach((u) => {
+                broadcastClient.handleUpdate(u, 'arbitrary_non_matching_socket_id')
+            });
         });
     }
 
@@ -94,8 +98,8 @@ export class TrackedPicture {
     ) {
         this.workQueue.push(priority, async () => {
             this.idToClientMap.forEach(
-                (client: BroadcastClient, socketId: string) => {
-                    client.handleUpdate(pixelUpdate);
+                (client: BroadcastClient) => {
+                    client.handleUpdate(pixelUpdate, sourceSocketId);
                 }
             );
 
@@ -105,15 +109,16 @@ export class TrackedPicture {
 
     public enqueueUpdateLocalRaster(
         priority: Priority,
-        pixelUpdate: PixelUpdate
     ) {
         this.workQueue.push(priority, async () => {
             if (this.raster) {
-                this.raster.handlePixelUpdate(pixelUpdate);
-                this.pendingUpdates.shift();
+                const nextUpdate = this.pendingUpdates.shift();
+                if (!nextUpdate) {
+                    console.error('nextUpdate is undefined, something went horribly wrong');
+                    throw Error('stack trace');
+                }
+                this.raster.handlePixelUpdate(nextUpdate);
                 this.dirty = true;
-                // the result of shift should be the same as pixelUpdate
-                // the pendingUpdates is to keep track of them for use elsewhere, not here
             }
         });
     }

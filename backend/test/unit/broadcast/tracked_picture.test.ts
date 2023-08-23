@@ -7,7 +7,8 @@ import { BroadcastClient } from '../../broadcast/broadcast_client';
 describe('TJTAG TrackedPicture Tests', () => {
     const filename = 'filename';
     const priority = Priority.ONE;
-    const socketId = 'socketId';
+    const socketId1 = 'socketId1';
+    const socketId2 = 'socketId2';
     const copiedRaster = 'copiedRaster';
     const pixelUpdate = {
         filename: filename,
@@ -128,28 +129,30 @@ describe('TJTAG TrackedPicture Tests', () => {
 
     it('adds clients to the map', async () => {
         await addClient(mockBroadcastClient1);
-        await addClient(mockBroadcastClient2);
-
-        mockHandleUpdate1.mockClear();
-        mockHandleUpdate2.mockClear();
-
         await sendUpdate();
+        await updateLocalRaster();
+
+        console.log('TJTAG adding second client');
+
+        await addClient(mockBroadcastClient2, socketId2);
         await sendUpdate();
 
         expect(mockHandleUpdate1).toHaveBeenCalledTimes(2);
-        expect(mockHandleUpdate2).toHaveBeenCalledTimes(2);
+        expect(mockHandleUpdate2).toHaveBeenCalledTimes(1);
     });
 
-    const addClient = async (broadcastClient = mockBroadcastClient1) => {
+    const addClient = async (broadcastClient = mockBroadcastClient1, socketId: string = socketId1) => {
         trackedPicture.enqueueAddClient(priority, socketId, broadcastClient);
         await pushedJob();
     };
 
-    // ok, TJTAG, these are getting skipped cause of matching socketid
-    // thats probs why it was in broadcast client, thats easy
-    // and i can probably turn the clients into a set instead of a map
     const sendUpdate = async () => {
-        trackedPicture.enqueueBroadcastUpdate(priority, pixelUpdate, socketId);
+        trackedPicture.enqueueBroadcastUpdate(priority, pixelUpdate, socketId2);
         await pushedJob();
     };
+
+    const updateLocalRaster = async () => {
+        trackedPicture.enqueueUpdateLocalRaster(priority);
+        await pushedJob();
+    }
 });

@@ -8,7 +8,7 @@ import {
 import { BroadcastClient } from '../../../src/broadcast/broadcast_client';
 import { Socket } from 'socket.io';
 
-describe('TJTAG BroadcastClient Tests', () => {
+describe('BroadcastClient Tests', () => {
     const defaultFilename = 'filename';
 
     const mockEmit = jest.fn();
