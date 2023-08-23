@@ -129,9 +129,4 @@ export default class BroadcastMediator {
             );
         }
     }
-
-    private scheduleWrite(filename: string, priority: Priority) {
-        // it could be dirty by the time we get to it,
-        // so check then
-    }
 }

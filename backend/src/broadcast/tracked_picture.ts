@@ -95,9 +95,7 @@ export class TrackedPicture {
         this.workQueue.push(priority, async () => {
             this.idToClientMap.forEach(
                 (client: BroadcastClient, socketId: string) => {
-                    if (socketId != sourceSocketId) {
-                        client.handleUpdate(pixelUpdate);
-                    }
+                    client.handleUpdate(pixelUpdate);
                 }
             );
 
