@@ -34,21 +34,6 @@ export default class BroadcastMediator {
                 // every so often we do a high prio one
                 // if we didn't do that, a very active picture
                 // could have its write delayed indefinitely
-                //
-                // an active picture's queue could overflow
-                // options:
-                // 1. jobs get an id, which is returned
-                // then the job status can be retrieved
-                // if the trackedPitcture.writeJob status is pending,
-                // we don't schedule the write
-                //
-                // 2. use dirty more aggresively, as in use it  to mean there
-                // are writes in the queue. then i could potentially use it here
-                // this could still result in too many writes though
-                //
-                // 3. schedule them way less frequently?
-                //
-                // as in maybe only schedule them for high prio here
 
                 if (trackedPicture.stopped()) {
                     this.trackedPictures.delete(filename);
@@ -124,8 +109,7 @@ export default class BroadcastMediator {
                 sourceSocketId
             );
             trackedPicture.enqueueUpdateLocalRaster(
-                this.UPDATE_LOCAL_RASTER_PRIORITY,
-                pixelUpdate
+                this.UPDATE_LOCAL_RASTER_PRIORITY
             );
         }
     }
