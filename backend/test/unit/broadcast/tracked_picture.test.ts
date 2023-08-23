@@ -128,11 +128,9 @@ describe('TJTAG TrackedPicture Tests', () => {
     });
 
     it('adds clients to the map', async () => {
-        await addClient(mockBroadcastClient1);
+        await addClient();
         await sendUpdate();
         await updateLocalRaster();
-
-        console.log('TJTAG adding second client');
 
         await addClient(mockBroadcastClient2, socketId2);
         await sendUpdate();
@@ -140,6 +138,87 @@ describe('TJTAG TrackedPicture Tests', () => {
         expect(mockHandleUpdate1).toHaveBeenCalledTimes(2);
         expect(mockHandleUpdate2).toHaveBeenCalledTimes(1);
     });
+
+    it('does not write the raster if not dirty', async () => {
+        await addClient();
+        await writeRaster();
+
+        expect(mockWriteRaster).toHaveBeenCalledTimes(0);
+    });
+
+    it('writes the raster if dirty', async () => {
+        await addClient();
+        await sendUpdate();
+        await updateLocalRaster();
+        await writeRaster();
+
+        expect(mockWriteRaster).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not enqueue a second write if a current write is pending', async () => {
+        await addClient();
+        await sendUpdate();
+        await updateLocalRaster();
+        await writeRaster();
+
+        pushedJob = (): Promise<void> => {
+            return new Promise(r => r());
+        };
+
+        await writeRaster();
+
+        expect(mockWriteRaster).toHaveBeenCalledTimes(1);
+    });
+
+    it('enqueues a second write if force is provided, even if a current write is pending', async () => {
+        await addClient();
+        await sendUpdate();
+        await updateLocalRaster();
+        await writeRaster();
+
+        let resetFunctionCalled = false;
+        pushedJob = (): Promise<void> => {
+            return new Promise(r => {
+                resetFunctionCalled = true;
+                r()
+            });
+        };
+
+        await writeRaster(true);
+
+        expect(mockWriteRaster).toHaveBeenCalledTimes(1);
+        expect(resetFunctionCalled).toBe(false);
+    });
+
+    it('returns stopped after the last client is removed and a write happens', async () => {
+        await addClient();
+        await sendUpdate();
+        await removeClient();
+
+        expect(trackedPicture.stopped()).toBe(false);
+
+        await updateLocalRaster();
+        await writeRaster();
+
+        expect(trackedPicture.stopped()).toBe(true);
+    });
+
+    it('throws when update local raster happens without pending updates', async () => {
+        await addClient();
+        await sendUpdate();
+        await updateLocalRaster();
+        await expect(updateLocalRaster()).rejects.toThrow();
+    });
+
+    const removeClient = async () => {
+        trackedPicture.enqueueRemoveClient(priority, socketId1)
+        await pushedJob();
+    };
+
+    const writeRaster = async (force: boolean = false) => {
+        trackedPicture.enqueueWrite(priority, force);
+        await pushedJob();
+    };
 
     const addClient = async (broadcastClient = mockBroadcastClient1, socketId: string = socketId1) => {
         trackedPicture.enqueueAddClient(priority, socketId, broadcastClient);

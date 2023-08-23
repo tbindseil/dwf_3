@@ -26,38 +26,30 @@ export class TrackedPicture {
     }
 
     public enqueueWrite(priority: Priority, force = false) {
-        // if force is true
-        // then not true is false and we continue
-        // if write enqueued is true
-        // not write enqueued is false and we have to evaluate force
-        // if write enqueued is false
-        // not write enqueued is true
-        // and we bypass
-        if (!(force || !this.writeEnqueued)) {
-            return;
-        }
+        if (force || !this.writeEnqueued) {
 
-        this.workQueue.push(priority, async () => {
-            if (this.raster && this.dirty) {
-                await this.pictureAccessor.writeRaster(
-                    this.raster,
-                    this.filename
-                );
+            this.workQueue.push(priority, async () => {
+                if (this.raster && this.dirty) {
+                    await this.pictureAccessor.writeRaster(
+                        this.raster,
+                        this.filename
+                    );
 
-                this.dirty = false;
-                this.writeEnqueued = false;
+                    this.dirty = false;
+                    this.writeEnqueued = false;
 
-                // if we write and there are no clients, release the raster
-                // no clients means noone can send updates
-                // write priority (determined by BroadcastMediator) means
-                // there were no more local picture update events
-                if (this.idToClientMap.size === 0) {
-                    this.raster = undefined;
+                    // if we write and there are no clients, release the raster
+                    // no clients means noone can send updates
+                    // write priority (determined by BroadcastMediator) means
+                    // there were no more local picture update events
+                    if (this.idToClientMap.size === 0) {
+                        this.raster = undefined;
+                    }
                 }
-            }
-        });
+            });
 
-        this.writeEnqueued = true;
+            this.writeEnqueued = true;
+        }
     }
 
     public enqueueAddClient(
