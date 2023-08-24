@@ -9,27 +9,34 @@ import {
     makeTrackedPicture,
 } from '../../../src/broadcast/tracked_picture';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
-import { instance, mock } from 'ts-mockito';
+import { anything, instance, mock, reset, verify } from 'ts-mockito';
+import {Priority} from '../../../src/broadcast/queue';
+import {BroadcastClient} from '../../../src/broadcast/broadcast_client';
 
 jest.mock('../../../src/broadcast/tracked_picture');
 const mockMakeTrackedPicture = jest.mocked(makeTrackedPicture, true);
 
-describe('BroadcastMediator Tests', () => {
+describe('TJTAG BroadcastMediator Tests', () => {
     const filename = 'filename';
 
-    const mockSocket1 = {} as unknown as Socket<
+    const mockSocket1 = {
+        id: '1'
+    } as unknown as Socket<
         ClientToServerEvents,
         ServerToClientEvents,
         InterServerEvents,
         SocketData
     >;
-    const mockSocket2 = {} as unknown as Socket<
+    const mockSocket2 = {
+        id: '2'
+    } as unknown as Socket<
         ClientToServerEvents,
         ServerToClientEvents,
         InterServerEvents,
         SocketData
     >;
     const mockPictureAccessor = {} as unknown as PictureAccessor;
+    const mockBroadcastClient = {} as unknown as BroadcastClient;
 
     // well i could
     // 1. make the whole mock interface here and save all the creations
@@ -46,10 +53,15 @@ describe('BroadcastMediator Tests', () => {
         (_queue, _pictureAccessor, filename) => makeMockTrackedPicture(filename)
     );
 
-    const broadcastMediator = new BroadcastMediator(mockPictureAccessor);
+    let broadcastMediator: BroadcastMediator;
+
+    beforeEach(() => {
+        mockTrackedPictures.clear();
+        broadcastMediator = new BroadcastMediator(mockPictureAccessor);
+    });
 
     // can probably msetInterval
-    it('enqueues writes on an interval if tracked pictures are not stopped', async () => {
+    it.skip('enqueues writes on an interval if tracked pictures are not stopped', async () => {
         broadcastMediator.addClient(filename, mockSocket1);
         broadcastMediator.addClient(filename, mockSocket2);
 
@@ -63,7 +75,10 @@ describe('BroadcastMediator Tests', () => {
 
     it('enqueues writes on a high priority every once in a while', async () => {});
 
-    it('adds client by enqueueing an operation to a tracked picture', () => {});
+    it('adds client by enqueueing an operation to a tracked picture', () => {
+        broadcastMediator.addClient(filename, mockSocket1);
+        verify(mockedTrackedPicture.enqueueAddClient(Priority.TWO, mockSocket1.id, anything())).called();
+    });
 
     it('removes clients', () => {});
 

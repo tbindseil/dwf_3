@@ -4,7 +4,7 @@ import { TrackedPicture } from '../../../src/broadcast/tracked_picture';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { BroadcastClient } from '../../broadcast/broadcast_client';
 
-describe('TJTAG TrackedPicture Tests', () => {
+describe('TrackedPicture Tests', () => {
     const filename = 'filename';
     const priority = Priority.ONE;
     const socketId1 = 'socketId1';
