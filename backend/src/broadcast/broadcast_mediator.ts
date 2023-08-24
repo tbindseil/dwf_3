@@ -8,7 +8,7 @@ import {
 } from 'dwf-3-models-tjb';
 import { Socket } from 'socket.io';
 import { Priority, Queue } from './queue';
-import { TrackedPicture } from './tracked_picture';
+import { TrackedPicture, makeTrackedPicture } from './tracked_picture';
 import { BroadcastClient } from './broadcast_client';
 
 export default class BroadcastMediator {
@@ -67,7 +67,7 @@ export default class BroadcastMediator {
         if (!this.trackedPictures.has(filename)) {
             this.trackedPictures.set(
                 filename,
-                new TrackedPicture(new Queue(), this.pictureAccessor, filename)
+                makeTrackedPicture(new Queue(), this.pictureAccessor, filename)
             );
         }
 

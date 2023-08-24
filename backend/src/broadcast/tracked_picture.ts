@@ -4,6 +4,13 @@ import { PixelUpdate } from 'dwf-3-models-tjb';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { BroadcastClient } from './broadcast_client';
 
+// for injecting mocks into unit tests
+export const makeTrackedPicture = (
+    queue: Queue,
+    pictureAccessor: PictureAccessor,
+    filename: string
+) => new TrackedPicture(queue, pictureAccessor, filename);
+
 export class TrackedPicture {
     private readonly idToClientMap: Map<string, BroadcastClient> = new Map();
     private readonly workQueue: Queue;
@@ -27,7 +34,6 @@ export class TrackedPicture {
 
     public enqueueWrite(priority: Priority, force = false) {
         if (force || !this.writeEnqueued) {
-
             this.workQueue.push(priority, async () => {
                 if (this.raster && this.dirty) {
                     await this.pictureAccessor.writeRaster(
@@ -72,7 +78,10 @@ export class TrackedPicture {
 
             // this one is just getting added, hence the arbitrary non matching socketid
             this.pendingUpdates.forEach((u) => {
-                broadcastClient.handleUpdate(u, 'arbitrary_non_matching_socket_id')
+                broadcastClient.handleUpdate(
+                    u,
+                    'arbitrary_non_matching_socket_id'
+                );
             });
         });
     }
@@ -89,24 +98,22 @@ export class TrackedPicture {
         sourceSocketId: string
     ) {
         this.workQueue.push(priority, async () => {
-            this.idToClientMap.forEach(
-                (client: BroadcastClient) => {
-                    client.handleUpdate(pixelUpdate, sourceSocketId);
-                }
-            );
+            this.idToClientMap.forEach((client: BroadcastClient) => {
+                client.handleUpdate(pixelUpdate, sourceSocketId);
+            });
 
             this.pendingUpdates.push(pixelUpdate);
         });
     }
 
-    public enqueueUpdateLocalRaster(
-        priority: Priority,
-    ) {
+    public enqueueUpdateLocalRaster(priority: Priority) {
         this.workQueue.push(priority, async () => {
             if (this.raster) {
                 const nextUpdate = this.pendingUpdates.shift();
                 if (!nextUpdate) {
-                    console.error('nextUpdate is undefined, something went horribly wrong');
+                    console.error(
+                        'nextUpdate is undefined, something went horribly wrong'
+                    );
                     throw Error('stack trace');
                 }
                 this.raster.handlePixelUpdate(nextUpdate);
