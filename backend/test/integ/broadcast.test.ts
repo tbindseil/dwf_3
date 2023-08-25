@@ -134,41 +134,37 @@ describe('TJTAG broadcast test', () => {
                 socketId: string
             ) => {
                 debug('start of verify loop');
+                const expectedWithoutThisClient = new Map<
+                    number,
+                    PixelUpdate
+                >();
+                expectedPixelUpdates.forEach(
+                    (
+                        value: {
+                            pixelUpdate: PixelUpdate;
+                            sourceSocketId: string;
+                        },
+                        timestamp: number
+                    ) => {
+                        if (value.sourceSocketId !== socketId) {
+                            expectedWithoutThisClient.set(
+                                timestamp,
+                                value.pixelUpdate
+                            );
+                        }
+                    }
+                );
+
+                // TJTAG the sizes don't even match yet
+                debug(
+                    `for client: ${socketId} actual size is: ${actualClientUpdatesReceivedMap.size} and expected size is: ${expectedPixelUpdates.size}`
+                );
+
+                expect(actualClientUpdatesReceivedMap).toEqual(
+                    expectedWithoutThisClient
+                );
             }
         );
-        //                const expectedWithoutThisClient = new Map<
-        //                    number,
-        //                    PixelUpdate
-        //                >();
-        //                debug('make client specific expected map');
-        //                expectedPixelUpdates.forEach(
-        //                    (
-        //                        value: {
-        //                            pixelUpdate: PixelUpdate;
-        //                            sourceSocketId: string;
-        //                        },
-        //                        timestamp: number
-        //                    ) => {
-        //                        debug(`value.sourceSocketId: ${value.sourceSocketId}`);
-        //                        debug(`socketId ${socketId}`);
-        //                        if (value.sourceSocketId !== socketId) {
-        //                            expectedWithoutThisClient.set(
-        //                                timestamp,
-        //                                value.pixelUpdate
-        //                            );
-        //                        }
-        //                    }
-        //                );
-        //
-        //                debug(
-        //                    `for client: ${socketId} actual size is: ${actualClientUpdatesReceivedMap.size} and expected size is: ${expectedPixelUpdates}`
-        //                );
-        //
-        //                expect(actualClientUpdatesReceivedMap).toEqual(
-        //                    expectedWithoutThisClient
-        //                );
-        //            }
-        //        );
 
         // do we want to kick them all off?
         // naw, let that be part of the randomness for now
