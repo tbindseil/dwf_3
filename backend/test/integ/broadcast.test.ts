@@ -195,13 +195,8 @@ describe('TJTAG broadcast test', () => {
                 }
             });
 
-            socket.on('connect', async () => {
-                debug(`connected callback and sid is: ${socket.id}`);
-
-                console.log(`spawning client with socketId: ${socket.id}`);
-
-                socket.emit('join_picture_request', { filename: testFilename });
-
+            socket.on('join_picture_response', async () => {
+                debug('on join_picture_response');
                 // need to forloop to serialize these
                 for (let i = 0; i < updates.length; ++i) {
                     const u = updates[i];
@@ -223,6 +218,14 @@ describe('TJTAG broadcast test', () => {
                 socket.close();
 
                 resolve();
+            });
+
+            socket.on('connect', () => {
+                debug(`connected callback and sid is: ${socket.id}`);
+
+                console.log(`spawning client with socketId: ${socket.id}`);
+
+                socket.emit('join_picture_request', { filename: testFilename });
             });
         });
     };
