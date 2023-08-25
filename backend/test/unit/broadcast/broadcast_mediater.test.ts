@@ -19,6 +19,16 @@ const mockMakeTrackedPicture = jest.mocked(makeTrackedPicture, true);
 describe('TJTAG BroadcastMediator Tests', () => {
     const filename = 'filename';
 
+    const pixelUpdate = {
+        filename: filename,
+        createdBy: 'tj',
+        x: 4,
+        y: 20,
+        red: 255,
+        green: 255,
+        blue: 255,
+    };
+
     const mockSocket1 = {
         id: '1'
     } as unknown as Socket<
@@ -80,7 +90,17 @@ describe('TJTAG BroadcastMediator Tests', () => {
         verify(mockedTrackedPicture.enqueueAddClient(Priority.TWO, mockSocket1.id, anything())).called();
     });
 
-    it('removes clients', () => {});
+    it('removes clients', () => {
+        broadcastMediator.addClient(filename, mockSocket1);
+        broadcastMediator.removeClient(filename, mockSocket1);
+        verify(mockedTrackedPicture.enqueueRemoveClient(Priority.THREE, mockSocket1.id)).called();
+    });
 
-    it('broadcasts updates', () => {});
+    it('broadcasts updates', () => {
+        broadcastMediator.addClient(filename, mockSocket1);
+        broadcastMediator.addClient(filename, mockSocket2);
+        broadcastMediator.broadcastUpdate(pixelUpdate, mockSocket1.id);
+        verify(mockedTrackedPicture.enqueueRemoveClient(Priority.THREE, mockSocket1.id)).called();
+        verify(mockedTrackedPicture.enqueueUpdateLocalRaster(Priority.FIVE)).called();
+    });
 });
