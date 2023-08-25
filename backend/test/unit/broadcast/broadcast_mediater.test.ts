@@ -9,14 +9,15 @@ import {
     makeTrackedPicture,
 } from '../../../src/broadcast/tracked_picture';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
-import { anything, instance, mock, reset, verify } from 'ts-mockito';
+import { anything, instance, mock, resetCalls, verify, when } from 'ts-mockito';
 import {Priority} from '../../../src/broadcast/queue';
-import {BroadcastClient} from '../../../src/broadcast/broadcast_client';
 
 jest.mock('../../../src/broadcast/tracked_picture');
 const mockMakeTrackedPicture = jest.mocked(makeTrackedPicture, true);
 
-describe('TJTAG BroadcastMediator Tests', () => {
+describe('BroadcastMediator Tests', () => {
+    jest.useFakeTimers();
+
     const filename = 'filename';
 
     const pixelUpdate = {
@@ -46,7 +47,6 @@ describe('TJTAG BroadcastMediator Tests', () => {
         SocketData
     >;
     const mockPictureAccessor = {} as unknown as PictureAccessor;
-    const mockBroadcastClient = {} as unknown as BroadcastClient;
 
     // well i could
     // 1. make the whole mock interface here and save all the creations
@@ -66,24 +66,47 @@ describe('TJTAG BroadcastMediator Tests', () => {
     let broadcastMediator: BroadcastMediator;
 
     beforeEach(() => {
+        resetCalls(mockedTrackedPicture);
         mockTrackedPictures.clear();
         broadcastMediator = new BroadcastMediator(mockPictureAccessor);
     });
 
-    // can probably msetInterval
-    it.skip('enqueues writes on an interval if tracked pictures are not stopped', async () => {
+    it('enqueues writes on an interval if tracked pictures are not stopped', async () => {
+        const otherFilename = 'otherFilename';
+
         broadcastMediator.addClient(filename, mockSocket1);
-        broadcastMediator.addClient(filename, mockSocket2);
+        broadcastMediator.addClient(otherFilename, mockSocket2);
 
         // advanvce 30001 to trigger the interval callback
-        jest.advanceTimersByTime(30001);
+        jest.advanceTimersByTime(30000 + 1);
 
-        mockTrackedPictures.forEach((value: TrackedPicture) =>
-            expect(value.enqueueWrite).toHaveBeenCalled()
-        );
+        // once per tracked picture
+        verify(mockedTrackedPicture.enqueueWrite(Priority.SIX, false)).twice();
     });
 
-    it('enqueues writes on a high priority every once in a while', async () => {});
+    it('enqueues forced, high priority writes every once in a while', async () => {
+        const otherFilename = 'otherFilename';
+
+        broadcastMediator.addClient(filename, mockSocket1);
+        broadcastMediator.addClient(otherFilename, mockSocket2);
+
+        // advanvce to trigger the interval callback
+        jest.advanceTimersByTime(30000 * 128 - 1);
+
+        // once per tracked picture
+        verify(mockedTrackedPicture.enqueueWrite(Priority.ONE, true)).twice();
+    });
+
+    it('deletes when the tracked picture is stopped', () => {
+        broadcastMediator.addClient(filename, mockSocket1);
+        when(mockedTrackedPicture.stopped()).thenReturn(true);
+
+        // advanvce 30001 to trigger the interval callback
+        jest.advanceTimersByTime(30000 + 1);
+
+        // once per tracked picture
+        verify(mockedTrackedPicture.enqueueWrite(Priority.SIX, false)).never();
+    });
 
     it('adds client by enqueueing an operation to a tracked picture', () => {
         broadcastMediator.addClient(filename, mockSocket1);
@@ -100,7 +123,8 @@ describe('TJTAG BroadcastMediator Tests', () => {
         broadcastMediator.addClient(filename, mockSocket1);
         broadcastMediator.addClient(filename, mockSocket2);
         broadcastMediator.broadcastUpdate(pixelUpdate, mockSocket1.id);
-        verify(mockedTrackedPicture.enqueueRemoveClient(Priority.THREE, mockSocket1.id)).called();
+        // verify(mockedTrackedPicture.enqueueBroadcastUpdate(Priority.THREE, pixelUpdate, mockSocket1.id)).called();
+        verify(mockedTrackedPicture.enqueueBroadcastUpdate(Priority.FOUR, pixelUpdate, mockSocket1.id)).called();
         verify(mockedTrackedPicture.enqueueUpdateLocalRaster(Priority.FIVE)).called();
     });
 });

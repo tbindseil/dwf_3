@@ -83,18 +83,18 @@ describe('TrackedPicture Tests', () => {
         );
     });
 
-    it.skip('enqueueWrite adds a write operation', () => {
-        const force = true;
-
-        trackedPicture.enqueueWrite(priority, force);
-
-        expect(mockPush).toBeCalledTimes(1);
-        // expect(mockPush).toBeCalledWith(priority, any);
-
-        pushedJob();
-
-        expect;
-    });
+//    it.skip('enqueueWrite adds a write operation', () => {
+//        const force = true;
+//
+//        trackedPicture.enqueueWrite(priority, force);
+//
+//        expect(mockPush).toBeCalledTimes(1);
+//        // expect(mockPush).toBeCalledWith(priority, any);
+//
+//        pushedJob();
+//
+//        expect;
+//    });
 
     it('reads the raster when first client is added', async () => {
         await addClient();
