@@ -1,11 +1,17 @@
-import { PictureDatabaseShape, JoinPictureResponse, PixelUpdate } from 'dwf-3-models-tjb';
+import {
+  PictureDatabaseShape,
+  JoinPictureResponse,
+  PixelUpdate,
+  ServerToClientEvents,
+  ClientToServerEvents,
+} from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import Contextualizer from './contextualizer';
 import ProvidedServices from './provided_services';
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 const ENDPOINT = 'http://127.0.0.1:6543/';
-const socket = io(ENDPOINT);
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(ENDPOINT);
 
 export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
@@ -70,7 +76,7 @@ const CurrentPictureService = ({ children }: any) => {
         console.error('attempting to leave before setting current picture');
         return;
       }
-        console.error('attempting to leave NOTNOTNOT before setting current picture');
+      console.error('attempting to leave NOTNOTNOT before setting current picture');
       socket.emit('leave_picture_request', {
         filename: currentPicture.filename,
       });

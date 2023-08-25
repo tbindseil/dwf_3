@@ -22,7 +22,6 @@ import {
 import { myErrorHandler } from './middleware/error_handler';
 import { makeKnex } from './db/knex_file';
 import { Server, Socket } from 'socket.io';
-import {Queue} from './broadcast/queue';
 
 // I either need to:
 // 1. save knex and destroy it on shutdown
@@ -54,8 +53,7 @@ const pictureAccessor = new LocalPictureAccessor(
     configureableAdditionalDirectory
 );
 
-const queue = new Queue();
-const broadcastMediator = new BroadcastMediator(pictureAccessor, queue);
+const broadcastMediator = new BroadcastMediator(pictureAccessor);
 
 // TODO inject -db- (and pictureArray? and ajv?) via middleware
 app.get('/pictures', (req: Request, res: Response, next: NextFunction) => {
