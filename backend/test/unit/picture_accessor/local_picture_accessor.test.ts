@@ -104,15 +104,13 @@ describe('LocalPictureAccessor tests', () => {
 
         mockJimpAdapter.read.mockReturnValue(jimg);
 
-        const joinPictureResponse = await localPictureAccessor.getRaster(
+        const raster = await localPictureAccessor.readRaster(
             filename
         );
 
-        expect(joinPictureResponse).toEqual({
-            width: jimg.bitmap.width,
-            height: jimg.bitmap.height,
-            data: jimg.bitmap.data,
-        });
+        expect(raster.width).toEqual(jimg.bitmap.width);
+        expect(raster.height).toEqual(jimg.bitmap.height);
+        expect(raster.getBuffer()).toEqual(new Uint8ClampedArray(jimg.bitmap.data));
     });
 
     it('writes the raster', async () => {
@@ -140,6 +138,6 @@ describe('LocalPictureAccessor tests', () => {
     });
 
     it('throws when getRaster is called with a non existent file name', async () => {
-        await expect(localPictureAccessor.getRaster('poopy')).rejects.toThrow();
+        await expect(localPictureAccessor.readRaster('poopy')).rejects.toThrow();
     });
 });

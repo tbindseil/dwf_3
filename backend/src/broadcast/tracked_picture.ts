@@ -68,7 +68,7 @@ export class TrackedPicture {
 
             // cold start
             if (!this.raster) {
-                this.raster = await this.pictureAccessor.getRaster(
+                this.raster = await this.pictureAccessor.readRaster(
                     this.filename
                 );
             }

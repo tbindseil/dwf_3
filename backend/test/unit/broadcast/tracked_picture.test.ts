@@ -50,7 +50,7 @@ describe('TrackedPicture Tests', () => {
     const mockGetRaster = jest.fn();
     const mockWriteRaster = jest.fn();
     const mockPictureAccessor = {
-        getRaster: mockGetRaster,
+        readRaster: mockGetRaster,
         writeRaster: mockWriteRaster,
     } as unknown as PictureAccessor;
 
@@ -82,19 +82,6 @@ describe('TrackedPicture Tests', () => {
             filename
         );
     });
-
-//    it.skip('enqueueWrite adds a write operation', () => {
-//        const force = true;
-//
-//        trackedPicture.enqueueWrite(priority, force);
-//
-//        expect(mockPush).toBeCalledTimes(1);
-//        // expect(mockPush).toBeCalledWith(priority, any);
-//
-//        pushedJob();
-//
-//        expect;
-//    });
 
     it('reads the raster when first client is added', async () => {
         await addClient();

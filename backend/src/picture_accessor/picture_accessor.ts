@@ -10,7 +10,7 @@ export default abstract class PictureAccessor {
 
     public abstract getFileSystem(): string;
 
-    public abstract getRaster(filename: string): Promise<Raster>;
+    public abstract readRaster(filename: string): Promise<Raster>;
 
     public abstract writeRaster(
         raster: Raster,

@@ -41,7 +41,7 @@ export default class LocalPictureAccessor extends PictureAccessor {
     }
 
     // TODO rename to readRaster
-    public async getRaster(filename: string): Promise<Raster> {
+    public async readRaster(filename: string): Promise<Raster> {
         const fullPath = path.join(this.baseDirectory, filename);
 
         // throws when fullPath doesn't exist, but jimp doesn't for some reason
