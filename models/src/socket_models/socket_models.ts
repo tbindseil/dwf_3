@@ -3,7 +3,7 @@ import { PixelUpdate } from '../updates/pixel_update';
 export interface ClientToServerEvents {
     join_picture_request: (joinPictureRequest: JoinPictureRequest) => void;
     leave_picture_request: (leavePictureRequest: LeavePictureRequest) => void;
-    client_to_server_udpate: (pixelUpdate: PixelUpdate) => void;
+    client_to_server_udpate: (pixelUpdate: PixelUpdate, callback: () => void) => void;
     unsubscribe: (filename: string) => void;
 }
 

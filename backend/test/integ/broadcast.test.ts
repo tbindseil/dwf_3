@@ -318,6 +318,13 @@ describe('TJTAG broadcast test', () => {
     //
     // 3. this is kinda like out there but what if we displayed the update with a 50/50 alpha component, then updated it to full once acked
     // i think it will require 2, so lets focus on that first
+
+    // so how to do strategy 2
+    // displayRaster, currentRaster = join_picture_response
+    // handleUserUpdate = () => {
+    //   ...
+    // }
+
     const spawnClient = async (updates: Update[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
