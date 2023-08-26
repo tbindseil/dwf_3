@@ -167,6 +167,12 @@ const CurrentPictureService = ({ children }: any) => {
             // raster + updateA1 + updateA2 + updateB1
             //
             // would single round isolation apply here?
+            // i bet it would if things were reset at sending of updateA2
+            // but with the way things are written right now, we are clearing after updateA1 is acked
+            // and that will leave the raster copied after updateA1 and not updateA2
+            // ie, displayRaster will be:
+            // raster + updateB1 + updateA1
+            // which is still not equivalent to current/server raster
             //
             // TJTAG consider below..
             // hmm, maybe on other updates, we just copy the currentRaster to the displayRaster everytime we get an update from server?
