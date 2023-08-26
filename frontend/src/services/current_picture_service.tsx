@@ -187,6 +187,7 @@ const CurrentPictureService = ({ children }: any) => {
             // * leave the displayRaster in sync with the currentRaster
             // * not over update
             // * not under update
+            // * show user updates immediately
             //
             // the consider below (copy current to display on all received) will over update
             // only tracking the last non-acked user update will potentially under update
@@ -194,8 +195,16 @@ const CurrentPictureService = ({ children }: any) => {
             //   but i guess that's kinda weird
             //
             // ^because ... if we update without taking into account all acked, we have to replay those
+            // so it violates showing user updates immediately
             //
             // this is so complicated
+            //
+            // so, maybe it is the above, and upon asking for displayRaster, when copy flag is active,
+            // we get latest current raster (this is missing all non acked user updates), then quickly
+            // add those to the copy of the current raster. this is the new display raster
+            //
+            // i think this solves everything, it will just take a lot of effort ot make it
+            // good code
             //
             // TJTAG consider below..
             // hmm, maybe on other updates, we just copy the currentRaster to the displayRaster everytime we get an update from server?
