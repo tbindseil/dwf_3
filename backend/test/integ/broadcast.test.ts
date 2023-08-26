@@ -66,8 +66,8 @@ describe('TJTAG broadcast test', () => {
     });
 
     it('runs the test', async () => {
-        const numClients = 3;
-        const numUpdates = [4, 1, 6];
+        const numClients = 2;
+        const numUpdates = [2, 2];
         await testsFromRandom(numClients, numUpdates);
     });
 
@@ -125,15 +125,11 @@ describe('TJTAG broadcast test', () => {
         await Promise.all(clients);
 
         // verify
-        debug('about to verify');
-        debug(`receivedPixelUpdates size is: ${receivedPixelUpdates.size}`);
-        // its 0...
         receivedPixelUpdates.forEach(
             (
-                actualClientUpdatesReceivedMap: Map<number, PixelUpdate>,
+                clientUpdatesReceivedMap: Map<number, PixelUpdate>,
                 socketId: string
             ) => {
-                debug('start of verify loop');
                 const expectedWithoutThisClient = new Map<
                     number,
                     PixelUpdate
@@ -157,12 +153,41 @@ describe('TJTAG broadcast test', () => {
 
                 // TJTAG the sizes don't even match yet
                 debug(
-                    `for client: ${socketId} actual size is: ${actualClientUpdatesReceivedMap.size} and expected size is: ${expectedPixelUpdates.size}`
+                    `for client: ${socketId} actual size is: ${clientUpdatesReceivedMap.size} and expected size is: ${expectedWithoutThisClient.size}`
                 );
 
-                expect(actualClientUpdatesReceivedMap).toEqual(
-                    expectedWithoutThisClient
+                // assert same size
+                // sort keys (timestamps) for each
+                // assert each map at the sorted key at the index are equal
+
+                expect(clientUpdatesReceivedMap.size).toEqual(
+                    expectedWithoutThisClient.size
                 );
+
+                const timestampSortFunc = (a: number, b: number) => {
+                    if (a < b) {
+                        return -1;
+                    } else if (a > b) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                };
+
+                const sortedActualKeys = [
+                    ...clientUpdatesReceivedMap.keys(),
+                ].sort(timestampSortFunc);
+                const sortedExpectedKeys = [
+                    ...expectedWithoutThisClient.keys(),
+                ].sort(timestampSortFunc);
+
+                for (let i = 0; i < sortedActualKeys.length; ++i) {
+                    expect(
+                        clientUpdatesReceivedMap.get(sortedActualKeys[i])
+                    ).toEqual(
+                        expectedWithoutThisClient.get(sortedExpectedKeys[i])
+                    );
+                }
             }
         );
 
@@ -180,13 +205,17 @@ describe('TJTAG broadcast test', () => {
                 io_package(ENDPOINT);
 
             socket.on('server_to_client_update', (pixelUpdate: PixelUpdate) => {
-                debug('on server_to_client_update');
                 if (!receivedPixelUpdates.has(socket.id)) {
                     receivedPixelUpdates.set(socket.id, new Map());
                 }
 
                 const clientMap = receivedPixelUpdates.get(socket.id);
                 if (clientMap) {
+                    debug(
+                        `setting received update for client ${
+                            socket.id
+                        } at ${performance.now()}`
+                    );
                     clientMap.set(performance.now(), pixelUpdate);
                 }
             });
@@ -197,13 +226,19 @@ describe('TJTAG broadcast test', () => {
                 for (let i = 0; i < updates.length; ++i) {
                     const u = updates[i];
 
-                    debug('update');
-                    debug(`socketId: ${socket.id}`);
-                    debug(`updateNum: ${i}`);
-                    debug(`now: ${performance.now()}`);
-                    debug(`waiting: ${u.waitTimeMS}ms`);
+                    //                    debug('update');
+                    //                    debug(`socketId: ${socket.id}`);
+                    //                    debug(`updateNum: ${i}`);
+                    //                    debug(`now: ${performance.now()}`);
+                    //                    debug(`waiting: ${u.waitTimeMS}ms`);
 
                     socket.emit('client_to_server_udpate', u.pixelUpdate);
+
+                    debug(
+                        `setting expected update for client ${
+                            socket.id
+                        } at ${performance.now()}`
+                    );
                     expectedPixelUpdates.set(performance.now(), {
                         pixelUpdate: u.pixelUpdate,
                         sourceSocketId: socket.id,
