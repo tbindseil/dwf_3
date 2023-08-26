@@ -33,7 +33,7 @@ const CurrentPictureService = ({ children }: any) => {
   // one to show user updates immediately
   // one to handle race condition
   let currentRaster: Raster;
-  let displayRaster: Raster;
+  // let displayRaster: Raster;
 
   socket.on('connect', () => {
     setupListeners();
@@ -67,11 +67,11 @@ const CurrentPictureService = ({ children }: any) => {
         joinPictureResponse.height,
         joinPictureResponse.data,
       );
-      displayRaster = new Raster(
-        joinPictureResponse.width,
-        joinPictureResponse.height,
-        joinPictureResponse.data,
-      );
+//      displayRaster = new Raster(
+//        joinPictureResponse.width,
+//        joinPictureResponse.height,
+//        joinPictureResponse.data,
+//      );
     },
     getCurrentPicture(): PictureDatabaseShape {
       return currentPicture;
@@ -93,14 +93,14 @@ const CurrentPictureService = ({ children }: any) => {
     getCurrentRaster(): Raster {
       return currentRaster;
     },
-    getDisplayRaster(): Raster {
-        return displayRaster;
-    },
+//    getDisplayRaster(): Raster {
+//        return displayRaster;
+//    },
     handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
       currentRaster.handlePixelUpdate(pixelUpdate);
-      displayRaster.handlePixelUpdate(pixelUpdate);
+      // displayRaster.handlePixelUpdate(pixelUpdate);
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
