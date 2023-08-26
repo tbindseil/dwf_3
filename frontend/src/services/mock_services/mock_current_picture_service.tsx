@@ -12,6 +12,7 @@ export const mockCurrentPictureService = {
   setCurrentPicture: jest.fn(),
   getCurrentPicture: jest.fn(),
   getCurrentRaster: jest.fn(),
+  getDisplayRaster: jest.fn(),
   handleUserUpdate: jest.fn(),
 };
 
