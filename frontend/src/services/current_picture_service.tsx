@@ -183,6 +183,20 @@ const CurrentPictureService = ({ children }: any) => {
             // and it could even be further optimized by only keeping track of the latest update
             // and identifing the latest update is doable with the uuid on updates
             //
+            // ok, so a solution has to:
+            // * leave the displayRaster in sync with the currentRaster
+            // * not over update
+            // * not under update
+            //
+            // the consider below (copy current to display on all received) will over update
+            // only tracking the last non-acked user update will potentially under update
+            // so, we must track all non acked user updates and only copy during get display raster
+            //   but i guess that's kinda weird
+            //
+            // ^because ... if we update without taking into account all acked, we have to replay those
+            //
+            // this is so complicated
+            //
             // TJTAG consider below..
             // hmm, maybe on other updates, we just copy the currentRaster to the displayRaster everytime we get an update from server?
             // pretty simple, possibly time consuming
