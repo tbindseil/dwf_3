@@ -20,6 +20,7 @@ const PICTURE_HEIGHT = 1000;
 interface Update {
     waitTimeMS: number;
     pixelUpdate: PixelUpdate;
+    sentAt?: number;
 }
 
 // TODO this needs to be dried out
@@ -224,6 +225,13 @@ describe('TJTAG broadcast test', () => {
         );
     };
 
+    // this will expose the issue i saw previously
+    // there is a race between a client receiving an update and making their own
+    // if a client updates its own raster, then receives an update that was previously received by the server,
+    // and the server gets the clients update after
+    // then there could be a difference in the resulting raster
+    //
+    // how to solve this.....
     const spawnClient = async (updates: Update[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
@@ -251,20 +259,19 @@ describe('TJTAG broadcast test', () => {
                 for (let i = 0; i < updates.length; ++i) {
                     const u = updates[i];
 
-                    //                    debug('update');
-                    //                    debug(`socketId: ${socket.id}`);
-                    //                    debug(`updateNum: ${i}`);
-                    //                    debug(`now: ${performance.now()}`);
-                    //                    debug(`waiting: ${u.waitTimeMS}ms`);
+                    debug('update');
+                    debug(`socketId: ${socket.id}`);
+                    debug(`updateNum: ${i}`);
+                    debug(`now: ${performance.now()}`);
+                    debug(`waiting: ${u.waitTimeMS}ms`);
 
                     socket.emit('client_to_server_udpate', u.pixelUpdate);
 
+                    u.sentAt = performance.now();
                     debug(
-                        `setting expected update for client ${
-                            socket.id
-                        } at ${performance.now()}`
+                        `setting expected update for client ${socket.id} at ${u.sentAt}`
                     );
-                    expectedPixelUpdates.set(performance.now(), {
+                    expectedPixelUpdates.set(u.sentAt, {
                         pixelUpdate: u.pixelUpdate,
                         sourceSocketId: socket.id,
                     });
@@ -314,7 +321,7 @@ describe('TJTAG broadcast test', () => {
         await new Promise((r) => setTimeout(r, ms));
     };
 
-    const debugEnabled = true;
+    const debugEnabled = false;
     const debug = (msg: string, force = false) => {
         if (force || debugEnabled) console.log(`TJTAG: ${msg}`);
     };
