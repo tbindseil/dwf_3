@@ -71,8 +71,13 @@ describe('TJTAG broadcast test', () => {
         await testsFromRandom(numClients, numUpdates);
     });
 
+    //    it('runs tests from file', async () => {
+    //        await testsFromFile(
+    //            'savedTestUpdates_Sat__Aug__26__2023__08:27:50__GMT-0600__(Mountain__Daylight__Time)'
+    //        );
+    //    });
+
     const testsFromFile = async (previousUpdatesFilename: string) => {
-        // unverified
         const recoveredUpdatesStr = await fs.promises.readFile(
             previousUpdatesFilename
         );
@@ -91,9 +96,47 @@ describe('TJTAG broadcast test', () => {
                 updatesForClients[i].push(makeRandomUpdate(i));
             }
         }
+
+        // write first incase we crash
+        const createdAt = new Date().toString().replaceAll(' ', '__');
+        await fs.promises.writeFile(
+            `savedTestUpdates_${createdAt}`,
+            JSON.stringify(updatesForClients)
+        );
+
         await tests(updatesForClients);
     };
 
+    // this smells funny
+    // and, its causing us to have to have all clients registered
+    // before sending any updates
+    //
+    // we really want to be able to:
+    // upon sending an update (and adding an expected update)
+    // know which clients are registered
+    // and tag the expected udpate with those clients
+    // then, we can filter the expectedPixelUpdates more precisely
+    //
+    // in addition
+    //
+    // we still need to test the picture sync on join mechanism
+    // - should they all end with the same picture? maybe not close right away but stagger when they start
+    // - should we track the picture at given time stamps? and find what the picture looks like after the last update but not before the it?
+    // - or maybe we think about what is guaranteed. and that is
+    // -- that the picture will be received along with any updates that are pending (!!!!)
+    // --- that pending updates thing messes things up
+    // ---- and by things i mean the regular test that broadcasts are received
+    // ----- basically, if a client joins "late", it will get some pending updates, which would not be accounted for in the update -> currently registered client map mentinoed above
+    //
+    // --- so... we actually need to track the picture
+    // ---- and since the real client updates the raster itself, these test clients will have to also
+    // --- so, it seems like we need to make sure the client is always ending with the right picture
+    // ---- where the right picture is the picture updated with all updates at the time the last udpate is sent
+    // ----- maybe I could tag updates with sentAt: performance.now()
+    //
+    // i still feel confident that its working, at least the broadcast aspect
+    // but i guess that is the easy part and the picture sync is difficult
+    //
     // one top level entry per client
     // each client has a map of when they received an update and the update received
     // then, all send updates are tracked at a time with who they are from
@@ -109,14 +152,6 @@ describe('TJTAG broadcast test', () => {
     >();
 
     const tests = async (updatesForClients: Update[][]) => {
-        // write first incase we crash
-        // unverified
-        const createdAt = new Date().toString().replaceAll(' ', '__');
-        await fs.promises.writeFile(
-            `savedTestUpdates_${createdAt}`,
-            JSON.stringify(updatesForClients)
-        );
-
         const clients: Promise<Socket>[] = [];
         updatesForClients.forEach((updates) => {
             clients.push(spawnClient(updates));
