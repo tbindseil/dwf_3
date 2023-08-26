@@ -66,8 +66,8 @@ describe('TJTAG broadcast test', () => {
     });
 
     it('runs the test', async () => {
-        const numClients = 2;
-        const numUpdates = [2, 2];
+        const numClients = 8;
+        const numUpdates = [2, 2, 2, 2, 2, 2, 2, 2];
         await testsFromRandom(numClients, numUpdates);
     });
 
@@ -117,12 +117,14 @@ describe('TJTAG broadcast test', () => {
             JSON.stringify(updatesForClients)
         );
 
-        const clients: Promise<void>[] = [];
+        const clients: Promise<Socket>[] = [];
         updatesForClients.forEach((updates) => {
             clients.push(spawnClient(updates));
         });
 
-        await Promise.all(clients);
+        const resolvedClients = await Promise.all(clients);
+
+        resolvedClients.forEach((client) => client.close());
 
         // verify
         receivedPixelUpdates.forEach(
@@ -149,11 +151,6 @@ describe('TJTAG broadcast test', () => {
                             );
                         }
                     }
-                );
-
-                // TJTAG the sizes don't even match yet
-                debug(
-                    `for client: ${socketId} actual size is: ${clientUpdatesReceivedMap.size} and expected size is: ${expectedWithoutThisClient.size}`
                 );
 
                 // assert same size
@@ -190,17 +187,10 @@ describe('TJTAG broadcast test', () => {
                 }
             }
         );
-
-        // do we want to kick them all off?
-        // naw, let that be part of the randomness for now
-        // TODO instead, more complicated, repeat them
     };
 
-    // i have to have a long hard look in the mirror
-    // and decide when i am going to start utilizing
-    // the built in socket io stuff
-    const spawnClient = async (updates: Update[]): Promise<void> => {
-        return new Promise<void>((resolve) => {
+    const spawnClient = async (updates: Update[]): Promise<Socket> => {
+        return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
                 io_package(ENDPOINT);
 
@@ -246,9 +236,11 @@ describe('TJTAG broadcast test', () => {
                     await delay(u.waitTimeMS);
                 }
 
-                socket.close();
+                // TJTAG once its done sending we need to keep it open
+                // then close all after everything is done
+                // socket.close();
 
-                resolve();
+                resolve(socket);
             });
 
             socket.on('connect', () => {
