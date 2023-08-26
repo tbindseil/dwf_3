@@ -33,7 +33,9 @@ export class Raster {
     this.asArray[imageDataOffset + 1] = green;
     this.asArray[imageDataOffset + 2] = blue;
 
-    // what if we did this as several blocks of arrays?
+    console.log(`TJTAG updated at ${performance.now()}`);
+
+    // what if we did this as several blocks of arrays? for parallization?
   }
 
   public getBuffer(): Uint8ClampedArray {

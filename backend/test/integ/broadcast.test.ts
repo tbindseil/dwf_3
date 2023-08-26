@@ -272,6 +272,18 @@ describe('TJTAG broadcast test', () => {
     //      how long does an ack take?
     //      does this actually work out sequentially?
     //
+    // 1.5 client only updates the raster upon receiving updates from the server
+    //       this implies that clients dont update upon doing something and send it to the server instead
+    //       and that the server doesn't filter a client's own updates
+    //      this is definitly the easiest...
+    //      how noticable is it?
+    //      not noticable at all, lets get some numbies
+    //      direct update time:
+    //      round trip update time:
+    //      TJTAG clicked at 15091.800000011921
+    //      TJTAG updated at 15112.40000000596
+    //      diff: 20.6 ms
+    //
     // 2. client holds a copy of raster at last acked update
     //      if an update comes in that is both from after the last acked update and before any unacked updates
     //      then we redraw from the last acked update

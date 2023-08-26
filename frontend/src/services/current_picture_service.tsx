@@ -86,12 +86,13 @@ const CurrentPictureService = ({ children }: any) => {
     },
     handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
+      // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
       currentRaster.handlePixelUpdate(pixelUpdate);
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
       // TODO can't send until join picture response received
-      currentRaster.handlePixelUpdate(pixelUpdate);
+      // currentRaster.handlePixelUpdate(pixelUpdate);
       socket.emit('client_to_server_udpate', pixelUpdate);
     },
   };
