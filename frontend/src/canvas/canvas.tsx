@@ -55,7 +55,6 @@ function Canvas() {
       blue: 255,
     };
 
-    // TODO this needs to JUST send to server
     currentPictureService.handleUserUpdate(pixelUpdate);
   }, []);
 

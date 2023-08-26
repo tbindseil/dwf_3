@@ -279,10 +279,14 @@ describe('TJTAG broadcast test', () => {
     //      how noticable is it?
     //      not noticable at all, lets get some numbies
     //      direct update time:
+    //      diff: .5 ms
     //      round trip update time:
     //      TJTAG clicked at 15091.800000011921
     //      TJTAG updated at 15112.40000000596
     //      diff: 20.6 ms
+    //
+    //      we are updating at a 30 ms rate
+    //      so we could lose one frame
     //
     // 2. client holds a copy of raster at last acked update
     //      if an update comes in that is both from after the last acked update and before any unacked updates
