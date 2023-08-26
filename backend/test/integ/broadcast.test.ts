@@ -232,6 +232,37 @@ describe('TJTAG broadcast test', () => {
     // then there could be a difference in the resulting raster
     //
     // how to solve this.....
+    //
+    // lets outline the problem with a sequence diagram
+    //
+    // server   clientA    clientB
+    //   |  joinPic|          |
+    //   |<--------|          |
+    //   |ack      |          |
+    //   |-------->|          |
+    //   |         | joinPic  |
+    //   |<--------|----------|
+    //   |ack      |          |
+    //   |---------|--------->|
+    //   |         |          |
+    //   |         |          |
+    //   |  updateA|          |
+    //   |<--------|          |
+    //   |         |   updateB|
+    //   |<--------|----------|
+    //   |bUpdateA |          |
+    //   |---------|--------->|
+    //   |bUpdateB |          |
+    //   |---------|--------->|
+    //   |         |          |
+    //
+    //   in the above situation, clientB is sitting with updateB, then updateA
+    //   and the server is sitting with updateA, then updateB
+    //
+    //   that's inconsistent, and the server has it right
+    //   i guess the server has to have it right
+    //
+    // so what does the client do?
     const spawnClient = async (updates: Update[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
