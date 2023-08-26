@@ -288,6 +288,17 @@ describe('TJTAG broadcast test', () => {
     //      we are updating at a 30 ms rate
     //      so we could lose one frame
     //
+    //      this is all local tho,
+    //      from aws (https://aws.amazon.com/what-is/rtt-in-networking/)
+    //      What is a good or optimal round-trip time?
+    //      A good round-trip time (RTT) should be below 100 milliseconds for optimal performance.
+    //      An RTT of 100–200 milliseconds means performance is likely affected, but your users are still able to access the service.
+    //      An RTT of 200 milliseconds or more means performance is degraded and your users experience long wait or page load times.
+    //      An RTT of more than 375 milliseconds commonly results in a connection being terminated.
+    //      so lets throw in a delay of 200 ms and see how we like it
+
+
+    //
     // 2. client holds a copy of raster at last acked update
     //      if an update comes in that is both from after the last acked update and before any unacked updates
     //      then we redraw from the last acked update
