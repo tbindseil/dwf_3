@@ -263,6 +263,22 @@ describe('TJTAG broadcast test', () => {
     //   i guess the server has to have it right
     //
     // so what does the client do?
+    //
+    // well, i see two options
+    // 1. client does not update raster until receiving an ack
+    //      any updates received while waiting for ack of sent update will be applied
+    //      sent update is applied when ack is received
+    //    questions:
+    //      how long does an ack take?
+    //      does this actually work out sequentially?
+    //
+    // 2. client holds a copy of raster at last acked update
+    //      if an update comes in that is both from after the last acked update and before any unacked updates
+    //      then we redraw from the last acked update
+    //      and upon an ack, we save the raster at that point and clear anything before it
+    //    questions:
+    //      how long does the redraw take?
+    //      how hard is it to track these things?
     const spawnClient = async (updates: Update[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
