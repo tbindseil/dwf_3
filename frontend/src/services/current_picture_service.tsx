@@ -147,8 +147,8 @@ const CurrentPictureService = ({ children }: any) => {
             //
             // but, option 2 requires filtering on the client side upon receiving the updates
             //
-            // this could be done by adding socketId to the pixelUpdate, or by giving all updates a uui
-            // all updates having a uui would be helpful if rounds overlapped
+            // this could be done by adding socketId to the pixelUpdate, or by giving all updates a uuid
+            // all updates having a uuid would be helpful if rounds overlapped
             //
             // so a scenario to consider (for intermingling rounds):
             // clientB sends updateB1
@@ -173,6 +173,15 @@ const CurrentPictureService = ({ children }: any) => {
             // ie, displayRaster will be:
             // raster + updateB1 + updateA1
             // which is still not equivalent to current/server raster
+            //
+            // so its on a per userUpdate basis
+            // if any nonuser updates have come in inbetween a user update being sent /applied to the
+            // current raster and it being acked, then upon ack, we need to copy
+            //
+            // I think this is the winner
+            //
+            // and it could even be further optimized by only keeping track of the latest update
+            // and identifing the latest update is doable with the uuid on updates
             //
             // TJTAG consider below..
             // hmm, maybe on other updates, we just copy the currentRaster to the displayRaster everytime we get an update from server?
