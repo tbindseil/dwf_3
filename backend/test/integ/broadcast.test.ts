@@ -272,6 +272,9 @@ describe('TJTAG broadcast test', () => {
     //      how long does an ack take?
     //      does this actually work out sequentially?
     //
+    //    ^ this suffers from the same issues as 1.5, namely, the update ack is delayed enough that
+    //    its a bad user experience
+    //   
     // 1.5 client only updates the raster upon receiving updates from the server
     //       this implies that clients dont update upon doing something and send it to the server instead
     //       and that the server doesn't filter a client's own updates
@@ -296,6 +299,8 @@ describe('TJTAG broadcast test', () => {
     //      An RTT of 200 milliseconds or more means performance is degraded and your users experience long wait or page load times.
     //      An RTT of more than 375 milliseconds commonly results in a connection being terminated.
     //      so lets throw in a delay of 200 ms and see how we like it
+    //
+    //      its bad...
 
 
     //
@@ -306,6 +311,13 @@ describe('TJTAG broadcast test', () => {
     //    questions:
     //      how long does the redraw take?
     //      how hard is it to track these things?
+    //
+    //    I thikn this is the best solution because
+    //    the user will mostly experience drawing as if by themselves
+    //    and only 
+    //
+    // 3. this is kinda like out there but what if we displayed the update with a 50/50 alpha component, then updated it to full once acked
+    // i think it will require 2, so lets focus on that first
     const spawnClient = async (updates: Update[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
