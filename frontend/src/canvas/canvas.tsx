@@ -44,15 +44,15 @@ function Canvas() {
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
     const y = event.pageY - (canvasRef.current?.offsetTop ?? 0);
     // update current picture via current picture service
-    const pixelUpdate = new PixelUpdate(
-      picture.filename,
-      'tj', // TODO usernames
+    const pixelUpdate = new PixelUpdate({
+      filename: picture.filename,
+      createdBy: 'tj', // TODO usernames
       x,
       y,
-      255,
-      255,
-      255,
-    );
+      red: 255,
+      green: 255,
+      blue: 255,
+    });
     console.log('TJTAG is it a function when seinding it?');
     console.log(`${pixelUpdate.updateRaster}`);
     console.log('TJTAG done');

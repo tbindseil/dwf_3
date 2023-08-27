@@ -114,6 +114,7 @@ export class TrackedPicture {
             if (this.raster) {
                 console.log(`TJTAG about to shift pendingUpdates and size is: ${this.pendingUpdates.length}`);
                 const nextUpdate = this.pendingUpdates.shift();
+                nextUpdate?.addFuncs();
                 console.log(`TJTAG next update is: ${nextUpdate}`);
                 console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
                 console.log(`TJTAG nextupdates func is: ${nextUpdate?.updateRaster}`);

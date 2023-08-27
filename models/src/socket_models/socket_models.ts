@@ -1,16 +1,16 @@
-import { PixelUpdate } from '../updates/pixel_update';
+import { PixelUpdateProps } from '../updates/pixel_update';
 
 export interface ClientToServerEvents {
     join_picture_request: (joinPictureRequest: JoinPictureRequest) => void;
     leave_picture_request: (leavePictureRequest: LeavePictureRequest) => void;
-    client_to_server_udpate: (pixelUpdate: PixelUpdate) => void;
+    client_to_server_udpate: (pixelUpdateProps: PixelUpdateProps) => void;
     unsubscribe: (filename: string) => void;
 }
 
 export interface ServerToClientEvents {
     join_picture_response: (joinPictureResponse: JoinPictureResponse) => void;
     leave_picture_response: () => void;
-    server_to_client_update: (pixelUpdate: PixelUpdate) => void;
+    server_to_client_update: (pixelUpdateProps: PixelUpdateProps) => void;
 }
 
 export interface InterServerEvents {
