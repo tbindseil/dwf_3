@@ -222,6 +222,10 @@ const CurrentPictureService = ({ children }: any) => {
             // ... as some kind of compromise between updating upon every user update ack and only the last user update ack
             // so when the getDisplayRaster is called, we want it to be all received updates with unacknowledged user updates on top
             // which means we also need to return user updates back in addition to ack. Well that part not necessarily
+            //
+            // so display raster is ephemeral
+            // it is a copy of current raster (all received) plus all pending updates
+            // i think ordering means i don't have to worry about guid, just queue.shift when i get an ack
       });
     },
   };
