@@ -4,6 +4,7 @@ import {
   PixelUpdate,
   ServerToClientEvents,
   ClientToServerEvents,
+  Update,
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 import Contextualizer from './contextualizer';
@@ -30,7 +31,7 @@ const CurrentPictureService = ({ children }: any) => {
   let currentPicture: PictureDatabaseShape;
   let currentRaster: Raster;
 
-  const pendingUserUpdates: PixelUpdate[] = [];
+  const pendingUserUpdates = new Map<string, Update>();
 
   socket.on('connect', () => {
     setupListeners();
@@ -96,14 +97,15 @@ const CurrentPictureService = ({ children }: any) => {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
       pixelUpdate.updateRaster(currentRaster);
+      pendingUserUpdates.delete(pixelUpdate.guid);
     },
     // how do I know that these will happen in order?
+    // TODO change all pixelupdate to update
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
-      pendingUserUpdates.push(pixelUpdate);
+      pendingUserUpdates.set(pixelUpdate.guid, pixelUpdate);
 
       // TODO can't send until join picture response received
       socket.emit('client_to_server_udpate', pixelUpdate); // , () => {
-      // TODO use uuid
       // console.log('ack emit client_to_server_udpate');
       // pendingUserUpdates.shift();
 
