@@ -1,6 +1,6 @@
 import {Raster} from 'dwf-3-raster-tjb';
 import {v4 as uuidv4} from 'uuid';
-import { PixelUpdateProps } from './pixel_update';
+import { PixelUpdate } from './pixel_update';
 
 export enum UpdateTypeEnum {
     PixelUpdate = 0
@@ -28,19 +28,18 @@ export abstract class Update {
     // changing the socket io parser from the default, basically, have all the functions
     // in a static map, and access them via an enum assigned in the props
     private static readonly updateRasterFuncs: Map<UpdateTypeEnum, (raster: Raster, props: unknown) => void> = new Map();
-    public static updateRaster(raster: Raster, updateType: UpdateTypeEnum, updateProps: unknown) {
+    public static updateRaster(raster: Raster, update: Update) {
         try {
             // TODO extract updateType here , maybe it can be private
-            this.updateRasterFuncs.get(updateType)!(raster, updateProps);
+            this.updateRasterFuncs.get(update.updateType)!(raster, update);
         } catch (e: unknown) {
             console.error(`issue calling updateRaster, error is: ${e}`);
         }
     }
 
     static {
-        console.log('TJTAG start of static');
         Update.updateRasterFuncs.set(UpdateTypeEnum.PixelUpdate, (raster: Raster, props: unknown) => {
-            const typedProps = props as PixelUpdateProps;
+            const typedProps = props as PixelUpdate;
 
             const imageDataOffset = 4 * (typedProps.y * raster.width + typedProps.x);
             const red = Update.clamp(typedProps.red);
@@ -53,7 +52,6 @@ export abstract class Update {
 
             // what if we did this as several blocks of arrays? for parallization?
         });
-        console.log('TJTAG end of static');
     }
 
     private static clamp(val: number, min = 0, max = 255): number {

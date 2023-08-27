@@ -130,7 +130,7 @@ export class TrackedPicture {
 //                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
                 // TODO getting an error once here on first update i thin
                 // yes, crashing here and not actually testing delay, but seems to at least draw quickly
-                Update.updateRaster(this.raster, nextUpdate.updateType, nextUpdate);
+                Update.updateRaster(this.raster, nextUpdate);
                 this.dirty = true;
             }
         });
