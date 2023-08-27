@@ -16,9 +16,7 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(ENDPOINT);
 export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
   getCurrentPicture(): PictureDatabaseShape;
-  // TODO probably can remove this from interface
   getCurrentRaster(): Raster;
-  getDisplayRaster(): Raster;
   handleUserUpdate(pixelUpdate: PixelUpdate): void;
 }
 
@@ -30,16 +28,9 @@ export const useCurrentPictureService = (): ICurrentPictureService =>
 
 const CurrentPictureService = ({ children }: any) => {
   let currentPicture: PictureDatabaseShape;
-
-  // keep track of two rasters
-  // one to show user updates immediately
-  // one to handle race condition
   let currentRaster: Raster;
-  let displayRaster: Raster;
 
-  // hmmm, reminds me of situations that resulted in a queue previously
-  let awaitingAck = false;
-  let outOfOrderUpdates: PixelUpdate[] = [];
+  let pendingUserUpdates: PixelUpdate[] = [];
 
   socket.on('connect', () => {
     setupListeners();
@@ -63,17 +54,12 @@ const CurrentPictureService = ({ children }: any) => {
         this.leaveCurrentPicture();
       }
       currentPicture = picture;
-      this.joinCurrentPicture();
       setupListeners();
+      this.joinCurrentPicture();
     },
     setCurrentRaster(joinPictureResponse: JoinPictureResponse): void {
       // this is private... ie not in the interface
       currentRaster = new Raster(
-        joinPictureResponse.width,
-        joinPictureResponse.height,
-        joinPictureResponse.data,
-      );
-      displayRaster = new Raster(
         joinPictureResponse.width,
         joinPictureResponse.height,
         joinPictureResponse.data,
@@ -97,37 +83,23 @@ const CurrentPictureService = ({ children }: any) => {
       });
     },
     getCurrentRaster(): Raster {
-      return currentRaster;
-    },
-    getDisplayRaster(): Raster {
-        return displayRaster;
+      const copy = currentRaster.copy();
+      pendingUserUpdates.forEach(u => copy.handlePixelUpdate(u));
+      return copy;
     },
     handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
       currentRaster.handlePixelUpdate(pixelUpdate);
-      displayRaster.handlePixelUpdate(pixelUpdate);
-
-      if (awaitingAck) {
-        outOfOrderUpdates.push(pixelUpdate);
-      }
     },
     // how do I know that these will happen in order?
     handleUserUpdate(pixelUpdate: PixelUpdate): void {
+      pendingUserUpdates.push(pixelUpdate);
+
       // TODO can't send until join picture response received
-      displayRaster.handlePixelUpdate(pixelUpdate);
-      awaitingAck = true;
       socket.emit('client_to_server_udpate', pixelUpdate, () => {
             console.log('ack emit client_to_server_udpate');
-            if (outOfOrderUpdates.length > 0) {
-                // we are out of sync
-                displayRaster = currentRaster.copy();
-            }
-
-            // reset synchronization mechanism
-            awaitingAck = false;
-            outOfOrderUpdates = [];
-            
+            pendingUserUpdates.shift();
 
             // this means we have to ack but not broadcast back to sending client
             // instead, could we just send to everyone?
@@ -226,6 +198,8 @@ const CurrentPictureService = ({ children }: any) => {
             // so display raster is ephemeral
             // it is a copy of current raster (all received) plus all pending updates
             // i think ordering means i don't have to worry about guid, just queue.shift when i get an ack
+            // i'd rather do gui - TODO
+            // ... doing that next
       });
     },
   };
