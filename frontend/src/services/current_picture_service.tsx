@@ -85,13 +85,13 @@ const CurrentPictureService = ({ children }: any) => {
     },
     getCurrentRaster(): Raster {
       const copy = currentRaster.copy();
-      pendingUserUpdates.forEach((u) => u.updateRaster(copy));
+      pendingUserUpdates.forEach((u) => Update.updateRaster(copy, u.updateType, u));
       return copy;
     },
     handleReceivedUpdate(update: Update): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
-      update.updateRaster(currentRaster);
+      Update.updateRaster(currentRaster, update.updateType, update);
       pendingUserUpdates.delete(update.guid);
     },
     // TODO change all pixelupdate to update

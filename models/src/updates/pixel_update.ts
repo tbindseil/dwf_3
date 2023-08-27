@@ -1,5 +1,4 @@
-import {Raster} from 'dwf-3-raster-tjb';
-import { Update, UpdateProps } from './update';
+import { Update, UpdateProps, UpdateTypeEnum } from './update';
 
 // Ok
 // this is getting weird, if i send Update,
@@ -43,7 +42,7 @@ export class PixelUpdate extends Update {
     public readonly blue: number;
 
     public constructor(props: PixelUpdateProps) {
-        super(props);
+        super(UpdateTypeEnum.PixelUpdate, props);
         this.x = props.x;
         this.y = props.y;
         this.red = props.red;
@@ -51,26 +50,4 @@ export class PixelUpdate extends Update {
         this.blue = props.blue;
     }
 
-    public updateRaster(raster: Raster) {
-        const imageDataOffset = 4 * (this.y * raster.width + this.x);
-        const red = this.clamp(this.red);
-        const green = this.clamp(this.green);
-        const blue = this.clamp(this.blue);
-
-        raster.getBuffer()[imageDataOffset] = red;
-        raster.getBuffer()[imageDataOffset + 1] = green;
-        raster.getBuffer()[imageDataOffset + 2] = blue;
-
-        // what if we did this as several blocks of arrays? for parallization?
-    }
-
-    private clamp(val: number, min = 0, max = 255): number {
-        if (val < min) {
-            return min;
-        } else if (val > max) {
-            return max;
-        } else {
-            return val;
-        }
-    }
 }

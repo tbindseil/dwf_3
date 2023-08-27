@@ -117,7 +117,7 @@ export class TrackedPicture {
                 // nextUpdate?.addFuncs();
                 console.log(`TJTAG next update is: ${nextUpdate}`);
                 console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
-                console.log(`TJTAG nextupdates func is: ${nextUpdate?.updateRaster}`);
+                // console.log(`TJTAG nextupdates func is: ${Update.updateRaster(raster, updateType, updateProps)}`);
                 if (!nextUpdate) {
                     console.error(
                         'nextUpdate is undefined, something went horribly wrong'
@@ -130,7 +130,7 @@ export class TrackedPicture {
 //                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
                 // TODO getting an error once here on first update i thin
                 // yes, crashing here and not actually testing delay, but seems to at least draw quickly
-                nextUpdate.updateRaster(this.raster);
+                Update.updateRaster(this.raster, nextUpdate.updateType, nextUpdate);
                 this.dirty = true;
             }
         });
