@@ -53,6 +53,9 @@ function Canvas() {
       255,
       255,
     );
+    console.log('TJTAG is it a function when seinding it?');
+    console.log(`${pixelUpdate.updateRaster}`);
+    console.log('TJTAG done');
 
     currentPictureService.handleUserUpdate(pixelUpdate);
   }, []);

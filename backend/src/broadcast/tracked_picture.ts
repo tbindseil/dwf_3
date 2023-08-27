@@ -116,15 +116,20 @@ export class TrackedPicture {
                 const nextUpdate = this.pendingUpdates.shift();
                 console.log(`TJTAG next update is: ${nextUpdate}`);
                 console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
+                console.log(`TJTAG nextupdates func is: ${nextUpdate?.updateRaster}`);
                 if (!nextUpdate) {
                     console.error(
                         'nextUpdate is undefined, something went horribly wrong'
                     );
                     throw Error('stack trace');
                 }
+                const newNextUpdate = new PixelUpdate(nextUpdate.filename, nextUpdate.createdBy, nextUpdate.x, nextUpdate.y, nextUpdate.red, nextUpdate.green, nextUpdate.blue);
+                console.log(`TJTAG newNext update is: ${newNextUpdate}`);
+                console.log(`TJTAG newNext update stringiftied is: ${JSON.stringify(newNextUpdate)}`);
+                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
                 // TODO getting an error once here on first update i thin
                 // yes, crashing here and not actually testing delay, but seems to at least draw quickly
-                nextUpdate.updateRaster(this.raster);
+                newNextUpdate.updateRaster(this.raster);
                 this.dirty = true;
             }
         });
