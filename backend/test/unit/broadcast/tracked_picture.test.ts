@@ -3,6 +3,7 @@ import { Priority, Queue, Job } from '../../../src/broadcast/queue';
 import { TrackedPicture } from '../../../src/broadcast/tracked_picture';
 import PictureAccessor from '../../../src/picture_accessor/picture_accessor';
 import { BroadcastClient } from '../../broadcast/broadcast_client';
+import { PixelUpdate } from 'dwf-3-models-tjb';
 
 describe('TrackedPicture Tests', () => {
     const filename = 'filename';
@@ -10,15 +11,7 @@ describe('TrackedPicture Tests', () => {
     const socketId1 = 'socketId1';
     const socketId2 = 'socketId2';
     const copiedRaster = 'copiedRaster';
-    const pixelUpdate = {
-        filename: filename,
-        createdBy: 'tj',
-        x: 4,
-        y: 20,
-        red: 255,
-        green: 255,
-        blue: 255,
-    };
+    const pixelUpdate = new PixelUpdate(filename, 'tj', 4, 20, 255, 255, 255);
 
     const mockHandleUpdate1 = jest.fn();
     const mockInitializeRaster1 = jest.fn();
@@ -149,7 +142,7 @@ describe('TrackedPicture Tests', () => {
         await writeRaster();
 
         pushedJob = (): Promise<void> => {
-            return new Promise(r => r());
+            return new Promise((r) => r());
         };
 
         await writeRaster();
@@ -165,9 +158,9 @@ describe('TrackedPicture Tests', () => {
 
         let resetFunctionCalled = false;
         pushedJob = (): Promise<void> => {
-            return new Promise(r => {
+            return new Promise((r) => {
                 resetFunctionCalled = true;
-                r()
+                r();
             });
         };
 
@@ -198,7 +191,7 @@ describe('TrackedPicture Tests', () => {
     });
 
     const removeClient = async () => {
-        trackedPicture.enqueueRemoveClient(priority, socketId1)
+        trackedPicture.enqueueRemoveClient(priority, socketId1);
         await pushedJob();
     };
 
@@ -207,7 +200,10 @@ describe('TrackedPicture Tests', () => {
         await pushedJob();
     };
 
-    const addClient = async (broadcastClient = mockBroadcastClient1, socketId: string = socketId1) => {
+    const addClient = async (
+        broadcastClient = mockBroadcastClient1,
+        socketId: string = socketId1
+    ) => {
         trackedPicture.enqueueAddClient(priority, socketId, broadcastClient);
         await pushedJob();
     };
@@ -220,5 +216,5 @@ describe('TrackedPicture Tests', () => {
     const updateLocalRaster = async () => {
         trackedPicture.enqueueUpdateLocalRaster(priority);
         await pushedJob();
-    }
+    };
 });

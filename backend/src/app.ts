@@ -107,11 +107,8 @@ io.on(
                 );
             }
         );
-        socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate, callback: () => void) => {
+        socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
             broadcastMediator.broadcastUpdate(pixelUpdate, socket.id);
-
-            // TOOD put this in broadcast client?
-            callback();
         });
 
         socket.on(

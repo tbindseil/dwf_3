@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPictureService } from '../services/current_picture_service';
 import { blotRasterToCanvas } from './utils';
+import { PixelUpdate } from 'dwf-3-models-tjb';
 
 function Canvas() {
   const [width, setWidth] = useState(0);
@@ -45,15 +46,15 @@ function Canvas() {
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
     const y = event.pageY - (canvasRef.current?.offsetTop ?? 0);
     // update current picture via current picture service
-    const pixelUpdate = {
-      filename: picture.filename,
-      createdBy: 'tj', // TODO usernames
-      x: x,
-      y: y,
-      red: 255,
-      green: 255,
-      blue: 255,
-    };
+    const pixelUpdate = new PixelUpdate(
+      picture.filename,
+      'tj', // TODO usernames
+      x,
+      y,
+      255,
+      255,
+      255,
+    );
 
     currentPictureService.handleUserUpdate(pixelUpdate);
   }, []);

@@ -274,7 +274,7 @@ describe('TJTAG broadcast test', () => {
     //
     //    ^ this suffers from the same issues as 1.5, namely, the update ack is delayed enough that
     //    its a bad user experience
-    //   
+    //
     // 1.5 client only updates the raster upon receiving updates from the server
     //       this implies that clients dont update upon doing something and send it to the server instead
     //       and that the server doesn't filter a client's own updates
@@ -302,7 +302,6 @@ describe('TJTAG broadcast test', () => {
     //
     //      its bad...
 
-
     //
     // 2. client holds a copy of raster at last acked update
     //      if an update comes in that is both from after the last acked update and before any unacked updates
@@ -314,7 +313,7 @@ describe('TJTAG broadcast test', () => {
     //
     //    I thikn this is the best solution because
     //    the user will mostly experience drawing as if by themselves
-    //    and only 
+    //    and only
     //
     // 3. this is kinda like out there but what if we displayed the update with a 50/50 alpha component, then updated it to full once acked
     // i think it will require 2, so lets focus on that first
@@ -390,15 +389,15 @@ describe('TJTAG broadcast test', () => {
 
     const makeRandomUpdate = (clientNum: number): Update => {
         const waitTimeMS = randomNumberBetweenZeroAnd(100);
-        const pixelUpdate = {
-            x: randomNumberBetweenZeroAnd(PICTURE_WIDTH),
-            y: randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-            red: randomNumberBetweenZeroAnd(255),
-            green: randomNumberBetweenZeroAnd(255),
-            blue: randomNumberBetweenZeroAnd(255),
-            filename: testFilename,
-            createdBy: `client_${clientNum}`,
-        };
+        const pixelUpdate = new PixelUpdate(
+            testFilename,
+            `client_${clientNum}`,
+            randomNumberBetweenZeroAnd(PICTURE_WIDTH),
+            randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
+            randomNumberBetweenZeroAnd(255),
+            randomNumberBetweenZeroAnd(255),
+            randomNumberBetweenZeroAnd(255)
+        );
 
         return {
             waitTimeMS,

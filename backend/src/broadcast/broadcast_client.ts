@@ -30,7 +30,11 @@ export class BroadcastClient {
     public initializeRaster(raster: Raster): void {
         this.socket.emit(
             'join_picture_response',
-            raster.toJoinPictureResponse()
+            {
+                width: raster.width,
+                height: raster.height,
+                data: raster.getBuffer()
+            }
         );
     }
 

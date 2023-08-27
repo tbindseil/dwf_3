@@ -116,7 +116,7 @@ export class TrackedPicture {
                     );
                     throw Error('stack trace');
                 }
-                this.raster.handlePixelUpdate(nextUpdate);
+                nextUpdate.updateRaster(this.raster);
                 this.dirty = true;
             }
         });
