@@ -209,6 +209,19 @@ const CurrentPictureService = ({ children }: any) => {
             // TJTAG consider below..
             // hmm, maybe on other updates, we just copy the currentRaster to the displayRaster everytime we get an update from server?
             // pretty simple, possibly time consuming
+
+            // so,
+            // sendUserUpdate adds guid to pending_user_updates_map, initializes outOfSync to false
+            // upon receiving update
+            //   if (update.guid not in pending_user_updates_map) {
+            //     pending_user_updates_map.foreach(u => u.outOfSync = true)
+            //
+            //
+            // hmm i guess i don't quite get it
+            // I want to copy on get display raster
+            // ... as some kind of compromise between updating upon every user update ack and only the last user update ack
+            // so when the getDisplayRaster is called, we want it to be all received updates with unacknowledged user updates on top
+            // which means we also need to return user updates back in addition to ack. Well that part not necessarily
       });
     },
   };
