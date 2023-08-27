@@ -11,7 +11,18 @@ describe('TrackedPicture Tests', () => {
     const socketId1 = 'socketId1';
     const socketId2 = 'socketId2';
     const copiedRaster = 'copiedRaster';
-    const pixelUpdate = new PixelUpdate(filename, 'tj', 4, 20, 255, 255, 255);
+
+    const mockUpdateRaster = jest.fn();
+    const pixelUpdate = {
+        filename: filename,
+        createdBy: 'tj',
+        x: 4,
+        y: 20,
+        red: 255,
+        green: 255,
+        blue: 255,
+        updateRaster: mockUpdateRaster
+    } as unknown as PixelUpdate;
 
     const mockHandleUpdate1 = jest.fn();
     const mockInitializeRaster1 = jest.fn();
@@ -29,9 +40,11 @@ describe('TrackedPicture Tests', () => {
 
     const mockCopy = jest.fn();
     const mockHandlePixelUpdate = jest.fn();
+    const mockGetBuffer = jest.fn();
     const mockRaster = {
         copy: mockCopy,
         handlePixelUpdate: mockHandlePixelUpdate,
+        getBuffer: mockGetBuffer
     } as unknown as Raster;
 
     let pushedJob: Job;
@@ -59,6 +72,7 @@ describe('TrackedPicture Tests', () => {
         mockCopy.mockClear();
         mockCopy.mockReturnValue(copiedRaster);
         mockHandlePixelUpdate.mockClear();
+        mockGetBuffer.mockClear();
 
         mockPush.mockClear();
         mockPush.mockImplementation((priority: Priority, job: Job) => {

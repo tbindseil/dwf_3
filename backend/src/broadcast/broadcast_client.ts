@@ -39,9 +39,7 @@ export class BroadcastClient {
     }
 
     public handleUpdate(pixelUpdate: PixelUpdate, fromSocketID: string): void {
-        // if (fromSocketID != this.socket.id) {
-            this.socket.emit('server_to_client_update', pixelUpdate);
-        // }
+        this.socket.emit('server_to_client_update', pixelUpdate);
     }
 
     public close(): void {

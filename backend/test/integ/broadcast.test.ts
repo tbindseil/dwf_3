@@ -32,7 +32,7 @@ server.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
-describe('TJTAG broadcast test', () => {
+describe('broadcast test', () => {
     let testFilename: string;
     const testPicture = {
         name: 'name',
