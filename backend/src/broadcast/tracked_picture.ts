@@ -1,6 +1,6 @@
 import { Priority, Queue } from './queue';
 import { Raster } from 'dwf-3-raster-tjb';
-import { PixelUpdate } from 'dwf-3-models-tjb';
+import { PixelUpdate, Update } from 'dwf-3-models-tjb';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { BroadcastClient } from './broadcast_client';
 
@@ -21,7 +21,7 @@ export class TrackedPicture {
     private raster?: Raster;
 
     // these are updates that have been broadcast but haven't been applied to the local copy of the raster
-    pendingUpdates: PixelUpdate[] = [];
+    pendingUpdates: Update[] = [];
     public constructor(
         queue: Queue,
         pictureAccessor: PictureAccessor,
@@ -94,17 +94,17 @@ export class TrackedPicture {
 
     public enqueueBroadcastUpdate(
         priority: Priority,
-        pixelUpdate: PixelUpdate,
+        update: Update,
         sourceSocketId: string
     ) {
         this.workQueue.push(priority, async () => {
 
             await new Promise((r) => setTimeout(r, 200));
             this.idToClientMap.forEach((client: BroadcastClient) => {
-                client.handleUpdate(pixelUpdate, sourceSocketId);
+                client.handleUpdate(update, sourceSocketId);
             });
 
-            this.pendingUpdates.push(pixelUpdate);
+            this.pendingUpdates.push(update);
             console.log(`TJTAG pushing to pendingUpdates and size is: ${this.pendingUpdates.length}`);
         });
     }
@@ -114,7 +114,7 @@ export class TrackedPicture {
             if (this.raster) {
                 console.log(`TJTAG about to shift pendingUpdates and size is: ${this.pendingUpdates.length}`);
                 const nextUpdate = this.pendingUpdates.shift();
-                nextUpdate?.addFuncs();
+                // nextUpdate?.addFuncs();
                 console.log(`TJTAG next update is: ${nextUpdate}`);
                 console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
                 console.log(`TJTAG nextupdates func is: ${nextUpdate?.updateRaster}`);
@@ -124,13 +124,13 @@ export class TrackedPicture {
                     );
                     throw Error('stack trace');
                 }
-                const newNextUpdate = new PixelUpdate(nextUpdate.filename, nextUpdate.createdBy, nextUpdate.x, nextUpdate.y, nextUpdate.red, nextUpdate.green, nextUpdate.blue);
-                console.log(`TJTAG newNext update is: ${newNextUpdate}`);
-                console.log(`TJTAG newNext update stringiftied is: ${JSON.stringify(newNextUpdate)}`);
-                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
+//                const newNextUpdate = new PixelUpdate(nextUpdate.filename, nextUpdate.createdBy, nextUpdate.x, nextUpdate.y, nextUpdate.red, nextUpdate.green, nextUpdate.blue);
+//                console.log(`TJTAG newNext update is: ${newNextUpdate}`);
+//                console.log(`TJTAG newNext update stringiftied is: ${JSON.stringify(newNextUpdate)}`);
+//                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
                 // TODO getting an error once here on first update i thin
                 // yes, crashing here and not actually testing delay, but seems to at least draw quickly
-                newNextUpdate.updateRaster(this.raster);
+                nextUpdate.updateRaster(this.raster);
                 this.dirty = true;
             }
         });

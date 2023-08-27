@@ -88,18 +88,18 @@ const CurrentPictureService = ({ children }: any) => {
       pendingUserUpdates.forEach((u) => u.updateRaster(copy));
       return copy;
     },
-    handleReceivedUpdate(pixelUpdate: PixelUpdate): void {
+    handleReceivedUpdate(update: Update): void {
       // what if I get an update before I get the initial raster? need to buffer it i guess
       // ^ i think that's impossible thanks to the priority queue nature of the broadcast mediator
-      pixelUpdate.updateRaster(currentRaster);
-      pendingUserUpdates.delete(pixelUpdate.guid);
+      update.updateRaster(currentRaster);
+      pendingUserUpdates.delete(update.guid);
     },
     // TODO change all pixelupdate to update
-    handleUserUpdate(pixelUpdate: PixelUpdate): void {
-      pendingUserUpdates.set(pixelUpdate.guid, pixelUpdate);
+    handleUserUpdate(update: Update): void {
+      pendingUserUpdates.set(update.guid, update);
 
       // TODO can't send until join picture response received
-      socket.emit('client_to_server_udpate', pixelUpdate); // , () => {
+      socket.emit('client_to_server_udpate', update); // , () => {
     },
   };
 

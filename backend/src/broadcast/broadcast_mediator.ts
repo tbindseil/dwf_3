@@ -5,6 +5,7 @@ import {
     PixelUpdate,
     ServerToClientEvents,
     SocketData,
+    Update,
 } from 'dwf-3-models-tjb';
 import { Socket } from 'socket.io';
 import { Priority, Queue } from './queue';
@@ -100,12 +101,12 @@ export default class BroadcastMediator {
         }
     }
 
-    public broadcastUpdate(pixelUpdate: PixelUpdate, sourceSocketId: string) {
-        const trackedPicture = this.trackedPictures.get(pixelUpdate.filename);
+    public broadcastUpdate(update: Update, sourceSocketId: string) {
+        const trackedPicture = this.trackedPictures.get(update.filename);
         if (trackedPicture) {
             trackedPicture.enqueueBroadcastUpdate(
                 this.BROADCAST_UPDATE_PRIORITY,
-                pixelUpdate,
+                update,
                 sourceSocketId
             );
             trackedPicture.enqueueUpdateLocalRaster(

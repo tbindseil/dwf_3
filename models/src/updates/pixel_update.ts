@@ -21,6 +21,12 @@ import { Update, UpdateProps } from './update';
 // but even if so, how to create a new SpecificUpdate? the functions are gone
 //
 // so i just need to make sure i get PixelUpdate fields when its Update
+//
+// so it does respect polymorphism when sending fields, ie, a PixelUpdate
+// broadcast to a typed broadcast for Update will astill have all these fields
+//
+// so, I think i will utilize an enum in each as an index into a static array of funcs
+// (think super(UpdateTypeEnum.SpecificEnum, filename, createdBy)
 export interface PixelUpdateProps extends UpdateProps {
     x: number;
     y: number;

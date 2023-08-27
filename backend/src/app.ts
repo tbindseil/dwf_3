@@ -17,6 +17,7 @@ import {
     InterServerEvents,
     SocketData,
     LeavePictureRequest,
+    Update,
 } from 'dwf-3-models-tjb';
 
 import { myErrorHandler } from './middleware/error_handler';
@@ -107,8 +108,8 @@ io.on(
                 );
             }
         );
-        socket.on('client_to_server_udpate', (pixelUpdate: PixelUpdate) => {
-            broadcastMediator.broadcastUpdate(pixelUpdate, socket.id);
+        socket.on('client_to_server_udpate', (update: Update) => {
+            broadcastMediator.broadcastUpdate(update, socket.id);
         });
 
         socket.on(

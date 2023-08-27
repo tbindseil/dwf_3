@@ -5,6 +5,7 @@ import {
     PixelUpdate,
     ServerToClientEvents,
     SocketData,
+    Update,
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
@@ -38,8 +39,8 @@ export class BroadcastClient {
         );
     }
 
-    public handleUpdate(pixelUpdate: PixelUpdate, fromSocketID: string): void {
-        this.socket.emit('server_to_client_update', pixelUpdate);
+    public handleUpdate(update: Update, fromSocketID: string): void {
+        this.socket.emit('server_to_client_update', update);
     }
 
     public close(): void {
