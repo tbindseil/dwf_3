@@ -415,6 +415,6 @@ describe('broadcast test', () => {
 
     const debugEnabled = false;
     const debug = (msg: string, force = false) => {
-        if (force || debugEnabled) console.log(`TJTAG: ${msg}`);
+        if (force || debugEnabled) console.log(msg);
     };
 });

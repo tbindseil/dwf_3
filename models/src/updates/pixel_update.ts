@@ -27,8 +27,6 @@ export class PixelUpdate extends Update {
         raster.getBuffer()[imageDataOffset + 1] = green;
         raster.getBuffer()[imageDataOffset + 2] = blue;
 
-        console.log(`TJTAG updated at ${performance.now()}`);
-
         // what if we did this as several blocks of arrays? for parallization?
     }
 

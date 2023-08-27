@@ -40,8 +40,6 @@ function Canvas() {
   }, []);
 
   const click = useCallback((event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-    console.log(`TJTAG clicked at ${performance.now()}`);
-
     // for now just gonna do white pixels
     const x = event.pageX - (canvasRef.current?.offsetLeft ?? 0);
     const y = event.pageY - (canvasRef.current?.offsetTop ?? 0);
