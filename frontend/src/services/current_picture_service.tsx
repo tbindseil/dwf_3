@@ -200,6 +200,18 @@ const CurrentPictureService = ({ children }: any) => {
             // i think ordering means i don't have to worry about guid, just queue.shift when i get an ack
             // i'd rather do gui - TODO
             // ... doing that next
+            // pros and cons
+            // pros
+            // each update is tagged
+            // dont need to ack
+            // cons
+            // need to assign
+            //
+            // but i think i can change it to a class and initialize it in the constructor
+            // then, that is a stepping stone for the next thing, which is different updates
+            // becasue each update can have an updateRaster method (taking in raster)
+            //
+            // so here we go!
       });
     },
   };
