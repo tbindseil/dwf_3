@@ -29,7 +29,7 @@ export const useCurrentPictureService = (): ICurrentPictureService =>
 
 const CurrentPictureService = ({ children }: any) => {
   let currentPicture: PictureDatabaseShape;
-  let currentRaster: Raster;
+  let currentRaster: Raster = new Raster(0, 0, new Uint8ClampedArray());
 
   const pendingUserUpdates = new Map<string, Update>();
 

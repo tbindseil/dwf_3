@@ -98,24 +98,32 @@ export class TrackedPicture {
         sourceSocketId: string
     ) {
         this.workQueue.push(priority, async () => {
+
+            await new Promise((r) => setTimeout(r, 200));
             this.idToClientMap.forEach((client: BroadcastClient) => {
                 client.handleUpdate(pixelUpdate, sourceSocketId);
             });
 
             this.pendingUpdates.push(pixelUpdate);
+            console.log(`TJTAG pushing to pendingUpdates and size is: ${this.pendingUpdates.length}`);
         });
     }
 
     public enqueueUpdateLocalRaster(priority: Priority) {
         this.workQueue.push(priority, async () => {
             if (this.raster) {
+                console.log(`TJTAG about to shift pendingUpdates and size is: ${this.pendingUpdates.length}`);
                 const nextUpdate = this.pendingUpdates.shift();
+                console.log(`TJTAG next update is: ${nextUpdate}`);
+                console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
                 if (!nextUpdate) {
                     console.error(
                         'nextUpdate is undefined, something went horribly wrong'
                     );
                     throw Error('stack trace');
                 }
+                // TODO getting an error once here on first update i thin
+                // yes, crashing here and not actually testing delay, but seems to at least draw quickly
                 nextUpdate.updateRaster(this.raster);
                 this.dirty = true;
             }
