@@ -1,3 +1,4 @@
+import {Raster} from 'dwf-3-raster-tjb';
 import { Update } from './update';
 
 export class PixelUpdate extends Update {
