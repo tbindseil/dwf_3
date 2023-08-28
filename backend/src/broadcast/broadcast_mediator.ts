@@ -2,7 +2,6 @@ import PictureAccessor from '../picture_accessor/picture_accessor';
 import {
     ClientToServerEvents,
     InterServerEvents,
-    PixelUpdate,
     ServerToClientEvents,
     SocketData,
     Update,

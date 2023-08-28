@@ -1,7 +1,6 @@
 import {
   PictureDatabaseShape,
   JoinPictureResponse,
-  PixelUpdate,
   ServerToClientEvents,
   ClientToServerEvents,
   Update,
@@ -18,7 +17,7 @@ export interface ICurrentPictureService {
   setCurrentPicture(picture: PictureDatabaseShape): void;
   getCurrentPicture(): PictureDatabaseShape;
   getCurrentRaster(): Raster;
-  handleUserUpdate(pixelUpdate: PixelUpdate): void;
+  handleUserUpdate(update: Update): void;
 }
 
 export const CurrentPictureServiceContext = Contextualizer.createContext(
@@ -94,7 +93,6 @@ const CurrentPictureService = ({ children }: any) => {
       Update.updateRaster(currentRaster, update);
       pendingUserUpdates.delete(update.uuid);
     },
-    // TODO change all pixelupdate to update
     handleUserUpdate(update: Update): void {
       pendingUserUpdates.set(update.uuid, update);
 

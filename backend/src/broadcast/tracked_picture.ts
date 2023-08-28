@@ -1,6 +1,6 @@
 import { Priority, Queue } from './queue';
 import { Raster } from 'dwf-3-raster-tjb';
-import { PixelUpdate, Update } from 'dwf-3-models-tjb';
+import { Update } from 'dwf-3-models-tjb';
 import PictureAccessor from '../picture_accessor/picture_accessor';
 import { BroadcastClient } from './broadcast_client';
 
@@ -105,31 +105,19 @@ export class TrackedPicture {
             });
 
             this.pendingUpdates.push(update);
-            console.log(`TJTAG pushing to pendingUpdates and size is: ${this.pendingUpdates.length}`);
         });
     }
 
     public enqueueUpdateLocalRaster(priority: Priority) {
         this.workQueue.push(priority, async () => {
             if (this.raster) {
-                console.log(`TJTAG about to shift pendingUpdates and size is: ${this.pendingUpdates.length}`);
                 const nextUpdate = this.pendingUpdates.shift();
-                // nextUpdate?.addFuncs();
-                console.log(`TJTAG next update is: ${nextUpdate}`);
-                console.log(`TJTAG next update stringiftied is: ${JSON.stringify(nextUpdate)}`);
-                // console.log(`TJTAG nextupdates func is: ${Update.updateRaster(raster, updateType, updateProps)}`);
                 if (!nextUpdate) {
                     console.error(
                         'nextUpdate is undefined, something went horribly wrong'
                     );
                     throw Error('stack trace');
                 }
-//                const newNextUpdate = new PixelUpdate(nextUpdate.filename, nextUpdate.createdBy, nextUpdate.x, nextUpdate.y, nextUpdate.red, nextUpdate.green, nextUpdate.blue);
-//                console.log(`TJTAG newNext update is: ${newNextUpdate}`);
-//                console.log(`TJTAG newNext update stringiftied is: ${JSON.stringify(newNextUpdate)}`);
-//                console.log(`TJTAG newNextupdates func is: ${newNextUpdate?.updateRaster}`);
-                // TODO getting an error once here on first update i thin
-                // yes, crashing here and not actually testing delay, but seems to at least draw quickly
                 Update.updateRaster(this.raster, nextUpdate);
                 this.dirty = true;
             }

@@ -2,7 +2,6 @@ import { Socket } from 'socket.io';
 import {
     ClientToServerEvents,
     InterServerEvents,
-    PixelUpdate,
     ServerToClientEvents,
     SocketData,
     Update,

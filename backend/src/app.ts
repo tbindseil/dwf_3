@@ -10,7 +10,6 @@ import { GetPictures, PostPicture } from './handlers/index';
 
 import {
     JoinPictureRequest,
-    PixelUpdate,
     Picture,
     ClientToServerEvents,
     ServerToClientEvents,

@@ -21,7 +21,15 @@ describe('BroadcastMediator Tests', () => {
     const filename = 'filename';
 
     // TODO move all these things (constants, utilities, mocks?) to one file
-    const pixelUpdate = new PixelUpdate(filename, 'tj', 4, 20, 255, 255, 255);
+    const pixelUpdate = new PixelUpdate({
+        filename: filename,
+        createdBy: 'tj',
+        x: 4,
+        y: 20,
+        red: 255,
+        green: 255,
+        blue: 255
+    });
 
     const mockSocket1 = {
         id: '1',
@@ -127,7 +135,6 @@ describe('BroadcastMediator Tests', () => {
         broadcastMediator.addClient(filename, mockSocket1);
         broadcastMediator.addClient(filename, mockSocket2);
         broadcastMediator.broadcastUpdate(pixelUpdate, mockSocket1.id);
-        // verify(mockedTrackedPicture.enqueueBroadcastUpdate(Priority.THREE, pixelUpdate, mockSocket1.id)).called();
         verify(
             mockedTrackedPicture.enqueueBroadcastUpdate(
                 Priority.FOUR,
