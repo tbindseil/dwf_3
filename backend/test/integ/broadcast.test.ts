@@ -324,6 +324,33 @@ describe('TJTAG broadcast test', () => {
     // handleUserUpdate = () => {
     //   ...
     // }
+    //
+    // what i ended up doing was pretty sweet actually
+    //
+    // 1 broadcast all updates to all clients, namely make sure a client is returned its own update in standard order
+    // 2 client keeps a raster that has all received updates
+    // 3 client tracks all non received user updates (in order they were applied)
+    // 4 when client asks for current raster, the raster from step 2 is first copied, and then has the updates from 3 applied. then its returned
+    // 5 when a client recieves its own update, it removes it from pending
+    //
+    // now we can draw pending updates a certain flashing way, maybe bliniking
+    //
+    // ok, keep all clients open till the very end and make sure they all end up with the same updates
+    // works now because user updates are sent, and because and.....
+    //
+    // wait ...
+    //
+    // i need to track the picture becuase they could join late for the early updates
+    //
+    //
+    //
+    //
+    // and really i ought to have the picture read so i can verify if it is good
+    //
+    // basically, a lot of the interesting stuff is handled in the client now
+    // and we just have to make sure broadcast order is maintained (should be easy thanks
+    // to tcp) and that the order that is broadcast is the same as the order that is written.
+    // this should be easy too.
 
     const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
