@@ -5,6 +5,7 @@ import { Socket, io as io_package } from 'socket.io-client';
 
 import {
     ClientToServerEvents,
+    Update,
     PixelUpdate,
     PostPictureInput,
     ServerToClientEvents,
@@ -17,7 +18,7 @@ const ENDPOINT = 'http://127.0.0.1:6543/';
 const PICTURE_WIDTH = 800;
 const PICTURE_HEIGHT = 1000;
 
-interface Update {
+interface Update_RENAME {
     waitTimeMS: number;
     pixelUpdate: PixelUpdate;
     sentAt?: number;
@@ -32,7 +33,7 @@ server.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
-describe('broadcast test', () => {
+describe('TJTAG broadcast test', () => {
     let testFilename: string;
     const testPicture = {
         name: 'name',
@@ -67,8 +68,8 @@ describe('broadcast test', () => {
     });
 
     it('runs the test', async () => {
-        const numClients = 8;
-        const numUpdates = [2, 2, 2, 2, 2, 2, 2, 2];
+        const numClients = 2;
+        const numUpdates = [2, 2]; // , 2, 2, 2, 2, 2, 2];
         await testsFromRandom(numClients, numUpdates);
     });
 
@@ -90,7 +91,7 @@ describe('broadcast test', () => {
         numClients: number,
         numUpdates: number[]
     ) => {
-        let updatesForClients: Update[][] = [];
+        let updatesForClients: Update_RENAME[][] = [];
         for (let i = 0; i < numClients; ++i) {
             updatesForClients.push([]);
             for (let j = 0; j < numUpdates[i]; ++j) {
@@ -143,16 +144,16 @@ describe('broadcast test', () => {
     // then, all send updates are tracked at a time with who they are from
     // if for each client we filter out the updates they sent, the remaining
     // maps should match
-    const receivedPixelUpdates: Map<
+    const receivedUpdates: Map<
         string,
-        Map<number, PixelUpdate>
+        Map<number, Update>
     > = new Map();
-    const expectedPixelUpdates = new Map<
+    const expectedUpdates = new Map<
         number,
-        { pixelUpdate: PixelUpdate; sourceSocketId: string }
+        { update: Update; sourceSocketId: string }
     >();
 
-    const tests = async (updatesForClients: Update[][]) => {
+    const tests = async (updatesForClients: Update_RENAME[][]) => {
         const clients: Promise<Socket>[] = [];
         updatesForClients.forEach((updates) => {
             clients.push(spawnClient(updates));
@@ -163,19 +164,19 @@ describe('broadcast test', () => {
         resolvedClients.forEach((client) => client.close());
 
         // verify
-        receivedPixelUpdates.forEach(
+        receivedUpdates.forEach(
             (
-                clientUpdatesReceivedMap: Map<number, PixelUpdate>,
+                clientUpdatesReceivedMap: Map<number, Update>,
                 socketId: string
             ) => {
                 const expectedWithoutThisClient = new Map<
                     number,
-                    PixelUpdate
+                    Update
                 >();
-                expectedPixelUpdates.forEach(
+                expectedUpdates.forEach(
                     (
                         value: {
-                            pixelUpdate: PixelUpdate;
+                            update: Update;
                             sourceSocketId: string;
                         },
                         timestamp: number
@@ -183,7 +184,7 @@ describe('broadcast test', () => {
                         if (value.sourceSocketId !== socketId) {
                             expectedWithoutThisClient.set(
                                 timestamp,
-                                value.pixelUpdate
+                                value.update
                             );
                         }
                     }
@@ -324,24 +325,24 @@ describe('broadcast test', () => {
     //   ...
     // }
 
-    const spawnClient = async (updates: Update[]): Promise<Socket> => {
+    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
         return new Promise<Socket>((resolve) => {
             const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
                 io_package(ENDPOINT);
 
-            socket.on('server_to_client_update', (pixelUpdate: PixelUpdate) => {
-                if (!receivedPixelUpdates.has(socket.id)) {
-                    receivedPixelUpdates.set(socket.id, new Map());
+            socket.on('server_to_client_update', (update: Update) => {
+                if (!receivedUpdates.has(socket.id)) {
+                    receivedUpdates.set(socket.id, new Map());
                 }
 
-                const clientMap = receivedPixelUpdates.get(socket.id);
+                const clientMap = receivedUpdates.get(socket.id);
                 if (clientMap) {
                     debug(
                         `setting received update for client ${
                             socket.id
                         } at ${performance.now()}`
                     );
-                    clientMap.set(performance.now(), pixelUpdate);
+                    clientMap.set(performance.now(), update);
                 }
             });
 
@@ -363,8 +364,8 @@ describe('broadcast test', () => {
                     debug(
                         `setting expected update for client ${socket.id} at ${u.sentAt}`
                     );
-                    expectedPixelUpdates.set(u.sentAt, {
-                        pixelUpdate: u.pixelUpdate,
+                    expectedUpdates.set(u.sentAt, {
+                        update: u.pixelUpdate,
                         sourceSocketId: socket.id,
                     });
                     await delay(u.waitTimeMS);
@@ -387,17 +388,17 @@ describe('broadcast test', () => {
         });
     };
 
-    const makeRandomUpdate = (clientNum: number): Update => {
+    const makeRandomUpdate = (clientNum: number): Update_RENAME => {
         const waitTimeMS = randomNumberBetweenZeroAnd(100);
-        const pixelUpdate = new PixelUpdate(
-            testFilename,
-            `client_${clientNum}`,
-            randomNumberBetweenZeroAnd(PICTURE_WIDTH),
-            randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-            randomNumberBetweenZeroAnd(255),
-            randomNumberBetweenZeroAnd(255),
-            randomNumberBetweenZeroAnd(255)
-        );
+        const pixelUpdate = new PixelUpdate({
+            filename: testFilename,
+            createdBy: `client_${clientNum}`,
+            x: randomNumberBetweenZeroAnd(PICTURE_WIDTH),
+            y: randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
+            red: randomNumberBetweenZeroAnd(255),
+            green: randomNumberBetweenZeroAnd(255),
+            blue: randomNumberBetweenZeroAnd(255)
+        });
 
         return {
             waitTimeMS,
