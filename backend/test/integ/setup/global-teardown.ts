@@ -7,11 +7,8 @@ import { removeAllPng } from './utils';
 
 module.exports = async () => {
     const serverClosed = new Promise<void>(async (resolve) => {
-        console.log('TJTAG removing png');
         await removeAllPng();
-        console.log('TJTAG done removing png');
 
-        console.log('TJTAG destroying database');
         try {
             const knexWithoutDatabase = makeKnexWithoutDatabase();
             await knexWithoutDatabase.raw(
@@ -22,17 +19,14 @@ module.exports = async () => {
             console.log(error);
             process.exit(1);
         }
-        console.log('TJTAG done destroying database');
 
         server.close(() => {
-            console.log('TJTAG server close callback');
+            console.log('server closing');
             resolve();
         });
     });
 
-    console.log('TJTAG awaiting serverClosed promise');
     await serverClosed;
-    console.log('TJTAG done awaiting serverClosed promise');
 };
 
 //module.exports = async () => {

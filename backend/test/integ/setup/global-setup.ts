@@ -45,7 +45,7 @@ async function startServer() {
         const port = process.env.PORT || 8080;
         // maybe i want to run this in a separate process since node is single threaded
         server.listen(port, () => {
-            console.log(`TJTAG TJTAG Listening on port ${port}`);
+            console.log(`Listening on port ${port}`);
             resolve();
         });
     });
@@ -56,9 +56,7 @@ module.exports = async () => {
     try {
         await createTestDatabase();
         await seedTestDatabase();
-        console.log('TJTAG starting server');
         await startServer();
-        console.log('TJTAG done starting server');
     } catch (error) {
         console.log(error);
         process.exit(1);
