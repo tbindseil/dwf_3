@@ -145,15 +145,15 @@ class Client {
         return Math.floor(high * Math.random());
     }
 }
-//
-//// TODO this needs to be dried out
-//io.listen(6543);
-//const port = process.env.PORT || 8080;
-//// maybe i want to run this in a separate process since node is single threaded
-//server.listen(port, () => {
-//    // TODO wait until server is running
-//    console.log(`Listening on port ${port}`);
-//});
+
+// TODO this needs to be dried out
+io.listen(6543);
+const port = process.env.PORT || 8080;
+// maybe i want to run this in a separate process since node is single threaded
+server.listen(port, () => {
+    // TODO wait until server is running
+    console.log(`Listening on port ${port}`);
+});
 
 describe('TJTAG broadcast test', () => {
     let testFilename: string;
@@ -270,4 +270,19 @@ describe('TJTAG broadcast test', () => {
 
         console.log('TJTAG done with verification');
     };
+
+    afterAll(async () => {
+        const serverClosed = new Promise<void>(resolve => {
+            server.close((err: unknown) => {
+                console.log('server closing');
+                console.log(`err is: ${err}`);
+                // when i start server in broadcast test
+                // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
+                // but, if i start server in global setup,
+                // then err is undefined
+                resolve();
+            });
+        });
+        await serverClosed;
+    });
 });

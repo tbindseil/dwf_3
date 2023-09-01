@@ -56,7 +56,7 @@ module.exports = async () => {
     try {
         await createTestDatabase();
         await seedTestDatabase();
-        await startServer();
+        // await startServer();
     } catch (error) {
         console.log(error);
         process.exit(1);

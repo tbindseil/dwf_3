@@ -20,15 +20,16 @@ module.exports = async () => {
             process.exit(1);
         }
 
-        server.close((err: unknown) => {
-            console.log('server closing');
-            console.log(`err is: ${err}`);
-            // when i start server in broadcast test
-            // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
-            // but, if i start server in global setup,
-            // then err is undefined
-            resolve();
-        });
+//        server.close((err: unknown) => {
+//            console.log('server closing');
+//            console.log(`err is: ${err}`);
+//            // when i start server in broadcast test
+//            // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
+//            // but, if i start server in global setup,
+//            // then err is undefined
+//            resolve();
+//        });
+resolve();
     });
 
     await serverClosed;
