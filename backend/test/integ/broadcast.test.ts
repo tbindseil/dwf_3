@@ -51,11 +51,18 @@ class Client {
         this.updates = updates;
         this.filename = filename;
         this.expectedUpdates = expectedUpdates;
+
+        this.socket.on('connect', () => {
+            debug(`connected callback and sid is: ${this.socket.id}`);
+            console.log(`spawning client with socketId: ${this.socket.id}`);
+        });
     }
 
-    // put most of it here and it can stay the same
-    public async start(): Promise<void> {
+    public async joinPicture(): Promise<void> {
         return new Promise<void>((resolve) => {
+            this.socket.on('join_picture_response', async () => {
+                resolve();
+            });
             this.socket.on('server_to_client_update', (update: Update) => {
                 debug(
                     `setting received update for client ${
@@ -64,45 +71,37 @@ class Client {
                 );
                 this.receivedUpdates.set(performance.now(), update);
             });
-
-            this.socket.on('join_picture_response', async () => {
-                debug('on join_picture_response');
-                // need to forloop to serialize these
-                for (let i = 0; i < this.updates.length; ++i) {
-                    const u = this.updates[i];
-
-                    debug('update');
-                    debug(`socketId: ${this.socket.id}`);
-                    debug(`updateNum: ${i}`);
-                    debug(`now: ${performance.now()}`);
-                    debug(`waiting: ${u.waitTimeMS}ms`);
-
-                    this.socket.emit('client_to_server_udpate', u.pixelUpdate);
-
-                    u.sentAt = performance.now();
-                    debug(
-                        `setting expected update for client ${this.socket.id} at ${u.sentAt}`
-                    );
-                    this.expectedUpdates.set(u.sentAt, {
-                        update: u.pixelUpdate,
-                        sourceSocketId: this.socket.id,
-                    });
-                    await delay(u.waitTimeMS);
-                }
-
-                // TJTAG once its done sending we need to keep it open
-                // then close all after everything is done
-                // socket.close();
-                resolve();
+            this.socket.emit('join_picture_request', {
+                filename: this.filename,
             });
+        });
+    }
 
-            this.socket.on('connect', () => {
-                debug(`connected callback and sid is: ${this.socket.id}`);
-                console.log(`spawning client with socketId: ${this.socket.id}`);
-                this.socket.emit('join_picture_request', {
-                    filename: this.filename,
+    // put most of it here and it can stay the same
+    public async start(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            // need to forloop to serialize these
+            for (let i = 0; i < this.updates.length; ++i) {
+                const u = this.updates[i];
+
+                debug('update');
+                debug(`socketId: ${this.socket.id}`);
+                debug(`updateNum: ${i}`);
+                debug(`now: ${performance.now()}`);
+                debug(`waiting: ${u.waitTimeMS}ms`);
+
+                this.socket.emit('client_to_server_udpate', u.pixelUpdate);
+
+                u.sentAt = performance.now();
+                debug(
+                    `setting expected update for client ${this.socket.id} at ${u.sentAt}`
+                );
+                this.expectedUpdates.set(u.sentAt, {
+                    update: u.pixelUpdate,
+                    sourceSocketId: this.socket.id,
                 });
-            });
+                await delay(u.waitTimeMS);
+            }
         });
     }
 
@@ -196,42 +195,6 @@ describe('TJTAG broadcast test', () => {
         await tests(updatesForClients);
     };
 
-    // this smells funny
-    // and, its causing us to have to have all clients registered
-    // before sending any updates
-    //
-    // we really want to be able to:
-    // upon sending an update (and adding an expected update)
-    // know which clients are registered
-    // and tag the expected udpate with those clients
-    // then, we can filter the expectedPixelUpdates more precisely
-    //
-    // in addition
-    //
-    // we still need to test the picture sync on join mechanism
-    // - should they all end with the same picture? maybe not close right away but stagger when they start
-    // - should we track the picture at given time stamps? and find what the picture looks like after the last update but not before the it?
-    // - or maybe we think about what is guaranteed. and that is
-    // -- that the picture will be received along with any updates that are pending (!!!!)
-    // --- that pending updates thing messes things up
-    // ---- and by things i mean the regular test that broadcasts are received
-    // ----- basically, if a client joins "late", it will get some pending updates, which would not be accounted for in the update -> currently registered client map mentinoed above
-    //
-    // --- so... we actually need to track the picture
-    // ---- and since the real client updates the raster itself, these test clients will have to also
-    // --- so, it seems like we need to make sure the client is always ending with the right picture
-    // ---- where the right picture is the picture updated with all updates at the time the last udpate is sent
-    // ----- maybe I could tag updates with sentAt: performance.now()
-    //
-    // i still feel confident that its working, at least the broadcast aspect
-    // but i guess that is the easy part and the picture sync is difficult
-    //
-    // one top level entry per client
-    // each client has a map of when they received an update and the update received
-    // then, all send updates are tracked at a time with who they are from
-    // if for each client we filter out the updates they sent, the remaining
-    // maps should match
-
     const test_allClientsReceiveAllUpdates = () => {};
 
     const receivedUpdates: Map<string, Map<number, Update>> = new Map();
@@ -245,6 +208,9 @@ describe('TJTAG broadcast test', () => {
         updatesForClients.forEach((updates) => {
             clients.push(new Client(updates, testFilename, expectedUpdates));
         });
+
+        const clientConnectPromsies: Promise<void>[] = [];
+        clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
 
         const clientWorkPromsies: Promise<void>[] = [];
         clients.forEach((c) => clientWorkPromsies.push(c.start()));
