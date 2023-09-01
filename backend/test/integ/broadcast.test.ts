@@ -10,7 +10,7 @@ import {
     PostPictureInput,
     ServerToClientEvents,
 } from 'dwf-3-models-tjb';
-import { server } from '../../src/app';
+import { io, server } from '../../src/app';
 import { performance } from 'perf_hooks';
 
 const PICTURE_WIDTH = 800;
@@ -145,6 +145,15 @@ class Client {
         return Math.floor(high * Math.random());
     }
 }
+
+// TODO this needs to be dried out
+io.listen(6543);
+const port = process.env.PORT || 8080;
+// maybe i want to run this in a separate process since node is single threaded
+server.listen(port, () => {
+    // TODO wait until server is running
+    console.log(`Listening on port ${port}`);
+});
 
 describe('TJTAG broadcast test', () => {
     let testFilename: string;
