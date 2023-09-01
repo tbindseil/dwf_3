@@ -91,7 +91,6 @@ export class TrackedPicture {
 
     public enqueueBroadcastUpdate(priority: Priority, update: Update) {
         this.workQueue.push(priority, async () => {
-            await new Promise((r) => setTimeout(r, 200));
             this.idToClientMap.forEach((client: BroadcastClient) => {
                 client.handleUpdate(update);
             });

@@ -51,22 +51,25 @@ class Client {
 
         this.socket.on('connect', () => {
             debug(`connected callback and sid is: ${this.socket.id}`);
-            console.log(`spawning client with socketId: ${this.socket.id}`);
+        });
+
+        this.socket.on('server_to_client_update', (update: Update) => {
+            debug(
+                `setting received update for client ${
+                    this.socket.id
+                } at ${performance.now()}`
+            );
+            this.receivedUpdates.set(performance.now(), update);
         });
     }
 
     public async joinPicture(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.socket.on('join_picture_response', async () => {
-                resolve();
-            });
-            this.socket.on('server_to_client_update', (update: Update) => {
                 debug(
-                    `setting received update for client ${
-                        this.socket.id
-                    } at ${performance.now()}`
+                    `received join_picture_response for socketid: ${this.socket.id}`
                 );
-                this.receivedUpdates.set(performance.now(), update);
+                resolve();
             });
             this.socket.emit('join_picture_request', {
                 filename: this.filename,
@@ -81,11 +84,12 @@ class Client {
             for (let i = 0; i < this.updates.length; ++i) {
                 const u = this.updates[i];
 
-                debug('update');
+                debug('printing update');
                 debug(`socketId: ${this.socket.id}`);
                 debug(`updateNum: ${i}`);
                 debug(`now: ${performance.now()}`);
                 debug(`waiting: ${u.waitTimeMS}ms`);
+                debug('done printing update');
 
                 this.socket.emit('client_to_server_udpate', u.pixelUpdate);
 
@@ -241,10 +245,13 @@ describe('TJTAG broadcast test', () => {
 
         clients.forEach((client) => client.close());
 
+        // let clients receive all updates
+        delay(1000);
+
         // verify
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
-            expect(receivedUpdates).toEqual(expectedUpdates);
+            expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
     };
 });
