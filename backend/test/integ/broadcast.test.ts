@@ -107,8 +107,18 @@ class Client {
         return this.receivedUpdates;
     }
 
-    public close() {
-        this.socket.close();
+    public async close(): Promise<void> {
+        return new Promise<void>(resolve => {
+            console.log('about to set leave_picture_response handler');
+            this.socket.on('leave_picture_response', () => {
+                console.log('received leave_picture_response handler');
+                this.socket.close();
+                resolve();
+            });
+            console.log('about to send leave_picture_request');
+            this.socket.emit('leave_picture_request', { filename: this.filename });
+            console.log('done send leave_picture_request');
+        });
     }
 
     public static makeRandomUpdate(
@@ -237,10 +247,12 @@ describe('TJTAG broadcast test', () => {
         clients.forEach((c) => clientWorkPromsies.push(c.start()));
         await Promise.all(clientWorkPromsies);
 
-        clients.forEach((client) => client.close());
-
         // let clients receive all updates
         await delay(1000);
+
+        for (let i = 0; i < clients.length; ++i) {
+            await clients[i].close();
+        }
 
         // verify
         clients.forEach((client) => {

@@ -85,6 +85,10 @@ export class TrackedPicture {
 
     public enqueueRemoveClient(priority: Priority, socketId: string) {
         this.workQueue.push(priority, async () => {
+            const broadcastClient = this.idToClientMap.get(socketId);
+            if (broadcastClient) {
+                broadcastClient.close();
+            }
             this.idToClientMap.delete(socketId);
         });
     }

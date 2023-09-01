@@ -40,6 +40,6 @@ export class BroadcastClient {
     }
 
     public close(): void {
-        this.socket._cleanup();
+        this.socket.emit('leave_picture_response');
     }
 }
