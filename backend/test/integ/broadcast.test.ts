@@ -246,49 +246,114 @@ describe('TJTAG broadcast test', () => {
     class Client {
         private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
         private readonly updates: Update_RENAME[];
-        private resolve?: () => {};
 
         public constructor(updates: Update_RENAME[]) {
             this.socket = io_package(ENDPOINT);
             this.updates = updates;
+        }
 
-            this.socket.on('server_to_client_update', (update: Update) => {
-                if (!receivedUpdates.has(this.socket.id)) {
-                    receivedUpdates.set(this.socket.id, new Map());
+        // put most of it here and it can stay the same
+        public async start(): Promise<void> {
+            return new Promise<void>((resolve) => {
+                this.socket.on('server_to_client_update', (update: Update) => {
+                    if (!receivedUpdates.has(this.socket.id)) {
+                        receivedUpdates.set(this.socket.id, new Map());
+                    }
+
+                    const clientMap = receivedUpdates.get(this.socket.id);
+                    if (clientMap) {
+                        debug(
+                            `setting received update for client ${
+                                this.socket.id
+                            } at ${performance.now()}`
+                        );
+                        clientMap.set(performance.now(), update);
+                    }
+                });
+
+                this.socket.on('join_picture_response', async () => {
+                    debug('on join_picture_response');
+                    // need to forloop to serialize these
+                    for (let i = 0; i < this.updates.length; ++i) {
+                        const u = this.updates[i];
+
+                        debug('update');
+                        debug(`socketId: ${this.socket.id}`);
+                        debug(`updateNum: ${i}`);
+                        debug(`now: ${performance.now()}`);
+                        debug(`waiting: ${u.waitTimeMS}ms`);
+
+                        this.socket.emit('client_to_server_udpate', u.pixelUpdate);
+
+                        u.sentAt = performance.now();
+                        debug(
+                            `setting expected update for client ${this.socket.id} at ${u.sentAt}`
+                        );
+                        expectedUpdates.set(u.sentAt, {
+                            update: u.pixelUpdate,
+                            sourceSocketId: this.socket.id,
+                        });
+                        await delay(u.waitTimeMS);
+                    }
+
+                    // TJTAG once its done sending we need to keep it open
+                    // then close all after everything is done
+                    // socket.close();
+                    resolve();
+                });
+
+                this.socket.on('connect', () => {
+                    debug(`connected callback and sid is: ${this.socket.id}`);
+                    console.log(`spawning client with socketId: ${this.socket.id}`);
+                    this.socket.emit('join_picture_request', { filename: testFilename });
+                });
+            });
+
+        }
+    }
+
+    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
+        return new Promise<Socket>((resolve) => {
+            const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
+                io_package(ENDPOINT);
+
+            socket.on('server_to_client_update', (update: Update) => {
+                if (!receivedUpdates.has(socket.id)) {
+                    receivedUpdates.set(socket.id, new Map());
                 }
 
-                const clientMap = receivedUpdates.get(this.socket.id);
+                const clientMap = receivedUpdates.get(socket.id);
                 if (clientMap) {
                     debug(
                         `setting received update for client ${
-                            this.socket.id
+                            socket.id
                         } at ${performance.now()}`
                     );
                     clientMap.set(performance.now(), update);
                 }
             });
 
-            this.socket.on('join_picture_response', async () => {
+            socket.on('join_picture_response', async () => {
                 debug('on join_picture_response');
                 // need to forloop to serialize these
-                for (let i = 0; i < this.updates.length; ++i) {
-                    const u = this.updates[i];
+                for (let i = 0; i < updates.length; ++i) {
+                    const u = updates[i];
 
                     debug('update');
-                    debug(`socketId: ${this.socket.id}`);
+                    debug(`socketId: ${socket.id}`);
                     debug(`updateNum: ${i}`);
                     debug(`now: ${performance.now()}`);
                     debug(`waiting: ${u.waitTimeMS}ms`);
 
-                    this.socket.emit('client_to_server_udpate', u.pixelUpdate);
+                    socket.emit('client_to_server_udpate', u.pixelUpdate);
 
                     u.sentAt = performance.now();
                     debug(
-                        `setting expected update for client ${this.socket.id} at ${u.sentAt}`
+                        `setting expected update for client ${socket.id} at ${u.sentAt}`
                     );
                     expectedUpdates.set(u.sentAt, {
                         update: u.pixelUpdate,
-                        sourceSocketId: this.socket.id,
+                        sourceSocketId: socket.id,
                     });
                     await delay(u.waitTimeMS);
                 }
@@ -296,34 +361,17 @@ describe('TJTAG broadcast test', () => {
                 // TJTAG once its done sending we need to keep it open
                 // then close all after everything is done
                 // socket.close();
-                if (this.resolve) {
-                    this.resolve();
-                } else {
-                    console.log('this.resovle is undef');
-                }
+
+                resolve(socket);
             });
 
-            this.socket.on('connect', () => {
-                debug(`connected callback and sid is: ${this.socket.id}`);
+            socket.on('connect', () => {
+                debug(`connected callback and sid is: ${socket.id}`);
+
+                console.log(`spawning client with socketId: ${socket.id}`);
+
+                socket.emit('join_picture_request', { filename: testFilename });
             });
-        }
-
-        // put most of it here and it can stay the same
-        public async start() {
-            console.log(`spawning client with socketId: ${this.socket.id}`);
-            this.socket.emit('join_picture_request', { filename: testFilename });
-        }
-
-        public waitForCompletion(): Promise<void> {
-            const p = new Promise(ex: (resolve: (value: (value: unkown) => void, reject: (reason?: any) => void) => void) => {
-                
-            })
-            return new Promise((resolve) => {this.resolve = resolve});
-        }
-    }
-
-    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
-        return new Promise<Socket>((resolve) => {
         });
     };
 
