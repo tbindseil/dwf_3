@@ -246,12 +246,14 @@ describe('TJTAG broadcast test', () => {
         clients.forEach((client) => client.close());
 
         // let clients receive all updates
-        delay(1000);
+        await delay(1000);
 
         // verify
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
             expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
+
+        console.log('TJTAG done with verification');
     };
 });
