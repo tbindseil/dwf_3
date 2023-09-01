@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import path from 'path';
 
-export const ENDPOINT = 'http://127.0.0.1:6543/';
-
 // this is setup in src/app.ts and there is a TO DO in the integ/
 // api.test.ts file noting to do an app config
 const TEST_PICTURE_FOLDER_NAME =

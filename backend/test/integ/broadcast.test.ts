@@ -11,7 +11,6 @@ import {
     ServerToClientEvents,
 } from 'dwf-3-models-tjb';
 import { server } from '../../src/app';
-import { ENDPOINT } from './setup/utils';
 import { performance } from 'perf_hooks';
 
 const PICTURE_WIDTH = 800;
@@ -33,6 +32,8 @@ const delay = async (ms: number) => {
 };
 
 class Client {
+    private static readonly ENDPOINT = 'http://127.0.0.1:6543/';
+
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private readonly updates: UpdateToSend[];
     private readonly filename: string;
@@ -44,7 +45,7 @@ class Client {
         filename: string,
         expectedUpdates: Map<number, Update>
     ) {
-        this.socket = io_package(ENDPOINT);
+        this.socket = io_package(Client.ENDPOINT);
         this.updates = updates;
         this.filename = filename;
         this.expectedUpdates = expectedUpdates;
