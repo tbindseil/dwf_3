@@ -105,6 +105,10 @@ class Client {
             });
         });
     }
+
+    public close() {
+        this.socket.close();
+    }
 }
 
 // TODO this needs to be dried out
@@ -237,14 +241,17 @@ describe('TJTAG broadcast test', () => {
     >();
 
     const tests = async (updatesForClients: Update_RENAME[][]) => {
-        const clients: Promise<Socket>[] = [];
+        const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
-            clients.push(spawnClient(updates));
+            clients.push(new Client(updates, testFilename, expectedUpdates));
         });
 
-        const resolvedClients = await Promise.all(clients);
+        const clientWorkPromsies: Promise<void>[] = [];
+        clients.forEach((c) => clientWorkPromsies.push(c.start()));
 
-        resolvedClients.forEach((client) => client.close());
+        await Promise.all(clients);
+
+        clients.forEach((client) => client.close());
 
         // verify
         receivedUpdates.forEach(
@@ -304,81 +311,6 @@ describe('TJTAG broadcast test', () => {
                 }
             }
         );
-    };
-
-    // i need to track the picture becuase they could join late for the early updates
-    //
-    //
-    //
-    //
-    // and really i ought to have the picture read so i can verify if it is good
-    //
-    // basically, a lot of the interesting stuff is handled in the client now
-    // and we just have to make sure broadcast order is maintained (should be easy thanks
-    // to tcp) and that the order that is broadcast is the same as the order that is written.
-    // this should be easy too.
-
-    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
-        return new Promise<Socket>((resolve) => {
-            const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-                io_package(ENDPOINT);
-
-            socket.on('server_to_client_update', (update: Update) => {
-                if (!receivedUpdates.has(socket.id)) {
-                    receivedUpdates.set(socket.id, new Map());
-                }
-
-                const clientMap = receivedUpdates.get(socket.id);
-                if (clientMap) {
-                    debug(
-                        `setting received update for client ${
-                            socket.id
-                        } at ${performance.now()}`
-                    );
-                    clientMap.set(performance.now(), update);
-                }
-            });
-
-            socket.on('join_picture_response', async () => {
-                debug('on join_picture_response');
-                // need to forloop to serialize these
-                for (let i = 0; i < updates.length; ++i) {
-                    const u = updates[i];
-
-                    debug('update');
-                    debug(`socketId: ${socket.id}`);
-                    debug(`updateNum: ${i}`);
-                    debug(`now: ${performance.now()}`);
-                    debug(`waiting: ${u.waitTimeMS}ms`);
-
-                    socket.emit('client_to_server_udpate', u.pixelUpdate);
-
-                    u.sentAt = performance.now();
-                    debug(
-                        `setting expected update for client ${socket.id} at ${u.sentAt}`
-                    );
-                    expectedUpdates.set(u.sentAt, {
-                        update: u.pixelUpdate,
-                        sourceSocketId: socket.id,
-                    });
-                    await delay(u.waitTimeMS);
-                }
-
-                // TJTAG once its done sending we need to keep it open
-                // then close all after everything is done
-                // socket.close();
-
-                resolve(socket);
-            });
-
-            socket.on('connect', () => {
-                debug(`connected callback and sid is: ${socket.id}`);
-
-                console.log(`spawning client with socketId: ${socket.id}`);
-
-                socket.emit('join_picture_request', { filename: testFilename });
-            });
-        });
     };
 
     const makeRandomUpdate = (clientNum: number): Update_RENAME => {
