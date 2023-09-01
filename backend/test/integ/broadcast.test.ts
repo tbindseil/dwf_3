@@ -79,7 +79,7 @@ class Client {
 
     // put most of it here and it can stay the same
     public async start(): Promise<void> {
-        return new Promise<void>((resolve) => {
+        return new Promise<void>(async (resolve) => {
             // need to forloop to serialize these
             for (let i = 0; i < this.updates.length; ++i) {
                 const u = this.updates[i];
@@ -102,6 +102,7 @@ class Client {
                 });
                 await delay(u.waitTimeMS);
             }
+            resolve();
         });
     }
 
@@ -211,11 +212,11 @@ describe('TJTAG broadcast test', () => {
 
         const clientConnectPromsies: Promise<void>[] = [];
         clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
+        await Promise.all(clientConnectPromsies);
 
         const clientWorkPromsies: Promise<void>[] = [];
         clients.forEach((c) => clientWorkPromsies.push(c.start()));
-
-        await Promise.all(clients);
+        await Promise.all(clientWorkPromsies);
 
         clients.forEach((client) => client.close());
 
