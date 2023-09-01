@@ -83,12 +83,12 @@ class Client {
             for (let i = 0; i < this.updates.length; ++i) {
                 const u = this.updates[i];
 
-                debug('printing update');
-                debug(`socketId: ${this.socket.id}`);
-                debug(`updateNum: ${i}`);
-                debug(`now: ${performance.now()}`);
-                debug(`waiting: ${u.waitTimeMS}ms`);
-                debug('done printing update');
+                debug(`printing update:
+                socketId: ${this.socket.id}
+                updateNum: ${i}
+                now: ${performance.now()}
+                waiting: ${u.waitTimeMS}ms
+                done printing update`);
 
                 this.socket.emit('client_to_server_udpate', u.pixelUpdate);
 
@@ -109,15 +109,13 @@ class Client {
 
     public async close(): Promise<void> {
         return new Promise<void>(resolve => {
-            console.log('about to set leave_picture_response handler');
             this.socket.on('leave_picture_response', () => {
-                console.log('received leave_picture_response handler');
+                debug(`received leave_picture_response on socekt: ${this.socket.id}`);
                 this.socket.close();
                 resolve();
             });
-            console.log('about to send leave_picture_request');
             this.socket.emit('leave_picture_request', { filename: this.filename });
-            console.log('done send leave_picture_request');
+            debug(`emitting leave_picture_request on socekt: ${this.socket.id}`);
         });
     }
 
