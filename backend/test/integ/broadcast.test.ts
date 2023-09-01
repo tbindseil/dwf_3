@@ -10,10 +10,9 @@ import {
     PostPictureInput,
     ServerToClientEvents,
 } from 'dwf-3-models-tjb';
-import { io, server } from '../../src/app';
+import { server } from '../../src/app';
+import { ENDPOINT } from './setup/utils';
 import { performance } from 'perf_hooks';
-
-const ENDPOINT = 'http://127.0.0.1:6543/';
 
 const PICTURE_WIDTH = 800;
 const PICTURE_HEIGHT = 1000;
@@ -138,15 +137,6 @@ class Client {
     }
 }
 
-// TODO this needs to be dried out
-io.listen(6543);
-const port = process.env.PORT || 8080;
-// maybe i want to run this in a separate process since node is single threaded
-server.listen(port, () => {
-    // TODO wait until server is running
-    console.log(`Listening on port ${port}`);
-});
-
 describe('TJTAG broadcast test', () => {
     let testFilename: string;
     const testPicture = {
@@ -222,12 +212,14 @@ describe('TJTAG broadcast test', () => {
             JSON.stringify(updatesForClients)
         );
 
-        await tests(updatesForClients);
+        await test_allClientsReceiveAllUpdatestest(updatesForClients);
     };
 
-    //    const test_allClientsReceiveAllUpdates = () => {};
+    const test_allClientsEndWithTheSamePicture_withStaggeredStarts = () => {
+        const lol = 4;
+    };
 
-    const tests = async (updatesForClients: UpdateToSend[][]) => {
+    const test_allClientsReceiveAllUpdatestest = async (updatesForClients: UpdateToSend[][]) => {
         const expectedUpdates = new Map<number, Update>();
 
         const clients: Client[] = [];
