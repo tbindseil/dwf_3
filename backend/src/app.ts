@@ -120,13 +120,5 @@ io.on(
                 );
             }
         );
-
-        socket.on('unsubscribe', (filename: string) => {
-            console.log(
-                `socket unsubscribe. Socket id: ${socket.id} and filename: ${filename}`
-            );
-            // now explicitly requested
-            // broadcastMediator.removeClient(filename, socket);
-        });
     }
 );
