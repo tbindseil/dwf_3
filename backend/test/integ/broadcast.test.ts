@@ -22,7 +22,8 @@ interface UpdateToSend {
     pixelUpdate: PixelUpdate;
     sentAt?: number;
 }
-const debugEnabled = false;
+
+const debugEnabled = true;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -76,7 +77,6 @@ class Client {
         });
     }
 
-    // put most of it here and it can stay the same
     public async start(): Promise<void> {
         return new Promise<void>(async (resolve) => {
             // need to forloop to serialize these
@@ -218,6 +218,8 @@ describe('TJTAG broadcast test', () => {
     const test_allClientsEndWithTheSamePicture_withStaggeredStarts = () => {
         const lol = 4;
     };
+    // also need to test that picture is updated on server
+    // also need to test multiple pictures at once
 
     const test_allClientsReceiveAllUpdatestest = async (updatesForClients: UpdateToSend[][]) => {
         const expectedUpdates = new Map<number, Update>();
