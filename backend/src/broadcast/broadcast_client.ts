@@ -28,17 +28,14 @@ export class BroadcastClient {
     }
 
     public initializeRaster(raster: Raster): void {
-        this.socket.emit(
-            'join_picture_response',
-            {
-                width: raster.width,
-                height: raster.height,
-                data: raster.getBuffer()
-            }
-        );
+        this.socket.emit('join_picture_response', {
+            width: raster.width,
+            height: raster.height,
+            data: raster.getBuffer(),
+        });
     }
 
-    public handleUpdate(update: Update, fromSocketID: string): void {
+    public handleUpdate(update: Update): void {
         this.socket.emit('server_to_client_update', update);
     }
 

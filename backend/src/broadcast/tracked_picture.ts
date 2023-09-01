@@ -78,10 +78,7 @@ export class TrackedPicture {
 
             // this one is just getting added, hence the arbitrary non matching socketid
             this.pendingUpdates.forEach((u) => {
-                broadcastClient.handleUpdate(
-                    u,
-                    'arbitrary_non_matching_socket_id'
-                );
+                broadcastClient.handleUpdate(u);
             });
         });
     }
@@ -92,16 +89,11 @@ export class TrackedPicture {
         });
     }
 
-    public enqueueBroadcastUpdate(
-        priority: Priority,
-        update: Update,
-        sourceSocketId: string
-    ) {
+    public enqueueBroadcastUpdate(priority: Priority, update: Update) {
         this.workQueue.push(priority, async () => {
-
             await new Promise((r) => setTimeout(r, 200));
             this.idToClientMap.forEach((client: BroadcastClient) => {
-                client.handleUpdate(update, sourceSocketId);
+                client.handleUpdate(update);
             });
 
             this.pendingUpdates.push(update);

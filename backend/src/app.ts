@@ -108,7 +108,7 @@ io.on(
             }
         );
         socket.on('client_to_server_udpate', (update: Update) => {
-            broadcastMediator.broadcastUpdate(update, socket.id);
+            broadcastMediator.broadcastUpdate(update);
         });
 
         socket.on(

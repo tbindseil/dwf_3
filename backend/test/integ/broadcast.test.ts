@@ -18,7 +18,7 @@ const ENDPOINT = 'http://127.0.0.1:6543/';
 const PICTURE_WIDTH = 800;
 const PICTURE_HEIGHT = 1000;
 
-interface Update_RENAME {
+interface UpdateToSend {
     waitTimeMS: number;
     pixelUpdate: PixelUpdate;
     sentAt?: number;
@@ -34,18 +34,15 @@ const delay = async (ms: number) => {
 
 class Client {
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-    private readonly updates: Update_RENAME[];
+    private readonly updates: UpdateToSend[];
     private readonly filename: string;
-    private readonly expectedUpdates: Map<
-        number,
-        { update: Update; sourceSocketId: string }
-    >;
+    private readonly expectedUpdates: Map<number, Update>;
     private readonly receivedUpdates: Map<number, Update> = new Map();
 
     public constructor(
-        updates: Update_RENAME[],
+        updates: UpdateToSend[],
         filename: string,
-        expectedUpdates: Map<number, { update: Update; sourceSocketId: string }>
+        expectedUpdates: Map<number, Update>
     ) {
         this.socket = io_package(ENDPOINT);
         this.updates = updates;
@@ -96,18 +93,44 @@ class Client {
                 debug(
                     `setting expected update for client ${this.socket.id} at ${u.sentAt}`
                 );
-                this.expectedUpdates.set(u.sentAt, {
-                    update: u.pixelUpdate,
-                    sourceSocketId: this.socket.id,
-                });
+                this.expectedUpdates.set(u.sentAt, u.pixelUpdate);
                 await delay(u.waitTimeMS);
             }
             resolve();
         });
     }
 
+    public getReceivedUpdates(): Map<number, Update> {
+        return this.receivedUpdates;
+    }
+
     public close() {
         this.socket.close();
+    }
+
+    public static makeRandomUpdate(
+        clientNum: number,
+        filename: string
+    ): UpdateToSend {
+        const waitTimeMS = Client.randomNumberBetweenZeroAnd(100);
+        const pixelUpdate = new PixelUpdate({
+            filename: filename,
+            createdBy: `client_${clientNum}`,
+            x: Client.randomNumberBetweenZeroAnd(PICTURE_WIDTH),
+            y: Client.randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
+            red: Client.randomNumberBetweenZeroAnd(255),
+            green: Client.randomNumberBetweenZeroAnd(255),
+            blue: Client.randomNumberBetweenZeroAnd(255),
+        });
+
+        return {
+            waitTimeMS,
+            pixelUpdate,
+        };
+    }
+
+    public static randomNumberBetweenZeroAnd(high: number): number {
+        return Math.floor(high * Math.random());
     }
 }
 
@@ -166,23 +189,25 @@ describe('TJTAG broadcast test', () => {
     //        );
     //    });
 
-    const testsFromFile = async (previousUpdatesFilename: string) => {
-        const recoveredUpdatesStr = await fs.promises.readFile(
-            previousUpdatesFilename
-        );
-        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
-        tests(recoveredUpdates);
-    };
+    //    const testsFromFile = async (previousUpdatesFilename: string) => {
+    //        const recoveredUpdatesStr = await fs.promises.readFile(
+    //            previousUpdatesFilename
+    //        );
+    //        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
+    //        tests(recoveredUpdates);
+    //    };
 
     const testsFromRandom = async (
         numClients: number,
         numUpdates: number[]
     ) => {
-        let updatesForClients: Update_RENAME[][] = [];
+        let updatesForClients: UpdateToSend[][] = [];
         for (let i = 0; i < numClients; ++i) {
             updatesForClients.push([]);
             for (let j = 0; j < numUpdates[i]; ++j) {
-                updatesForClients[i].push(makeRandomUpdate(i));
+                updatesForClients[i].push(
+                    Client.makeRandomUpdate(i, testFilename)
+                );
             }
         }
 
@@ -196,15 +221,11 @@ describe('TJTAG broadcast test', () => {
         await tests(updatesForClients);
     };
 
-    const test_allClientsReceiveAllUpdates = () => {};
+    //    const test_allClientsReceiveAllUpdates = () => {};
 
-    const receivedUpdates: Map<string, Map<number, Update>> = new Map();
-    const expectedUpdates = new Map<
-        number,
-        { update: Update; sourceSocketId: string }
-    >();
+    const tests = async (updatesForClients: UpdateToSend[][]) => {
+        const expectedUpdates = new Map<number, Update>();
 
-    const tests = async (updatesForClients: Update_RENAME[][]) => {
         const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
             clients.push(new Client(updates, testFilename, expectedUpdates));
@@ -221,84 +242,9 @@ describe('TJTAG broadcast test', () => {
         clients.forEach((client) => client.close());
 
         // verify
-        receivedUpdates.forEach(
-            (
-                clientUpdatesReceivedMap: Map<number, Update>,
-                socketId: string
-            ) => {
-                const expectedWithoutThisClient = new Map<number, Update>();
-                expectedUpdates.forEach(
-                    (
-                        value: {
-                            update: Update;
-                            sourceSocketId: string;
-                        },
-                        timestamp: number
-                    ) => {
-                        if (value.sourceSocketId !== socketId) {
-                            expectedWithoutThisClient.set(
-                                timestamp,
-                                value.update
-                            );
-                        }
-                    }
-                );
-
-                // assert same size
-                // sort keys (timestamps) for each
-                // assert each map at the sorted key at the index are equal
-
-                expect(clientUpdatesReceivedMap.size).toEqual(
-                    expectedWithoutThisClient.size
-                );
-
-                const timestampSortFunc = (a: number, b: number) => {
-                    if (a < b) {
-                        return -1;
-                    } else if (a > b) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                };
-
-                const sortedActualKeys = [
-                    ...clientUpdatesReceivedMap.keys(),
-                ].sort(timestampSortFunc);
-                const sortedExpectedKeys = [
-                    ...expectedWithoutThisClient.keys(),
-                ].sort(timestampSortFunc);
-
-                for (let i = 0; i < sortedActualKeys.length; ++i) {
-                    expect(
-                        clientUpdatesReceivedMap.get(sortedActualKeys[i])
-                    ).toEqual(
-                        expectedWithoutThisClient.get(sortedExpectedKeys[i])
-                    );
-                }
-            }
-        );
-    };
-
-    const makeRandomUpdate = (clientNum: number): Update_RENAME => {
-        const waitTimeMS = randomNumberBetweenZeroAnd(100);
-        const pixelUpdate = new PixelUpdate({
-            filename: testFilename,
-            createdBy: `client_${clientNum}`,
-            x: randomNumberBetweenZeroAnd(PICTURE_WIDTH),
-            y: randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-            red: randomNumberBetweenZeroAnd(255),
-            green: randomNumberBetweenZeroAnd(255),
-            blue: randomNumberBetweenZeroAnd(255),
+        clients.forEach((client) => {
+            const receivedUpdates = client.getReceivedUpdates();
+            expect(receivedUpdates).toEqual(expectedUpdates);
         });
-
-        return {
-            waitTimeMS,
-            pixelUpdate,
-        };
-    };
-
-    const randomNumberBetweenZeroAnd = (high: number): number => {
-        return Math.floor(high * Math.random());
     };
 });

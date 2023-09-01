@@ -100,13 +100,12 @@ export default class BroadcastMediator {
         }
     }
 
-    public broadcastUpdate(update: Update, sourceSocketId: string) {
+    public broadcastUpdate(update: Update) {
         const trackedPicture = this.trackedPictures.get(update.filename);
         if (trackedPicture) {
             trackedPicture.enqueueBroadcastUpdate(
                 this.BROADCAST_UPDATE_PRIORITY,
-                update,
-                sourceSocketId
+                update
             );
             trackedPicture.enqueueUpdateLocalRaster(
                 this.UPDATE_LOCAL_RASTER_PRIORITY
