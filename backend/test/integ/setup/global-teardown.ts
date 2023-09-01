@@ -20,8 +20,10 @@ module.exports = async () => {
             process.exit(1);
         }
 
-        server.close(() => {
+        server.close((err: unknown) => {
             console.log('server closing');
+            console.log(`err is: ${err}`);
+            // Server is not running!>@>@>>!?>>>!>>?!?!?!
             resolve();
         });
     });
