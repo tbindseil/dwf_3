@@ -223,7 +223,7 @@ describe('TrackedPicture Tests', () => {
     };
 
     const sendUpdate = async () => {
-        trackedPicture.enqueueBroadcastUpdate(priority, pixelUpdate, socketId2);
+        trackedPicture.enqueueBroadcastUpdate(priority, pixelUpdate);
         await pushedJob();
     };
 

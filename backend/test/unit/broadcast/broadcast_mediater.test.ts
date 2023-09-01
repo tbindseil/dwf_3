@@ -134,12 +134,11 @@ describe('BroadcastMediator Tests', () => {
     it('broadcasts updates', () => {
         broadcastMediator.addClient(filename, mockSocket1);
         broadcastMediator.addClient(filename, mockSocket2);
-        broadcastMediator.broadcastUpdate(pixelUpdate, mockSocket1.id);
+        broadcastMediator.broadcastUpdate(pixelUpdate);
         verify(
             mockedTrackedPicture.enqueueBroadcastUpdate(
                 Priority.FOUR,
                 pixelUpdate,
-                mockSocket1.id
             )
         ).called();
         verify(

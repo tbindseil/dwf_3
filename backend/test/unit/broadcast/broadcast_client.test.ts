@@ -49,17 +49,8 @@ describe('BroadcastClient Tests', () => {
         });
     });
 
-    it('passes the update to the socket if the id does not match', () => {
-        broadcastClient.handleUpdate(dummyPixelUpdate, mockSocket.id + 'DIFFERENTIATING_SUFFIX');
-
-        expect(mockEmit).toHaveBeenCalledWith(
-            'server_to_client_update',
-            dummyPixelUpdate
-        );
-    });
-
-    it('passes the update to the socket if the id matches', () => {
-        broadcastClient.handleUpdate(dummyPixelUpdate, mockSocket.id);
+    it('passes the update to the socket', () => {
+        broadcastClient.handleUpdate(dummyPixelUpdate);
 
         expect(mockEmit).toHaveBeenCalledWith(
             'server_to_client_update',
