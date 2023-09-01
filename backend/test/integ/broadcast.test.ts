@@ -144,6 +144,11 @@ describe('TJTAG broadcast test', () => {
     // then, all send updates are tracked at a time with who they are from
     // if for each client we filter out the updates they sent, the remaining
     // maps should match
+
+    const test_allClientsReceiveAllUpdates = () => {
+        
+    };
+
     const receivedUpdates: Map<
         string,
         Map<number, Update>
@@ -226,120 +231,6 @@ describe('TJTAG broadcast test', () => {
         );
     };
 
-    // this will expose the issue i saw previously
-    // there is a race between a client receiving an update and making their own
-    // if a client updates its own raster, then receives an update that was previously received by the server,
-    // and the server gets the clients update after
-    // then there could be a difference in the resulting raster
-    //
-    // how to solve this.....
-    //
-    // lets outline the problem with a sequence diagram
-    //
-    // server   clientA    clientB
-    //   |  joinPic|          |
-    //   |<--------|          |
-    //   |ack      |          |
-    //   |-------->|          |
-    //   |         | joinPic  |
-    //   |<--------|----------|
-    //   |ack      |          |
-    //   |---------|--------->|
-    //   |         |          |
-    //   |         |          |
-    //   |  updateA|          |
-    //   |<--------|          |
-    //   |         |   updateB|
-    //   |<--------|----------|
-    //   |bUpdateA |          |
-    //   |---------|--------->|
-    //   |bUpdateB |          |
-    //   |---------|--------->|
-    //   |         |          |
-    //
-    //   in the above situation, clientB is sitting with updateB, then updateA
-    //   and the server is sitting with updateA, then updateB
-    //
-    //   that's inconsistent, and the server has it right
-    //   i guess the server has to have it right
-    //
-    // so what does the client do?
-    //
-    // well, i see two options
-    // 1. client does not update raster until receiving an ack
-    //      any updates received while waiting for ack of sent update will be applied
-    //      sent update is applied when ack is received
-    //    questions:
-    //      how long does an ack take?
-    //      does this actually work out sequentially?
-    //
-    //    ^ this suffers from the same issues as 1.5, namely, the update ack is delayed enough that
-    //    its a bad user experience
-    //
-    // 1.5 client only updates the raster upon receiving updates from the server
-    //       this implies that clients dont update upon doing something and send it to the server instead
-    //       and that the server doesn't filter a client's own updates
-    //      this is definitly the easiest...
-    //      how noticable is it?
-    //      not noticable at all, lets get some numbies
-    //      direct update time:
-    //      diff: .5 ms
-    //      round trip update time:
-    //      TJTAG clicked at 15091.800000011921
-    //      TJTAG updated at 15112.40000000596
-    //      diff: 20.6 ms
-    //
-    //      we are updating at a 30 ms rate
-    //      so we could lose one frame
-    //
-    //      this is all local tho,
-    //      from aws (https://aws.amazon.com/what-is/rtt-in-networking/)
-    //      What is a good or optimal round-trip time?
-    //      A good round-trip time (RTT) should be below 100 milliseconds for optimal performance.
-    //      An RTT of 100–200 milliseconds means performance is likely affected, but your users are still able to access the service.
-    //      An RTT of 200 milliseconds or more means performance is degraded and your users experience long wait or page load times.
-    //      An RTT of more than 375 milliseconds commonly results in a connection being terminated.
-    //      so lets throw in a delay of 200 ms and see how we like it
-    //
-    //      its bad...
-
-    //
-    // 2. client holds a copy of raster at last acked update
-    //      if an update comes in that is both from after the last acked update and before any unacked updates
-    //      then we redraw from the last acked update
-    //      and upon an ack, we save the raster at that point and clear anything before it
-    //    questions:
-    //      how long does the redraw take?
-    //      how hard is it to track these things?
-    //
-    //    I thikn this is the best solution because
-    //    the user will mostly experience drawing as if by themselves
-    //    and only
-    //
-    // 3. this is kinda like out there but what if we displayed the update with a 50/50 alpha component, then updated it to full once acked
-    // i think it will require 2, so lets focus on that first
-
-    // so how to do strategy 2
-    // displayRaster, currentRaster = join_picture_response
-    // handleUserUpdate = () => {
-    //   ...
-    // }
-    //
-    // what i ended up doing was pretty sweet actually
-    //
-    // 1 broadcast all updates to all clients, namely make sure a client is returned its own update in standard order
-    // 2 client keeps a raster that has all received updates
-    // 3 client tracks all non received user updates (in order they were applied)
-    // 4 when client asks for current raster, the raster from step 2 is first copied, and then has the updates from 3 applied. then its returned
-    // 5 when a client recieves its own update, it removes it from pending
-    //
-    // now we can draw pending updates a certain flashing way, maybe bliniking
-    //
-    // ok, keep all clients open till the very end and make sure they all end up with the same updates
-    // works now because user updates are sent, and because and.....
-    //
-    // wait ...
-    //
     // i need to track the picture becuase they could join late for the early updates
     //
     //
@@ -352,48 +243,52 @@ describe('TJTAG broadcast test', () => {
     // to tcp) and that the order that is broadcast is the same as the order that is written.
     // this should be easy too.
 
-    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
-        return new Promise<Socket>((resolve) => {
-            const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-                io_package(ENDPOINT);
+    class Client {
+        private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
+        private readonly updates: Update_RENAME[];
+        private resolve?: () => {};
 
-            socket.on('server_to_client_update', (update: Update) => {
-                if (!receivedUpdates.has(socket.id)) {
-                    receivedUpdates.set(socket.id, new Map());
+        public constructor(updates: Update_RENAME[]) {
+            this.socket = io_package(ENDPOINT);
+            this.updates = updates;
+
+            this.socket.on('server_to_client_update', (update: Update) => {
+                if (!receivedUpdates.has(this.socket.id)) {
+                    receivedUpdates.set(this.socket.id, new Map());
                 }
 
-                const clientMap = receivedUpdates.get(socket.id);
+                const clientMap = receivedUpdates.get(this.socket.id);
                 if (clientMap) {
                     debug(
                         `setting received update for client ${
-                            socket.id
+                            this.socket.id
                         } at ${performance.now()}`
                     );
                     clientMap.set(performance.now(), update);
                 }
             });
 
-            socket.on('join_picture_response', async () => {
+            this.socket.on('join_picture_response', async () => {
                 debug('on join_picture_response');
                 // need to forloop to serialize these
-                for (let i = 0; i < updates.length; ++i) {
-                    const u = updates[i];
+                for (let i = 0; i < this.updates.length; ++i) {
+                    const u = this.updates[i];
 
                     debug('update');
-                    debug(`socketId: ${socket.id}`);
+                    debug(`socketId: ${this.socket.id}`);
                     debug(`updateNum: ${i}`);
                     debug(`now: ${performance.now()}`);
                     debug(`waiting: ${u.waitTimeMS}ms`);
 
-                    socket.emit('client_to_server_udpate', u.pixelUpdate);
+                    this.socket.emit('client_to_server_udpate', u.pixelUpdate);
 
                     u.sentAt = performance.now();
                     debug(
-                        `setting expected update for client ${socket.id} at ${u.sentAt}`
+                        `setting expected update for client ${this.socket.id} at ${u.sentAt}`
                     );
                     expectedUpdates.set(u.sentAt, {
                         update: u.pixelUpdate,
-                        sourceSocketId: socket.id,
+                        sourceSocketId: this.socket.id,
                     });
                     await delay(u.waitTimeMS);
                 }
@@ -401,17 +296,34 @@ describe('TJTAG broadcast test', () => {
                 // TJTAG once its done sending we need to keep it open
                 // then close all after everything is done
                 // socket.close();
-
-                resolve(socket);
+                if (this.resolve) {
+                    this.resolve();
+                } else {
+                    console.log('this.resovle is undef');
+                }
             });
 
-            socket.on('connect', () => {
-                debug(`connected callback and sid is: ${socket.id}`);
-
-                console.log(`spawning client with socketId: ${socket.id}`);
-
-                socket.emit('join_picture_request', { filename: testFilename });
+            this.socket.on('connect', () => {
+                debug(`connected callback and sid is: ${this.socket.id}`);
             });
+        }
+
+        // put most of it here and it can stay the same
+        public async start() {
+            console.log(`spawning client with socketId: ${this.socket.id}`);
+            this.socket.emit('join_picture_request', { filename: testFilename });
+        }
+
+        public waitForCompletion(): Promise<void> {
+            const p = new Promise(ex: (resolve: (value: (value: unkown) => void, reject: (reason?: any) => void) => void) => {
+                
+            })
+            return new Promise((resolve) => {this.resolve = resolve});
+        }
+    }
+
+    const spawnClient = async (updates: Update_RENAME[]): Promise<Socket> => {
+        return new Promise<Socket>((resolve) => {
         });
     };
 
