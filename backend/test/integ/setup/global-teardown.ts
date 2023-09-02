@@ -6,7 +6,7 @@ import {server} from '../../../src/app';
 import { removeAllPng } from './utils';
 
 module.exports = async () => {
-    const serverClosed = new Promise<void>(async (resolve) => {
+    // const serverClosed = new Promise<void>(async (resolve) => {
         await removeAllPng();
 
         try {
@@ -19,6 +19,7 @@ module.exports = async () => {
             console.log(error);
             process.exit(1);
         }
+        // resolve();
 
 //        server.close((err: unknown) => {
 //            console.log('server closing');
@@ -29,8 +30,7 @@ module.exports = async () => {
 //            // then err is undefined
 //            resolve();
 //        });
-resolve();
-    });
+    // });
 
-    await serverClosed;
+    // await serverClosed;
 };

@@ -4,7 +4,7 @@ import {
     makeKnexWithoutDatabase,
     testDatabase,
 } from '../../../src/db/knex_file';
-import { io, server } from '../../../src/app';
+// import { io, server } from '../../../src/app';
 
 // Create the database
 async function createTestDatabase() {
@@ -39,17 +39,17 @@ async function seedTestDatabase() {
     }
 }
 
-async function startServer() {
-    return new Promise<void>(resolve => {
-        io.listen(6543);
-        const port = process.env.PORT || 8080;
-        // maybe i want to run this in a separate process since node is single threaded
-        server.listen(port, () => {
-            console.log(`Listening on port ${port}`);
-            resolve();
-        });
-    });
-}
+//async function startServer() {
+//    return new Promise<void>(resolve => {
+//        io.listen(6543);
+//        const port = process.env.PORT || 8080;
+//        // maybe i want to run this in a separate process since node is single threaded
+//        server.listen(port, () => {
+//            console.log(`Listening on port ${port}`);
+//            resolve();
+//        });
+//    });
+//}
 
 module.exports = async () => {
     Model.knex(makeKnex());
