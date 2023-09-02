@@ -39,17 +39,18 @@ async function seedTestDatabase() {
     }
 }
 
-//async function startServer() {
-//    return new Promise<void>(resolve => {
+async function startServer(): Promise<void> {
+    return new Promise<void>(resolve => {
 //        io.listen(6543);
-//        const port = process.env.PORT || 8080;
-//        // maybe i want to run this in a separate process since node is single threaded
+        const port = process.env.PORT || 8080;
+        // maybe i want to run this in a separate process since node is single threaded
 //        server.listen(port, () => {
 //            console.log(`Listening on port ${port}`);
 //            resolve();
 //        });
-//    });
-//}
+        resolve();
+    });
+}
 
 module.exports = async () => {
     Model.knex(makeKnex());
