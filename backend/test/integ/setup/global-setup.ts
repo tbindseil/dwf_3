@@ -4,7 +4,7 @@ import {
     makeKnexWithoutDatabase,
     testDatabase,
 } from '../../../src/db/knex_file';
-// import { io, server } from '../../../src/app';
+import { io, server } from '../../../src/app';
 
 // Create the database
 async function createTestDatabase() {
