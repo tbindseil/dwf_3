@@ -270,18 +270,18 @@ describe('TJTAG broadcast test', () => {
         console.log('TJTAG done with verification');
     };
 
-    afterAll(async () => {
-        const serverClosed = new Promise<void>((resolve) => {
-            server.close((err: unknown) => {
-                console.log('server closing');
-                console.log(`err is: ${err}`);
-                // when i start server in broadcast test
-                // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
-                // but, if i start server in global setup,
-                // then err is undefined
-                resolve();
-            });
-        });
-        await serverClosed;
-    });
+//    afterAll(async () => {
+//        const serverClosed = new Promise<void>((resolve) => {
+//            server.close((err: unknown) => {
+//                console.log('server closing');
+//                console.log(`err is: ${err}`);
+//                // when i start server in broadcast test
+//                // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
+//                // but, if i start server in global setup,
+//                // then err is undefined
+//                resolve();
+//            });
+//        });
+//        await serverClosed;
+//    });
 });
