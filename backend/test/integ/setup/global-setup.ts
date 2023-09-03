@@ -40,14 +40,14 @@ async function seedTestDatabase() {
 }
 
 async function startServer(): Promise<void> {
-    return new Promise<void>(resolve => {
-//        io.listen(6543);
+    return new Promise<void>((resolve) => {
+        io.listen(6543);
         const port = process.env.PORT || 8080;
         // maybe i want to run this in a separate process since node is single threaded
-//        server.listen(port, () => {
-//            console.log(`Listening on port ${port}`);
-//            resolve();
-//        });
+        server.listen(port, () => {
+            console.log(`Listening on port ${port}`);
+            resolve();
+        });
         resolve();
     });
 }
@@ -57,7 +57,7 @@ module.exports = async () => {
     try {
         await createTestDatabase();
         await seedTestDatabase();
-        // await startServer();
+        await startServer();
     } catch (error) {
         console.log(error);
         process.exit(1);

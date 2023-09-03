@@ -10,7 +10,7 @@ import {
     PostPictureInput,
     ServerToClientEvents,
 } from 'dwf-3-models-tjb';
-import { io, server } from '../../src/app';
+import { server } from '../../src/app';
 import { performance } from 'perf_hooks';
 
 const PICTURE_WIDTH = 800;
@@ -109,14 +109,20 @@ class Client {
     }
 
     public async close(): Promise<void> {
-        return new Promise<void>(resolve => {
+        return new Promise<void>((resolve) => {
             this.socket.on('leave_picture_response', () => {
-                debug(`received leave_picture_response on socekt: ${this.socket.id}`);
+                debug(
+                    `received leave_picture_response on socekt: ${this.socket.id}`
+                );
                 this.socket.close();
                 resolve();
             });
-            this.socket.emit('leave_picture_request', { filename: this.filename });
-            debug(`emitting leave_picture_request on socekt: ${this.socket.id}`);
+            this.socket.emit('leave_picture_request', {
+                filename: this.filename,
+            });
+            debug(
+                `emitting leave_picture_request on socekt: ${this.socket.id}`
+            );
         });
     }
 
@@ -145,15 +151,6 @@ class Client {
         return Math.floor(high * Math.random());
     }
 }
-
-// TODO this needs to be dried out
-io.listen(6543);
-const port = process.env.PORT || 8080;
-// maybe i want to run this in a separate process since node is single threaded
-server.listen(port, () => {
-    // TODO wait until server is running
-    console.log(`Listening on port ${port}`);
-});
 
 describe('TJTAG broadcast test', () => {
     let testFilename: string;
@@ -239,7 +236,9 @@ describe('TJTAG broadcast test', () => {
     // also need to test that picture is updated on server
     // also need to test multiple pictures at once
 
-    const test_allClientsReceiveAllUpdatestest = async (updatesForClients: UpdateToSend[][]) => {
+    const test_allClientsReceiveAllUpdatestest = async (
+        updatesForClients: UpdateToSend[][]
+    ) => {
         const expectedUpdates = new Map<number, Update>();
 
         const clients: Client[] = [];
@@ -272,7 +271,7 @@ describe('TJTAG broadcast test', () => {
     };
 
     afterAll(async () => {
-        const serverClosed = new Promise<void>(resolve => {
+        const serverClosed = new Promise<void>((resolve) => {
             server.close((err: unknown) => {
                 console.log('server closing');
                 console.log(`err is: ${err}`);
