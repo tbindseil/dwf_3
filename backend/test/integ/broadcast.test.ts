@@ -9,9 +9,11 @@ import {
     PixelUpdate,
     PostPictureInput,
     ServerToClientEvents,
+    JoinPictureResponse,
 } from 'dwf-3-models-tjb';
 import { server, io } from '../../src/app';
 import { performance } from 'perf_hooks';
+import { Raster } from 'dwf-3-raster-tjb';
 
 const PICTURE_WIDTH = 800;
 const PICTURE_HEIGHT = 1000;
@@ -40,6 +42,8 @@ class Client {
     private readonly expectedUpdates: Map<number, Update>;
     private readonly receivedUpdates: Map<number, Update> = new Map();
 
+    private raster: Raster;
+
     public constructor(
         updates: UpdateToSend[],
         filename: string,
@@ -61,17 +65,35 @@ class Client {
                 } at ${performance.now()}`
             );
             this.receivedUpdates.set(performance.now(), update);
+            Update.updateRaster(this.raster, update);
         });
     }
 
-    public async joinPicture(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            this.socket.on('join_picture_response', async () => {
-                debug(
-                    `received join_picture_response for socketid: ${this.socket.id}`
-                );
-                resolve();
-            });
+    public async joinPicture(
+        delayBeforeJoining: boolean = false,
+        delayMS: number = 0
+    ): Promise<Client> {
+        if (delayBeforeJoining) {
+            await delay(delayMS);
+        }
+
+        return new Promise<Client>((resolve) => {
+            this.socket.on(
+                'join_picture_response',
+                async (joinPictureResponse: JoinPictureResponse) => {
+                    debug(
+                        `received join_picture_response for socketid: ${this.socket.id}`
+                    );
+
+                    this.raster = new Raster(
+                        joinPictureResponse.width,
+                        joinPictureResponse.height,
+                        joinPictureResponse.data
+                    );
+
+                    resolve(this);
+                }
+            );
             this.socket.emit('join_picture_request', {
                 filename: this.filename,
             });
@@ -106,6 +128,10 @@ class Client {
 
     public getReceivedUpdates(): Map<number, Update> {
         return this.receivedUpdates;
+    }
+
+    public getRaster(): Raster {
+        return this.raster;
     }
 
     public async close(): Promise<void> {
@@ -235,18 +261,22 @@ describe('TJTAG broadcast test', () => {
             JSON.stringify(updatesForClients)
         );
 
-        await test_allClientsReceiveAllUpdatestest(updatesForClients);
+        runTestSuite(updatesForClients);
     };
 
-    const test_allClientsEndWithTheSamePicture_withStaggeredStarts = () => {
-        const lol = 4;
+    const runTestSuite = async (updatesForClients: UpdateToSend[][]) => {
+        // also need to test that picture is updated on server
+        // also need to test multiple pictures at once
+        await test_allClientsReceiveAllUpdatestest(updatesForClients);
+        await test_allClientsEndWithTheSamePicture_withStaggeredStarts(
+            updatesForClients
+        );
     };
-    // also need to test that picture is updated on server
-    // also need to test multiple pictures at once
 
     const test_allClientsReceiveAllUpdatestest = async (
         updatesForClients: UpdateToSend[][]
     ) => {
+        // start all, then
         const expectedUpdates = new Map<number, Update>();
 
         const clients: Client[] = [];
@@ -254,7 +284,7 @@ describe('TJTAG broadcast test', () => {
             clients.push(new Client(updates, testFilename, expectedUpdates));
         });
 
-        const clientConnectPromsies: Promise<void>[] = [];
+        const clientConnectPromsies: Promise<Client>[] = [];
         clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
         await Promise.all(clientConnectPromsies);
 
@@ -274,22 +304,44 @@ describe('TJTAG broadcast test', () => {
             const receivedUpdates = client.getReceivedUpdates();
             expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
-
-        console.log('TJTAG done with verification');
     };
 
-//    afterAll(async () => {
-//        const serverClosed = new Promise<void>((resolve) => {
-//            server.close((err: unknown) => {
-//                console.log('server closing');
-//                console.log(`err is: ${err}`);
-//                // when i start server in broadcast test
-//                // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
-//                // but, if i start server in global setup,
-//                // then err is undefined
-//                resolve();
-//            });
-//        });
-//        await serverClosed;
-//    });
+    const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
+        updatesForClients: UpdateToSend[][]
+    ) => {
+        const expectedUpdates = new Map<number, Update>();
+
+        const clients: Client[] = [];
+        updatesForClients.forEach((updates) => {
+            clients.push(new Client(updates, testFilename, expectedUpdates));
+        });
+
+        const clientConnectPromsies: Promise<Client>[] = [];
+        const clientWorkPromsies: Promise<void>[] = [];
+        clients.forEach((c) =>
+            clientConnectPromsies.push(
+                c.joinPicture(true, Client.randomNumberBetweenZeroAnd(500))
+            )
+        );
+        clientConnectPromsies.forEach((promise: Promise<Client>) => {
+            promise.then((client: Client) => {
+                clientWorkPromsies.push(client.start());
+            });
+        });
+
+        await Promise.all(clientWorkPromsies);
+
+        // let clients receive all updates
+        await delay(1000);
+
+        for (let i = 0; i < clients.length; ++i) {
+            await clients[i].close();
+        }
+
+        // verify
+        clients.forEach((client) => {
+            const receivedUpdates = client.getReceivedUpdates();
+            expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
+        });
+    };
 });
