@@ -10,7 +10,7 @@ import {
     PostPictureInput,
     ServerToClientEvents,
 } from 'dwf-3-models-tjb';
-import { server } from '../../src/app';
+import { server, io } from '../../src/app';
 import { performance } from 'perf_hooks';
 
 const PICTURE_WIDTH = 800;
@@ -22,7 +22,7 @@ interface UpdateToSend {
     sentAt?: number;
 }
 
-const debugEnabled = true;
+const debugEnabled = false;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -151,6 +151,14 @@ class Client {
         return Math.floor(high * Math.random());
     }
 }
+
+// start server, this needs to be done in global setup but its being whack
+io.listen(6543);
+const port = process.env.PORT || 8080;
+// maybe i want to run this in a separate process since node is single threaded
+server.listen(port, () => {
+    console.log(`Listening on port ${port}`);
+});
 
 describe('TJTAG broadcast test', () => {
     let testFilename: string;
