@@ -228,65 +228,65 @@ describe('TJTAG broadcast test', () => {
         testFilename = pictures.pictures[0].filename;
     });
 
-    //    it('runs the test', async () => {
-    //        const numClients = 7;
-    //        const numUpdates = [2, 2, 2, 3, 4, 5, 7]; // [4, 6, 9, 12, 1, 4, 2, 3, 2];
-    //        await testsFromRandom(numClients, numUpdates);
-    //    });
-
-    it('runs tests from file', async () => {
-        await testsFromFile(
-            'savedTestUpdates_Sat__Sep__09__2023__10:54:37__GMT-0600__(Mountain__Daylight__Time)'
-        );
+    it('runs the test', async () => {
+        const numClients = 10;
+        const numUpdates = [8, 12, 4, 1, 2, 2, 3, 4, 5, 7];
+        await testsFromRandom(numClients, numUpdates);
     });
 
-    const testsFromFile = async (previousUpdatesFilename: string) => {
-        const recoveredUpdatesStr = await fs.promises.readFile(
-            previousUpdatesFilename
-        );
-        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
+    //    it('runs tests from file', async () => {
+    //        await testsFromFile(
+    //            'savedTestUpdates_Sat__Sep__09__2023__10:54:37__GMT-0600__(Mountain__Daylight__Time)'
+    //        );
+    //    });
 
-        // filenames need to be replaced becuase of a wrinkle
-        // we use the filename in the update to determine where to broadcast
-        // it should be pictureID instead of filename
-        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
-            (u: UpdateToSend) => {
-                return {
-                    waitTimeMS: u.waitTimeMS,
-                    pixelUpdate: {
-                        ...u.pixelUpdate,
-                        filename: testPicture,
-                    },
-                };
-            }
-        );
-
-        await runTestSuite(recoveredUpdates_replacedFilename);
-    };
-
-    //    const testsFromRandom = async (
-    //        numClients: number,
-    //        numUpdates: number[]
-    //    ) => {
-    //        let updatesForClients: UpdateToSend[][] = [];
-    //        for (let i = 0; i < numClients; ++i) {
-    //            updatesForClients.push([]);
-    //            for (let j = 0; j < numUpdates[i]; ++j) {
-    //                updatesForClients[i].push(
-    //                    Client.makeRandomUpdate(i, testFilename)
-    //                );
-    //            }
-    //        }
+    //    const testsFromFile = async (previousUpdatesFilename: string) => {
+    //        const recoveredUpdatesStr = await fs.promises.readFile(
+    //            previousUpdatesFilename
+    //        );
+    //        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
     //
-    //        // write first incase we crash
-    //        const createdAt = new Date().toString().replaceAll(' ', '__');
-    //        await fs.promises.writeFile(
-    //            `savedTestUpdates_${createdAt}`,
-    //            JSON.stringify(updatesForClients)
+    //        // filenames need to be replaced becuase of a wrinkle
+    //        // we use the filename in the update to determine where to broadcast
+    //        // it should be pictureID instead of filename
+    //        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
+    //            (u: UpdateToSend) => {
+    //                return {
+    //                    waitTimeMS: u.waitTimeMS,
+    //                    pixelUpdate: {
+    //                        ...u.pixelUpdate,
+    //                        filename: testPicture,
+    //                    },
+    //                };
+    //            }
     //        );
     //
-    //        await runTestSuite(updatesForClients);
+    //        await runTestSuite(recoveredUpdates_replacedFilename);
     //    };
+
+    const testsFromRandom = async (
+        numClients: number,
+        numUpdates: number[]
+    ) => {
+        let updatesForClients: UpdateToSend[][] = [];
+        for (let i = 0; i < numClients; ++i) {
+            updatesForClients.push([]);
+            for (let j = 0; j < numUpdates[i]; ++j) {
+                updatesForClients[i].push(
+                    Client.makeRandomUpdate(i, testFilename)
+                );
+            }
+        }
+
+        // write first incase we crash
+        const createdAt = new Date().toString().replaceAll(' ', '__');
+        await fs.promises.writeFile(
+            `savedTestUpdates_${createdAt}`,
+            JSON.stringify(updatesForClients)
+        );
+
+        await runTestSuite(updatesForClients);
+    };
 
     const runTestSuite = async (updatesForClients: UpdateToSend[][]) => {
         // also need to test that picture is updated on server
