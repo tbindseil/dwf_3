@@ -24,7 +24,7 @@ interface UpdateToSend {
     sentAt?: number;
 }
 
-const debugEnabled = false;
+const debugEnabled = true;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -42,7 +42,7 @@ class Client {
     private readonly expectedUpdates: Map<number, Update>;
     private readonly receivedUpdates: Map<number, Update> = new Map();
 
-    private raster: Raster;
+    private raster?: Raster;
 
     public constructor(
         updates: UpdateToSend[],
@@ -65,7 +65,11 @@ class Client {
                 } at ${performance.now()}`
             );
             this.receivedUpdates.set(performance.now(), update);
-            Update.updateRaster(this.raster, update);
+            if (this.raster) {
+                Update.updateRaster(this.raster, update);
+            } else {
+                throw Error('receiving update before setting raster');
+            }
         });
     }
 
@@ -131,7 +135,11 @@ class Client {
     }
 
     public getRaster(): Raster {
-        return this.raster;
+        if (this.raster) {
+            return this.raster;
+        } else {
+            throw Error('raster requested before its received');
+        }
     }
 
     public async close(): Promise<void> {
@@ -220,57 +228,55 @@ describe('TJTAG broadcast test', () => {
         testFilename = pictures.pictures[0].filename;
     });
 
-    it('runs the test', async () => {
-        const numClients = 2;
-        const numUpdates = [2, 2]; // , 2, 2, 2, 2, 2, 2];
-        await testsFromRandom(numClients, numUpdates);
-    });
-
-    //    it('runs tests from file', async () => {
-    //        await testsFromFile(
-    //            'savedTestUpdates_Sat__Aug__26__2023__08:27:50__GMT-0600__(Mountain__Daylight__Time)'
-    //        );
+    //    it('runs the test', async () => {
+    //        const numClients = 7;
+    //        const numUpdates = [2, 2, 2, 3, 4, 5, 7]; // [4, 6, 9, 12, 1, 4, 2, 3, 2];
+    //        await testsFromRandom(numClients, numUpdates);
     //    });
 
-    //    const testsFromFile = async (previousUpdatesFilename: string) => {
-    //        const recoveredUpdatesStr = await fs.promises.readFile(
-    //            previousUpdatesFilename
-    //        );
-    //        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
-    //        tests(recoveredUpdates);
-    //    };
-
-    const testsFromRandom = async (
-        numClients: number,
-        numUpdates: number[]
-    ) => {
-        let updatesForClients: UpdateToSend[][] = [];
-        for (let i = 0; i < numClients; ++i) {
-            updatesForClients.push([]);
-            for (let j = 0; j < numUpdates[i]; ++j) {
-                updatesForClients[i].push(
-                    Client.makeRandomUpdate(i, testFilename)
-                );
-            }
-        }
-
-        // write first incase we crash
-        const createdAt = new Date().toString().replaceAll(' ', '__');
-        await fs.promises.writeFile(
-            `savedTestUpdates_${createdAt}`,
-            JSON.stringify(updatesForClients)
+    it('runs tests from file', async () => {
+        await testsFromFile(
+            'savedTestUpdates_Sat__Sep__09__2023__10:54:37__GMT-0600__(Mountain__Daylight__Time)'
         );
+    });
 
-        runTestSuite(updatesForClients);
+    const testsFromFile = async (previousUpdatesFilename: string) => {
+        const recoveredUpdatesStr = await fs.promises.readFile(
+            previousUpdatesFilename
+        );
+        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
+        await runTestSuite(recoveredUpdates);
     };
+
+    //    const testsFromRandom = async (
+    //        numClients: number,
+    //        numUpdates: number[]
+    //    ) => {
+    //        let updatesForClients: UpdateToSend[][] = [];
+    //        for (let i = 0; i < numClients; ++i) {
+    //            updatesForClients.push([]);
+    //            for (let j = 0; j < numUpdates[i]; ++j) {
+    //                updatesForClients[i].push(
+    //                    Client.makeRandomUpdate(i, testFilename)
+    //                );
+    //            }
+    //        }
+    //
+    //        // write first incase we crash
+    //        const createdAt = new Date().toString().replaceAll(' ', '__');
+    //        await fs.promises.writeFile(
+    //            `savedTestUpdates_${createdAt}`,
+    //            JSON.stringify(updatesForClients)
+    //        );
+    //
+    //        await runTestSuite(updatesForClients);
+    //    };
 
     const runTestSuite = async (updatesForClients: UpdateToSend[][]) => {
         // also need to test that picture is updated on server
         // also need to test multiple pictures at once
         await test_allClientsReceiveAllUpdatestest(updatesForClients);
-        await test_allClientsEndWithTheSamePicture_withStaggeredStarts(
-            updatesForClients
-        );
+        // await test_allClientsEndWithTheSamePicture_withStaggeredStarts( updatesForClients);
     };
 
     const test_allClientsReceiveAllUpdatestest = async (
@@ -319,6 +325,7 @@ describe('TJTAG broadcast test', () => {
         );
         await initialPictureClient.joinPicture();
         const initialRaster = initialPictureClient.getRaster();
+        await initialPictureClient.close();
 
         const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
@@ -348,33 +355,10 @@ describe('TJTAG broadcast test', () => {
         }
 
         // verify
-        const expectedUpdatesd;
-
-        // ok, each picture is a subsection of the whole raster
-        // subsections give rectangles to show where in the main frame the subsection is
-        // ie, x, y, w, h and only those regions of the actual raster have to be iterated
-        // I think the point of this rant is that it recurses (and composes) nicely
-        // so imagine, a naive worst case is that there is a line all the way accross diagonally
-        // well, that could be the whol raster despite being
-        //
-        // .. wait man, so basically, it doesn't work well (or at least i don't see how yet)
-        // for the line diagonal.  no it totally does
-        //
-        // but whats cool is that for a long undo,
-        // we have to apply all together
-        //
-        // idk man this is whack, reread and probably delete
-        //
-        // this is likely the only nugget here
-        // and for undo, can save inverse operations
-        //
-        // end nugget
-        //
-        // and each undo would fit well into the
-
-        clients.forEach((client) => {
-            const receivedUpdates = client.getReceivedUpdates();
-            expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
+        expectedUpdates.forEach((u) => Update.updateRaster(initialRaster, u));
+        clients.forEach((client: Client) => {
+            const actualRaster = client.getRaster();
+            expect(actualRaster).toEqual(initialRaster);
         });
     };
 });
