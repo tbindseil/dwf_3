@@ -228,15 +228,17 @@ describe('TJTAG broadcast test', () => {
         testFilename = pictures.pictures[0].filename;
     });
 
-    it.only('runs random test', async () => {
-        const numClients = 10;
-        const numUpdates = [8, 12, 4, 1, 2, 2, 3, 4, 5, 7];
+    it('runs random test', async () => {
+        const numClients = 20;
+        const numUpdates = [
+            1, 45, 3, 8, 33, 14, 3, 9, 19, 20, 8, 12, 4, 1, 2, 2, 3, 4, 5, 7,
+        ];
         await testsFromRandom(numClients, numUpdates);
     });
 
-    it('runs tests from file', async () => {
+    it.only('runs tests from file', async () => {
         await testsFromFile(
-            'savedTestUpdates_Sat__Sep__09__2023__12:03:54__GMT-0600__(Mountain__Daylight__Time)'
+            'savedTestUpdates_Sat__Sep__09__2023__12:40:50__GMT-0600__(Mountain__Daylight__Time)'
         );
     });
 
@@ -289,6 +291,8 @@ describe('TJTAG broadcast test', () => {
     };
 
     const runTestSuite = async (updatesForClients: UpdateToSend[][]) => {
+        console.log('WTF RUN TEST SUITE');
+        console.log(`updatesForClients.length is: ${updatesForClients.length}`);
         // also need to test that picture is updated on server
         // also need to test multiple pictures at once
         await test_allClientsReceiveAllUpdatestest(updatesForClients);
@@ -324,9 +328,42 @@ describe('TJTAG broadcast test', () => {
         }
 
         // verify
+        console.log(
+            `@@@@ TJTAG @@@@ verifying and clients.length is ${clients.length}`
+        );
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
-            expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
+
+            const receivedValues = Array.from(receivedUpdates.values());
+            const expectedValues = Array.from(expectedUpdates.values());
+
+            console.log(
+                `@@@@ TJTAG @@@@ receivedValues.length is: ${receivedValues.length} and expectedValues.length is: ${expectedValues.length}`
+            );
+            for (let i = 0; i < receivedValues.length; ++i) {
+                console.log(`@@@@ TJTG @@@@ verifying, i is: ${i}`);
+                expect(receivedValues[i]).toEqual(expectedValues[i]);
+            }
+            //
+            //            console.log(
+            //                `@@@@ TJTAG @@@@ receivedUpdates.size is: ${receivedUpdates.size}`
+            //            );
+            //            let numReceivedPrinted = 0;
+            //            receivedUpdates.forEach((u) => {
+            //                if (numReceivedPrinted++ < 5) {
+            //                    console.log(`(received) u is: ${JSON.stringify(u)}`);
+            //                }
+            //            });
+            //            console.log(
+            //                `@@@@ TJTAG @@@@ expectedUpdates.size is: ${expectedUpdates.size}`
+            //            );
+            //            let numExpectedPrinted = 0;
+            //            expectedUpdates.forEach((u) => {
+            //                if (numExpectedPrinted++ < 5) {
+            //                    console.log(`(expected) u is: ${JSON.stringify(u)}`);
+            //                }
+            //            });
+            //            expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
     };
 
