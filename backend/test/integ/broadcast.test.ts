@@ -277,6 +277,8 @@ describe('TJTAG broadcast test', () => {
         // also need to test multiple pictures at once
         await test_allClientsReceiveAllUpdatestest(updatesForClients);
         // await test_allClientsEndWithTheSamePicture_withStaggeredStarts( updatesForClients);
+        // // also test that picture is saved
+        // also test multipl pictures
     };
 
     const test_allClientsReceiveAllUpdatestest = async (
@@ -308,6 +310,12 @@ describe('TJTAG broadcast test', () => {
         // verify
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
+            console.log(
+                `TJTAG receivedUpdates.size is ${receivedUpdates.size}`
+            );
+            console.log(
+                `TJTAG expectedUpdates.size is ${receivedUpdates.size}`
+            );
             expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
     };

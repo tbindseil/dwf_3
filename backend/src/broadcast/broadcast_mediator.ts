@@ -71,14 +71,24 @@ export default class BroadcastMediator {
             );
         }
 
+        console.log(
+            `@@@@ TJTAG @@@@ adding client:
+                filename is: ${filename}
+                socket.id is: ${socket.id}
+                tp.size is: ${this.trackedPictures.size}`
+        );
+
         const trackedPicture = this.trackedPictures.get(filename);
         if (trackedPicture) {
+            console.log('@@@@ TJTAG @@@@ if in add client');
             const broadcastClient = new BroadcastClient(socket);
             trackedPicture.enqueueAddClient(
                 this.ADD_CLIENT_PRIORITY,
                 socket.id,
                 broadcastClient
             );
+        } else {
+            console.log('@@@@ TJTAG @@@@ else in add client');
         }
     }
 
@@ -101,6 +111,7 @@ export default class BroadcastMediator {
     }
 
     public broadcastUpdate(update: Update) {
+        console.log('@@@@ TJTAG @@@@ broadcast 2');
         const trackedPicture = this.trackedPictures.get(update.filename);
         if (trackedPicture) {
             trackedPicture.enqueueBroadcastUpdate(
@@ -109,6 +120,11 @@ export default class BroadcastMediator {
             );
             trackedPicture.enqueueUpdateLocalRaster(
                 this.UPDATE_LOCAL_RASTER_PRIORITY
+            );
+        } else {
+            console.log('@@@@ TJTAG @@@@ ELSE ELSE ELSE ELSE ELSE ELSE ELSE');
+            console.log(
+                `@@@@ TJTAG @@@@ else and filename is: ${update.filename}`
             );
         }
     }
