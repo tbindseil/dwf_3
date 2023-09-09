@@ -228,41 +228,41 @@ describe('TJTAG broadcast test', () => {
         testFilename = pictures.pictures[0].filename;
     });
 
-    it('runs the test', async () => {
+    it.only('runs random test', async () => {
         const numClients = 10;
         const numUpdates = [8, 12, 4, 1, 2, 2, 3, 4, 5, 7];
         await testsFromRandom(numClients, numUpdates);
     });
 
-    //    it('runs tests from file', async () => {
-    //        await testsFromFile(
-    //            'savedTestUpdates_Sat__Sep__09__2023__10:54:37__GMT-0600__(Mountain__Daylight__Time)'
-    //        );
-    //    });
+    it('runs tests from file', async () => {
+        await testsFromFile(
+            'savedTestUpdates_Sat__Sep__09__2023__12:03:54__GMT-0600__(Mountain__Daylight__Time)'
+        );
+    });
 
-    //    const testsFromFile = async (previousUpdatesFilename: string) => {
-    //        const recoveredUpdatesStr = await fs.promises.readFile(
-    //            previousUpdatesFilename
-    //        );
-    //        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
-    //
-    //        // filenames need to be replaced becuase of a wrinkle
-    //        // we use the filename in the update to determine where to broadcast
-    //        // it should be pictureID instead of filename
-    //        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
-    //            (u: UpdateToSend) => {
-    //                return {
-    //                    waitTimeMS: u.waitTimeMS,
-    //                    pixelUpdate: {
-    //                        ...u.pixelUpdate,
-    //                        filename: testPicture,
-    //                    },
-    //                };
-    //            }
-    //        );
-    //
-    //        await runTestSuite(recoveredUpdates_replacedFilename);
-    //    };
+    const testsFromFile = async (previousUpdatesFilename: string) => {
+        const recoveredUpdatesStr = await fs.promises.readFile(
+            previousUpdatesFilename
+        );
+        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
+
+        // filenames need to be replaced becuase of a wrinkle
+        // we use the filename in the update to determine where to broadcast
+        // it should be pictureID instead of filename
+        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
+            (u: UpdateToSend) => {
+                return {
+                    waitTimeMS: u.waitTimeMS,
+                    pixelUpdate: {
+                        ...u.pixelUpdate,
+                        filename: testPicture,
+                    },
+                };
+            }
+        );
+
+        await runTestSuite(recoveredUpdates_replacedFilename);
+    };
 
     const testsFromRandom = async (
         numClients: number,
