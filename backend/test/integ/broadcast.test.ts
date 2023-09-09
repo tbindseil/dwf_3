@@ -337,6 +337,8 @@ describe('TJTAG broadcast test', () => {
         }
 
         // verify
+        // TJTAG looks like with the existing file, the 15th update is always failing
+        // and the contents seem consistently different
         console.log(
             `@@@@ TJTAG @@@@ verifying and clients.length is ${clients.length}`
         );
