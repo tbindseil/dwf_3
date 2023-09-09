@@ -63,23 +63,15 @@ export class TrackedPicture {
         socketId: string,
         broadcastClient: BroadcastClient
     ) {
-        console.log('@@@@ TJTAG @@@@ enqueueAddClient 1');
         this.workQueue.push(priority, async () => {
-            console.log('@@@@ TJTAG @@@@ enqueueAddClient 2');
             this.idToClientMap.set(socketId, broadcastClient);
-            console.log(
-                `@@@@ TJTAG @@@@ enqueueAddClient 2.5 this.idToClientMap.size is: ${this.idToClientMap.size}`
-            );
 
             // cold start
             if (!this.raster) {
-                console.log('@@@@ TJTAG @@@@ enqueueAddClient 3');
                 this.raster = await this.pictureAccessor.readRaster(
                     this.filename
                 );
-                console.log('@@@@ TJTAG @@@@ enqueueAddClient AFTERREADRASTER');
             }
-            console.log('@@@@ TJTAG @@@@ enqueueAddClient 4');
 
             const copiedRaster = this.raster.copy();
             broadcastClient.initializeRaster(copiedRaster);

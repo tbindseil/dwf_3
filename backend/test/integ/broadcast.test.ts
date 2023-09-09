@@ -24,7 +24,7 @@ interface UpdateToSend {
     sentAt?: number;
 }
 
-const debugEnabled = true;
+const debugEnabled = false;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -245,7 +245,23 @@ describe('TJTAG broadcast test', () => {
             previousUpdatesFilename
         );
         const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
-        await runTestSuite(recoveredUpdates);
+
+        // filenames need to be replaced becuase of a wrinkle
+        // we use the filename in the update to determine where to broadcast
+        // it should be pictureID instead of filename
+        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
+            (u: UpdateToSend) => {
+                return {
+                    waitTimeMS: u.waitTimeMS,
+                    pixelUpdate: {
+                        ...u.pixelUpdate,
+                        filename: testPicture,
+                    },
+                };
+            }
+        );
+
+        await runTestSuite(recoveredUpdates_replacedFilename);
     };
 
     //    const testsFromRandom = async (
@@ -310,12 +326,6 @@ describe('TJTAG broadcast test', () => {
         // verify
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
-            console.log(
-                `TJTAG receivedUpdates.size is ${receivedUpdates.size}`
-            );
-            console.log(
-                `TJTAG expectedUpdates.size is ${receivedUpdates.size}`
-            );
             expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
         });
     };
