@@ -24,7 +24,7 @@ interface UpdateToSend {
     sentAt?: number;
 }
 
-const debugEnabled = false;
+const debugEnabled = true;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -51,6 +51,9 @@ class Client {
     ) {
         this.socket = io_package(Client.ENDPOINT);
         this.updates = updates;
+        console.log(
+            `@@@@ TJTAG @@@@ updates.length is: ${this.updates.length}`
+        );
         this.filename = filename;
         this.expectedUpdates = expectedUpdates;
 
@@ -251,17 +254,20 @@ describe('TJTAG broadcast test', () => {
         // filenames need to be replaced becuase of a wrinkle
         // we use the filename in the update to determine where to broadcast
         // it should be pictureID instead of filename
-        const recoveredUpdates_replacedFilename = recoveredUpdates.map(
-            (u: UpdateToSend) => {
-                return {
-                    waitTimeMS: u.waitTimeMS,
-                    pixelUpdate: {
-                        ...u.pixelUpdate,
-                        filename: testPicture,
-                    },
-                };
-            }
-        );
+        const recoveredUpdates_replacedFilename: UpdateToSend[][] = [];
+        recoveredUpdates.forEach((updates: UpdateToSend[]) => {
+            recoveredUpdates_replacedFilename.push(
+                updates.map((u: UpdateToSend) => {
+                    return {
+                        waitTimeMS: u.waitTimeMS,
+                        pixelUpdate: {
+                            ...u.pixelUpdate,
+                            filename: testFilename,
+                        },
+                    };
+                })
+            );
+        });
 
         await runTestSuite(recoveredUpdates_replacedFilename);
     };
@@ -309,6 +315,9 @@ describe('TJTAG broadcast test', () => {
 
         const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
+            console.log(
+                `@@@@ TJTAG @@@@ updates is: ${JSON.stringify(updates)}`
+            );
             clients.push(new Client(updates, testFilename, expectedUpdates));
         });
 

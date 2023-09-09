@@ -108,6 +108,7 @@ io.on(
             }
         );
         socket.on('client_to_server_udpate', (update: Update) => {
+            console.log('@@@@ TJTAG @@@@ broadcast debug 1');
             broadcastMediator.broadcastUpdate(update);
         });
 
