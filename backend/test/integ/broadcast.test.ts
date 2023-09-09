@@ -311,6 +311,15 @@ describe('TJTAG broadcast test', () => {
     ) => {
         const expectedUpdates = new Map<number, Update>();
 
+        // since udpates is empty, it will just give back the picture it receives
+        const initialPictureClient = new Client(
+            [],
+            testFilename,
+            expectedUpdates
+        );
+        await initialPictureClient.joinPicture();
+        const initialRaster = initialPictureClient.getRaster();
+
         const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
             clients.push(new Client(updates, testFilename, expectedUpdates));
@@ -339,6 +348,30 @@ describe('TJTAG broadcast test', () => {
         }
 
         // verify
+        const expectedUpdatesd;
+
+        // ok, each picture is a subsection of the whole raster
+        // subsections give rectangles to show where in the main frame the subsection is
+        // ie, x, y, w, h and only those regions of the actual raster have to be iterated
+        // I think the point of this rant is that it recurses (and composes) nicely
+        // so imagine, a naive worst case is that there is a line all the way accross diagonally
+        // well, that could be the whol raster despite being
+        //
+        // .. wait man, so basically, it doesn't work well (or at least i don't see how yet)
+        // for the line diagonal.  no it totally does
+        //
+        // but whats cool is that for a long undo,
+        // we have to apply all together
+        //
+        // idk man this is whack, reread and probably delete
+        //
+        // this is likely the only nugget here
+        // and for undo, can save inverse operations
+        //
+        // end nugget
+        //
+        // and each undo would fit well into the
+
         clients.forEach((client) => {
             const receivedUpdates = client.getReceivedUpdates();
             expect(receivedUpdates.values()).toEqual(expectedUpdates.values());
