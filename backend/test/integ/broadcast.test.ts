@@ -24,7 +24,7 @@ interface UpdateToSend {
     sentAt?: number;
 }
 
-const debugEnabled = true;
+const debugEnabled = false;
 const debug = (msg: string, force = false) => {
     if (force || debugEnabled) console.log(msg);
 };
@@ -40,6 +40,7 @@ class Client {
     private readonly updates: UpdateToSend[];
     private readonly filename: string;
     private readonly expectedUpdates: Map<number, Update>;
+    private readonly clientNum: number;
     private readonly receivedUpdates: Map<number, Update> = new Map();
 
     private raster?: Raster;
@@ -47,7 +48,8 @@ class Client {
     public constructor(
         updates: UpdateToSend[],
         filename: string,
-        expectedUpdates: Map<number, Update>
+        expectedUpdates: Map<number, Update>,
+        clientNum: number
     ) {
         this.socket = io_package(Client.ENDPOINT);
         this.updates = updates;
@@ -56,6 +58,7 @@ class Client {
         );
         this.filename = filename;
         this.expectedUpdates = expectedUpdates;
+        this.clientNum = clientNum;
 
         this.socket.on('connect', () => {
             debug(`connected callback and sid is: ${this.socket.id}`);
@@ -63,10 +66,19 @@ class Client {
 
         this.socket.on('server_to_client_update', (update: Update) => {
             debug(
-                `setting received update for client ${
-                    this.socket.id
-                } at ${performance.now()}`
+                `receiving update:
+                updateID: ${update.uuid}
+                now: ${performance.now()}`,
+                this.clientNum == 0
             );
+            //            debug(
+            //                `receiving update:
+            //                updateID: ${update.uuid}
+            //                ReceivingClientID ${this.socket.id}
+            //                now: ${performance.now()}
+            //                pixelUpdate: ${JSON.stringify(update)}`,
+            //                this.clientNum == 0
+            //            );
             this.receivedUpdates.set(performance.now(), update);
             if (this.raster) {
                 Update.updateRaster(this.raster, update);
@@ -113,19 +125,18 @@ class Client {
             for (let i = 0; i < this.updates.length; ++i) {
                 const u = this.updates[i];
 
-                debug(`printing update:
-                socketId: ${this.socket.id}
-                updateNum: ${i}
-                now: ${performance.now()}
-                waiting: ${u.waitTimeMS}ms
-                done printing update`);
+                u.sentAt = performance.now();
+
+                debug(
+                    `sending update:
+                updateID: ${u.pixelUpdate.uuid}
+                now: ${u.sentAt}
+                waiting: ${u.waitTimeMS}ms`,
+                    true
+                );
 
                 this.socket.emit('client_to_server_udpate', u.pixelUpdate);
 
-                u.sentAt = performance.now();
-                debug(
-                    `setting expected update for client ${this.socket.id} at ${u.sentAt}`
-                );
                 this.expectedUpdates.set(u.sentAt, u.pixelUpdate);
                 await delay(u.waitTimeMS);
             }
@@ -314,11 +325,14 @@ describe('TJTAG broadcast test', () => {
         const expectedUpdates = new Map<number, Update>();
 
         const clients: Client[] = [];
+        let clientNum = 0;
         updatesForClients.forEach((updates) => {
-            console.log(
-                `@@@@ TJTAG @@@@ updates is: ${JSON.stringify(updates)}`
+            //            console.log(
+            //                `@@@@ TJTAG @@@@ updates is: ${JSON.stringify(updates)}`
+            //            );
+            clients.push(
+                new Client(updates, testFilename, expectedUpdates, clientNum++)
             );
-            clients.push(new Client(updates, testFilename, expectedUpdates));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
@@ -387,7 +401,8 @@ describe('TJTAG broadcast test', () => {
         const initialPictureClient = new Client(
             [],
             testFilename,
-            expectedUpdates
+            expectedUpdates,
+            0
         );
         await initialPictureClient.joinPicture();
         const initialRaster = initialPictureClient.getRaster();
@@ -395,7 +410,7 @@ describe('TJTAG broadcast test', () => {
 
         const clients: Client[] = [];
         updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilename, expectedUpdates));
+            clients.push(new Client(updates, testFilename, expectedUpdates, 0));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];

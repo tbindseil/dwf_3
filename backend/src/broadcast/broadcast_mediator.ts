@@ -101,7 +101,7 @@ export default class BroadcastMediator {
     }
 
     public broadcastUpdate(update: Update) {
-        console.log('@@@@ TJTAG @@@@ broadcast debug 2');
+        // console.log('@@@@ TJTAG @@@@ broadcast debug 2');
         const trackedPicture = this.trackedPictures.get(update.filename);
         if (trackedPicture) {
             trackedPicture.enqueueBroadcastUpdate(
@@ -112,7 +112,7 @@ export default class BroadcastMediator {
                 this.UPDATE_LOCAL_RASTER_PRIORITY
             );
         } else {
-            console.log('@@@@ TJTAG @@@@ broadcast update next');
+            // console.log('@@@@ TJTAG @@@@ broadcast update next');
         }
     }
 }

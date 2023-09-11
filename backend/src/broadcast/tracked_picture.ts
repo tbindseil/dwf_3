@@ -94,9 +94,9 @@ export class TrackedPicture {
     }
 
     public enqueueBroadcastUpdate(priority: Priority, update: Update) {
-        console.log('@@@@ TJTAG @@@@ broadcast debug 3');
+        // console.log('@@@@ TJTAG @@@@ broadcast debug 3');
         this.workQueue.push(priority, async () => {
-            console.log('@@@@ TJTAG @@@@ broadcast debug 4');
+            // console.log('@@@@ TJTAG @@@@ broadcast debug 4');
             this.idToClientMap.forEach((client: BroadcastClient) => {
                 client.handleUpdate(update);
             });
