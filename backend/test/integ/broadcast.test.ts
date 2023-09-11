@@ -42,6 +42,7 @@ class Client {
     private readonly expectedUpdates: Map<number, Update>;
     private readonly clientNum: number;
     private readonly receivedUpdates: Map<number, Update> = new Map();
+    private readonly sentUpdates: Map<number, Update> = new Map();
 
     private raster?: Raster;
 
@@ -132,15 +133,31 @@ class Client {
 
                 this.socket.emit('client_to_server_udpate', u.pixelUpdate);
 
+                debug(
+                    `done sending update: ${u.pixelUpdate.uuid} @ ${u.sentAt} then waiting ${u.waitTimeMS}ms`,
+                    true
+                );
+
                 this.expectedUpdates.set(u.sentAt, u.pixelUpdate);
+                this.sentUpdates.set(u.sentAt, u.pixelUpdate);
+
                 await delay(u.waitTimeMS);
             }
             resolve();
         });
     }
 
+    // i guess there is no guarantee on the order that two different
+    // updates from two different clients will be received on
+    //
+    // but it would be interesting to know if this would work for a given client
+
     public getReceivedUpdates(): Map<number, Update> {
         return this.receivedUpdates;
+    }
+
+    public getSentUpdates(): Map<number, Update> {
+        return this.sentUpdates;
     }
 
     public getRaster(): Raster {
@@ -352,18 +369,34 @@ describe('TJTAG broadcast test', () => {
             `@@@@ TJTAG @@@@ verifying and clients.length is ${clients.length}`
         );
         clients.forEach((client) => {
-            const receivedUpdates = client.getReceivedUpdates();
+            const sentUpdateIDs = Array.from(
+                client.getSentUpdates().values()
+            ).map((u) => u.uuid);
+            const receivedUpdateIDsFromSelf = Array.from(
+                client.getReceivedUpdates().values()
+            )
+                .filter((u) => sentUpdateIDs.includes(u.uuid))
+                .map((u) => u.uuid);
 
-            const receivedValues = Array.from(receivedUpdates.values());
-            const expectedValues = Array.from(expectedUpdates.values());
-
+            console.log(`sentUpdateIDs is; ${JSON.stringify(sentUpdateIDs)}`);
             console.log(
-                `@@@@ TJTAG @@@@ receivedValues.length is: ${receivedValues.length} and expectedValues.length is: ${expectedValues.length}`
+                `receivedUpdateIDsFromSelf is; ${JSON.stringify(
+                    receivedUpdateIDsFromSelf
+                )}`
             );
-            for (let i = 0; i < receivedValues.length; ++i) {
-                console.log(`@@@@ TJTG @@@@ verifying, i is: ${i}`);
-                expect(receivedValues[i]).toEqual(expectedValues[i]);
-            }
+
+            expect(receivedUpdateIDsFromSelf).toEqual(sentUpdateIDs);
+
+            //            const receivedValues = Array.from(receivedUpdates.values());
+            //            const expectedValues = Array.from(expectedUpdates.values());
+            //
+            //            console.log(
+            //                `@@@@ TJTAG @@@@ receivedValues.length is: ${receivedValues.length} and expectedValues.length is: ${expectedValues.length}`
+            //            );
+            //            for (let i = 0; i < receivedValues.length; ++i) {
+            //                console.log(`@@@@ TJTG @@@@ verifying, i is: ${i}`);
+            //                expect(receivedValues[i]).toEqual(expectedValues[i]);
+            //            }
             //
             //            console.log(
             //                `@@@@ TJTAG @@@@ receivedUpdates.size is: ${receivedUpdates.size}`
