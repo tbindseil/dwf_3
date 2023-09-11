@@ -66,9 +66,7 @@ class Client {
 
         this.socket.on('server_to_client_update', (update: Update) => {
             debug(
-                `receiving update:
-                updateID: ${update.uuid}
-                now: ${performance.now()}`,
+                `receiving update: ${update.uuid} @ ${performance.now()}`,
                 this.clientNum == 0
             );
             //            debug(
@@ -128,10 +126,7 @@ class Client {
                 u.sentAt = performance.now();
 
                 debug(
-                    `sending update:
-                updateID: ${u.pixelUpdate.uuid}
-                now: ${u.sentAt}
-                waiting: ${u.waitTimeMS}ms`,
+                    `sending update: ${u.pixelUpdate.uuid} @ ${u.sentAt} then waiting ${u.waitTimeMS}ms`,
                     true
                 );
 

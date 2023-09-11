@@ -108,7 +108,9 @@ io.on(
             }
         );
         socket.on('client_to_server_udpate', (update: Update) => {
-            // console.log('@@@@ TJTAG @@@@ broadcast debug 1');
+            console.log(
+                `@@@@ TJTAG @@@@ server receiving update: ${update.uuid}`
+            );
             broadcastMediator.broadcastUpdate(update);
         });
 
