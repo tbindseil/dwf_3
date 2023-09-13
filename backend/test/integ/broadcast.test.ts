@@ -39,7 +39,7 @@ class Client {
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private readonly updates: UpdateToSend[];
     private readonly filename: string;
-    private readonly clientNum: number;
+    public readonly clientNum: number;
     private readonly receivedUpdates: Map<number, Update> = new Map();
     private readonly sentUpdates: Map<number, Update> = new Map();
 
@@ -207,11 +207,8 @@ describe('TJTAG broadcast test', () => {
     };
 
     beforeEach(async () => {
-        // console.log( `@@ TJTAG @@ before starting server @ ${performance.now()}`);
         await startServer();
-        // console.log(`@@ TJTAG @@ after starting server @ ${performance.now()}`);
 
-        // console.log(`@@ TJTAG @@ start of beforeEach @ ${performance.now()}`);
         // create a picture and make sure its there
         const payload: PostPictureInput = {
             name: testPicture.name,
@@ -220,7 +217,6 @@ describe('TJTAG broadcast test', () => {
             height: testPicture.height,
         };
 
-        // console.log(`@@ TJTAG @@ mid1 of beforeEach @ ${performance.now()}`);
         await request(server)
             .post('/picture')
             .send(payload)
@@ -228,7 +224,6 @@ describe('TJTAG broadcast test', () => {
             .set('Accept', 'application/json')
             .expect(200);
 
-        // console.log(`@@ TJTAG @@ mid2 of beforeEach @ ${performance.now()}`);
         // look at all posted pictures
         const { body: pictures } = await request(server)
             .get('/pictures')
@@ -236,10 +231,9 @@ describe('TJTAG broadcast test', () => {
         expect(pictures.pictures.length).toEqual(1);
 
         testFilename = pictures.pictures[0].filename;
-        // console.log(`@@ TJTAG @@ end of beforeEach @ ${performance.now()}`);
     });
 
-    it.only('runs random test', async () => {
+    it('runs random test', async () => {
         //        const numClients = 20;
         //        const numUpdates = [
         //            1, 45, 3, 8, 33, 14, 3, 9, 19, 20, 8, 12, 4, 1, 2, 2, 3, 4, 5, 7,
@@ -262,9 +256,9 @@ describe('TJTAG broadcast test', () => {
         await testsFromRandom(numClients, numUpdates);
     };
 
-    it('runs tests from file', async () => {
+    it.only('runs tests from file', async () => {
         await testsFromFile(
-            'savedTestUpdates_Sat__Sep__09__2023__12:40:50__GMT-0600__(Mountain__Daylight__Time)'
+            'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)'
         );
     });
 
@@ -299,7 +293,6 @@ describe('TJTAG broadcast test', () => {
         numClients: number,
         numUpdates: number[]
     ) => {
-        // console.log( `@@ TJTAG @@ start of testsFromRandom @ ${performance.now()}`);
         let updatesForClients: UpdateToSend[][] = [];
         for (let i = 0; i < numClients; ++i) {
             updatesForClients.push([]);
@@ -309,8 +302,6 @@ describe('TJTAG broadcast test', () => {
                 );
             }
         }
-
-        // console.log( `@@ TJTAG @@ middle of testsFromRandom @ ${performance.now()}`);
 
         // write first incase we crash
         const createdAt = new Date().toString().replaceAll(' ', '__');
@@ -373,20 +364,17 @@ describe('TJTAG broadcast test', () => {
     const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
         updatesForClients: UpdateToSend[][]
     ) => {
-        let logNum = 0;
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         // since udpates is empty, it will just give back the picture it receives
         // this one listens, we get actual (expected) from it
         const initialPictureClient = new Client([], testFilename, 0);
         await initialPictureClient.joinPicture();
 
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         const clients: Client[] = [];
+        let clientNum = 0;
         updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilename, 0));
+            clients.push(new Client(updates, testFilename, clientNum++));
         });
 
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         const clientConnectPromsies: Promise<Client>[] = [];
         const clientWorkPromsies: Promise<void>[] = [];
         clients.forEach((c) =>
@@ -394,30 +382,34 @@ describe('TJTAG broadcast test', () => {
                 c.joinPicture(true, Client.randomNumberBetweenZeroAnd(500))
             )
         );
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         clientConnectPromsies.forEach((promise: Promise<Client>) => {
             promise.then((client: Client) => {
                 clientWorkPromsies.push(client.start());
             });
         });
 
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         await Promise.all(clientWorkPromsies);
 
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         // let clients receive all updates
         await delay(1000);
 
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
         initialPictureClient.close();
         for (let i = 0; i < clients.length; ++i) {
             await clients[i].close();
         }
-        // console.log(`@@ TJTAG @@ ${logNum++} @ ${performance.now()}`);
 
         // verify
         const expectedRaster = initialPictureClient.getRaster();
+        console.log('printing initial picture update ids');
+        initialPictureClient
+            .getReceivedUpdates()
+            .forEach((u) => console.log(`    ${u.uuid}`));
         clients.forEach((client: Client) => {
+            console.log(`printing client_${client.clientNum} update ids`);
+            client
+                .getReceivedUpdates()
+                .forEach((u) => console.log(`    ${u.uuid}`));
+
             const actualRaster = client.getRaster();
             expect(actualRaster).toEqual(expectedRaster);
         });
