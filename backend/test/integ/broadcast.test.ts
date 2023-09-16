@@ -35,10 +35,60 @@ interface ClientScript {
 // with toFile() and fromFile() functions
 // and a map of filename => clientscript[]
 // and probably even a way to plug new filenames in (or i could just make it happen with ids?)
-interface TestSchedule {
-    filename: {
-        clientScript: ClientScript;
-    };
+class TestSchedule {
+    // maps filename to ClientScript
+    private readonly pictures: Map<string, ClientScript[]>;
+
+    private constructor(pictures: Map<string, ClientScript[]>) {
+        this.pictures = pictures;
+    }
+
+    public async toFile() {
+        // well what's interesting is that the filename isn't consistent accross runs
+        // so we just need to keep the ClientScripts grouped together
+        // so we could probably just group them into an array of arrays
+        const scriptsSansFilenames: ClientScript[][] = [];
+        Array.from(this.pictures.values()).forEach((scripts) =>
+            scriptsSansFilenames.push(scripts)
+        );
+        const createdAt = new Date().toString().replaceAll(' ', '__');
+        await fs.promises.writeFile(
+            `savedTestSchedule_${createdAt}`,
+            JSON.stringify(scriptsSansFilenames)
+        );
+    }
+
+    public static async fromFile(
+        testScheduleFile: string,
+        pictureFilenames: string[]
+    ): Promise<TestSchedule> {
+        const scriptsSansFilenames: ClientScript[][] = JSON.parse(
+            '' + (await fs.promises.readFile(testScheduleFile))
+        );
+
+        // TODO NUM_PICTURES is kinda tied in here
+        if (scriptsSansFilenames.length !== pictureFilenames.length) {
+            throw Error(
+                `recovered ${scriptsSansFilenames.length} sets of updates but expected ${pictureFilenames.length}`
+            );
+        }
+
+        // now match the filenames to the scripts, this could potentially(?) result in inconsistencies
+        const pictureToScripts = new Map<string, ClientScript[]>();
+        for (let i = 0; i < scriptsSansFilenames.length; ++i) {
+            pictureToScripts.set(pictureFilenames[i], scriptsSansFilenames[i]);
+        }
+
+        return new TestSchedule(pictureToScripts);
+    }
+
+    public static fromRandom(): Promise<TestSchedule> {
+        const numPictures = 4;
+        const clientsPerPictures = [4, 4, 4, 4];
+        const updatesPerClientPerPicture = [[4], [4], [4], [4]];
+        // TODO continue
+        return new TestSchedule(pictureToScripts);
+    }
 }
 
 const debugEnabled = false;
