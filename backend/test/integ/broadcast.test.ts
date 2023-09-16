@@ -78,6 +78,9 @@ class Client {
         if (delayBeforeJoining) {
             // console.log(`@@ TJTAG @@ delayMS is: ${delayMS}`);
             await delay(delayMS);
+            console.log(
+                `@@ TJTAG @@ clientNum_${this.clientNum} done waiting ${delayMS}ms`
+            );
         }
 
         return new Promise<Client>((resolve) => {
@@ -256,6 +259,8 @@ describe('TJTAG broadcast test', () => {
         await testsFromRandom(numClients, numUpdates);
     };
 
+    // so it seems like it is inconsistently failing with this file
+    // and whats weird is that clients will pass even when they have a different number of updates than the initial client
     it.only('runs tests from file', async () => {
         await testsFromFile(
             'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)'
@@ -398,21 +403,31 @@ describe('TJTAG broadcast test', () => {
             await clients[i].close();
         }
 
-        // verify
-        const expectedRaster = initialPictureClient.getRaster();
-        console.log('printing initial picture update ids');
-        initialPictureClient
-            .getReceivedUpdates()
-            .forEach((u) => console.log(`    ${u.uuid}`));
-        clients.forEach((client: Client) => {
-            console.log(`printing client_${client.clientNum} update ids`);
-            client
-                .getReceivedUpdates()
-                .forEach((u) => console.log(`    ${u.uuid}`));
+        const makeUpdatesFileString = (c: Client): string => {
+            let ret = 'printing picture update ids';
+            c.getReceivedUpdates().forEach((u) => (ret += `\n    ${u.uuid}`));
+            return ret;
+        };
 
+        // TODO the file doesn't capture all aspects of randomness
+
+        const inintialPictureString =
+            makeUpdatesFileString(initialPictureClient);
+        await fs.promises.writeFile('initial', inintialPictureString);
+
+        const expectedRaster = initialPictureClient.getRaster();
+        for (let i = 0; i < clients.length; ++i) {
+            const client = clients[i];
+            const clientPictureString = makeUpdatesFileString(client);
+            await fs.promises.writeFile(
+                `client_${client.clientNum}`,
+                clientPictureString
+            );
+
+            console.log(`verifying client ${client.clientNum}`);
             const actualRaster = client.getRaster();
             expect(actualRaster).toEqual(expectedRaster);
-        });
+        }
     };
 
     afterAll(async () => {
