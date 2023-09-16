@@ -325,10 +325,21 @@ describe('TJTAG broadcast test', () => {
         // also need to test that picture is updated on server
         // also need to test multiple pictures at once
         // also need to test multipl pictures
-        // await test_allClientsReceiveTheirOwnUpdatesInOrder(updatesForClients);
-        await test_allClientsEndWithTheSamePicture_withStaggeredStarts(
-            updatesForClients
-        );
+        const tests: Promise<void>[] = [];
+        for (let i = 0; i < 5; ++i) {
+            tests.push(
+                test_allClientsReceiveTheirOwnUpdatesInOrder(updatesForClients)
+            );
+            tests.push(
+                test_allClientsEndWithTheSamePicture_withStaggeredStarts(
+                    updatesForClients
+                )
+            );
+        }
+
+        // this won't work with the same picture
+        // TODO pass in picture
+        await Promise.all(tests);
     };
 
     const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
