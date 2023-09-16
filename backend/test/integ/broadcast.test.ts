@@ -24,25 +24,26 @@ const PICTURE_WIDTH = 80;
 const PICTURE_HEIGHT = 100;
 
 interface Action {
-    waitTimeMS: number; // TODO preWaitMS
-    pixelUpdate: PixelUpdate;
     sentAt?: number;
+    pixelUpdate: PixelUpdate;
+    postActionWaitMS: number;
 }
 
 interface ClientScript {
+    clientID: string;
     initialWait: number;
     actions: Action[];
 }
 
 class TestSchedule {
-    private readonly pictures: Map<string, ClientScript[]>; // TODO rename
+    private readonly pictureScripts: Map<string, ClientScript[]>;
 
-    private constructor(pictures: Map<string, ClientScript[]>) {
-        this.pictures = pictures;
+    private constructor(pictureScripts: Map<string, ClientScript[]>) {
+        this.pictureScripts = pictureScripts;
     }
 
     public getClientScripts(filename: string): ClientScript[] {
-        const clientScripts = this.pictures.get(filename);
+        const clientScripts = this.pictureScripts.get(filename);
         if (!clientScripts) {
             throw Error(`no scripts for filename: ${filename}`);
         }
@@ -54,7 +55,7 @@ class TestSchedule {
         // so we just need to keep the ClientScripts grouped together
         // so we could probably just group them into an array of arrays
         const scriptsSansFilenames: ClientScript[][] = [];
-        Array.from(this.pictures.values()).forEach((scripts) =>
+        Array.from(this.pictureScripts.values()).forEach((scripts) =>
             scriptsSansFilenames.push(scripts)
         );
         const createdAt = new Date().toString().replaceAll(' ', '__');
@@ -73,40 +74,39 @@ class TestSchedule {
         );
 
         // TODO NUM_PICTURES is kinda tied in here
+        // see: test schedule should determine the initial picture creation
         if (scriptsSansFilenames.length !== pictureFilenames.length) {
             throw Error(
                 `recovered ${scriptsSansFilenames.length} sets of updates but expected ${pictureFilenames.length}`
             );
         }
 
-        const pictureToScripts = new Map<string, ClientScript[]>();
+        const pictureScripts = new Map<string, ClientScript[]>();
         for (let i = 0; i < scriptsSansFilenames.length; ++i) {
-            pictureToScripts.set(pictureFilenames[i], scriptsSansFilenames[i]);
+            pictureScripts.set(pictureFilenames[i], scriptsSansFilenames[i]);
         }
 
         // updates have the picture they are applied to as part of their model
         // TODO probably a code smell here, make sure there is a note to address
-        pictureToScripts.forEach(
-            (scripts: ClientScript[], filename: string) => {
-                scripts.forEach((script) => {
-                    script.actions.map((a) => {
-                        return {
-                            waitTimeMS: a.waitTimeMS,
-                            pixelUpdate: {
-                                ...a.pixelUpdate,
-                                filename: filename,
-                            },
-                        };
-                    });
+        pictureScripts.forEach((scripts: ClientScript[], filename: string) => {
+            scripts.forEach((script) => {
+                script.actions.map((a) => {
+                    return {
+                        waitTimeMS: a.postActionWaitMS,
+                        pixelUpdate: {
+                            ...a.pixelUpdate,
+                            filename: filename,
+                        },
+                    };
                 });
-            }
-        );
+            });
+        });
 
-        return new TestSchedule(pictureToScripts);
+        return new TestSchedule(pictureScripts);
     }
 
     public static makeRandomTestSchedule(filenames: string[]): TestSchedule {
-        const pictureToScripts = new Map<string, ClientScript[]>();
+        const pictureScripts = new Map<string, ClientScript[]>();
 
         filenames.forEach((filename) => {
             const clientsInThisPicture = Client.randomNumberBetweenZeroAnd(
@@ -118,16 +118,16 @@ class TestSchedule {
                 clientScripts.push(
                     this.makeRandomClientScript(
                         filename,
-                        `${j}`, // TODO this is kind of a weird place to declare client id, it seems like client id should come in here somehow
+                        `${filename}__client_${j}`,
                         Client.randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
                     )
                 );
             }
 
-            pictureToScripts.set(filename, clientScripts);
+            pictureScripts.set(filename, clientScripts);
         });
 
-        const randomTestSchedule = new TestSchedule(pictureToScripts);
+        const randomTestSchedule = new TestSchedule(pictureScripts);
         randomTestSchedule.toFile();
         return randomTestSchedule;
     }
@@ -140,10 +140,11 @@ class TestSchedule {
         const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS); // TODO I don't think this should be in the Client class
         const actions: Action[] = [];
         for (let i = 0; i < numActions; ++i) {
-            actions.push(Client.makeRandomUpdate(clientID, filename));
+            actions.push(Client.makeRandomAction(clientID, filename));
         }
 
         return {
+            clientID,
             initialWait,
             actions,
         };
@@ -165,21 +166,15 @@ class Client {
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private readonly script: ClientScript;
     private readonly filename: string;
-    public readonly clientNum: number; // TODO clientID?
     private readonly receivedUpdates: Map<number, Update> = new Map();
     private readonly sentUpdates: Map<number, Update> = new Map();
 
     private raster?: Raster;
 
-    public constructor(
-        script: ClientScript,
-        filename: string,
-        clientNum: number
-    ) {
+    public constructor(script: ClientScript, filename: string) {
         this.socket = io_package(Client.ENDPOINT);
         this.script = script;
         this.filename = filename; // TODO should this be in the interface?
-        this.clientNum = clientNum;
 
         this.socket.on('connect', () => {
             debug(`connected callback and sid is: ${this.socket.id}`);
@@ -201,7 +196,7 @@ class Client {
         if (this.script.initialWait) {
             await delay(this.script.initialWait);
             debug(
-                `clientNum_${this.clientNum} done waiting ${this.script.initialWait}ms`
+                `clientNum_${this.script.clientID} done waiting ${this.script.initialWait}ms`
             );
         }
 
@@ -237,7 +232,7 @@ class Client {
                 currAction.sentAt = performance.now();
 
                 debug(
-                    `sending update: ${currAction.pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.waitTimeMS}ms`
+                    `sending update: ${currAction.pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.postActionWaitMS}ms`
                 );
 
                 this.socket.emit(
@@ -246,7 +241,7 @@ class Client {
                 );
                 this.sentUpdates.set(currAction.sentAt, currAction.pixelUpdate);
 
-                await delay(currAction.waitTimeMS);
+                await delay(currAction.postActionWaitMS);
             }
             resolve();
         });
@@ -287,19 +282,16 @@ class Client {
     }
 
     public makeUpdatesFileString(): string {
-        let ret = `printing picture update ids for client_${this.clientNum}`;
+        let ret = `printing picture update ids for client_${this.script.clientID}`;
         this.getReceivedUpdates().forEach((u) => (ret += `\n    ${u.uuid}`));
         return ret;
     }
 
-    public static makeRandomUpdate(
-        clientNum: string,
-        filename: string
-    ): Action {
+    public static makeRandomAction(clientID: string, filename: string): Action {
         const waitTimeMS = Client.randomNumberBetweenZeroAnd(100);
         const pixelUpdate = new PixelUpdate({
             filename: filename,
-            createdBy: `client_${clientNum}`,
+            createdBy: clientID,
             x: Client.randomNumberBetweenZeroAnd(PICTURE_WIDTH),
             y: Client.randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
             red: Client.randomNumberBetweenZeroAnd(255),
@@ -308,7 +300,7 @@ class Client {
         });
 
         return {
-            waitTimeMS,
+            postActionWaitMS: waitTimeMS,
             pixelUpdate,
         };
     }
@@ -402,19 +394,20 @@ describe('TJTAG broadcast test', () => {
             const clientScripts = testSchedule.getClientScripts(filename);
 
             // TODO only one of these will pass if client num is 1, for obvious reasons (same picture)
+            // so really, the test schedule should determine the initial picture creation
 
-            //            tests.push(
-            //                test_allClientsReceiveTheirOwnUpdatesInOrder(
-            //                    filename,
-            //                    clientScripts
-            //                )
-            //            );
             tests.push(
-                test_allClientsEndWithTheSamePicture_withStaggeredStarts(
+                test_allClientsReceiveTheirOwnUpdatesInOrder(
                     filename,
                     clientScripts
                 )
             );
+            //tests.push(
+            //    test_allClientsEndWithTheSamePicture_withStaggeredStarts(
+            //        filename,
+            //        clientScripts
+            //    )
+            //);
         });
 
         await Promise.all(tests);
@@ -425,9 +418,8 @@ describe('TJTAG broadcast test', () => {
         clientScripts: ClientScript[]
     ) => {
         const clients: Client[] = [];
-        let clientNum = 0;
-        clientScripts.forEach((clientscript) => {
-            clients.push(new Client(clientscript, filename, clientNum++)); // TODO instead of clientNum, save clientID in client script and pass it in
+        clientScripts.forEach((clientScript) => {
+            clients.push(new Client(clientScript, filename));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
@@ -466,16 +458,14 @@ describe('TJTAG broadcast test', () => {
         // since udpates is empty, it will just give back the picture it receives
         // this one listens, we get actual (expected) from it
         const initialPictureClient = new Client(
-            { initialWait: 0, actions: [] },
-            filename,
-            0
+            { clientID: 'initialPictureClient', initialWait: 0, actions: [] },
+            filename
         );
         await initialPictureClient.joinPicture();
 
         const clients: Client[] = [];
-        let clientNum = 0;
         clientScripts.forEach((clientscript) => {
-            clients.push(new Client(clientscript, filename, clientNum++));
+            clients.push(new Client(clientscript, filename));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
