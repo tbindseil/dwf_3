@@ -17,6 +17,9 @@ import { performance } from 'perf_hooks';
 import { Raster } from 'dwf-3-raster-tjb';
 
 const NUM_PICTURES = 3;
+const MAX_CLIENTS_PER_PICTURE = 20;
+const MAX_CLIENT_ACTIONS = 20;
+const MAX_WAIT_MS = 200;
 const PICTURE_WIDTH = 80;
 const PICTURE_HEIGHT = 100;
 
@@ -82,12 +85,46 @@ class TestSchedule {
         return new TestSchedule(pictureToScripts);
     }
 
-    public static fromRandom(): Promise<TestSchedule> {
-        const numPictures = 4;
-        const clientsPerPictures = [4, 4, 4, 4];
-        const updatesPerClientPerPicture = [[4], [4], [4], [4]];
-        // TODO continue
+    public static makeRandomTestSchedule(filenames: string[]): TestSchedule {
+        const pictureToScripts = new Map<string, ClientScript[]>();
+
+        filenames.forEach((filename) => {
+            const clientsInThisPicture = Client.randomNumberBetweenZeroAnd(
+                MAX_CLIENTS_PER_PICTURE
+            );
+
+            const clientScripts: ClientScript[] = [];
+            for (let j = 0; j < clientsInThisPicture; ++j) {
+                clientScripts.push(
+                    this.makeRandomClientScript(
+                        filename,
+                        `${j}`, // TODO this is kind of a weird place to declare client id, it seems like client id should come in here somehow
+                        Client.randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
+                    )
+                );
+            }
+
+            pictureToScripts.set(filename, clientScripts);
+        });
+
         return new TestSchedule(pictureToScripts);
+    }
+
+    public static makeRandomClientScript(
+        filename: string,
+        clientID: string,
+        numActions: number
+    ): ClientScript {
+        const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS); // TODO I don't think this should be in the Client class
+        const actions: Action[] = [];
+        for (let i = 0; i < numActions; ++i) {
+            actions.push(Client.makeRandomUpdate(clientID, filename));
+        }
+
+        return {
+            initialWait,
+            actions,
+        };
     }
 }
 
@@ -234,7 +271,7 @@ class Client {
     }
 
     public static makeRandomUpdate(
-        clientNum: number,
+        clientNum: string,
         filename: string
     ): Action {
         const waitTimeMS = Client.randomNumberBetweenZeroAnd(100);
