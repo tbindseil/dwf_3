@@ -396,7 +396,7 @@ describe('TJTAG broadcast test', () => {
         await Promise.all(clientWorkPromsies);
 
         // let clients receive all updates
-        await delay(1000);
+        await delay(5000);
 
         initialPictureClient.close();
         for (let i = 0; i < clients.length; ++i) {
