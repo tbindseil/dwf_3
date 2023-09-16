@@ -20,10 +20,25 @@ const NUM_PICTURES = 3;
 const PICTURE_WIDTH = 80;
 const PICTURE_HEIGHT = 100;
 
-interface UpdateToSend {
-    waitTimeMS: number;
+interface Action {
+    waitTimeMS: number; // TODO preWaitMS
     pixelUpdate: PixelUpdate;
     sentAt?: number;
+}
+
+interface ClientScript {
+    initialWait: number;
+    actions: Action[];
+}
+
+// TODO this should probably be a class,
+// with toFile() and fromFile() functions
+// and a map of filename => clientscript[]
+// and probably even a way to plug new filenames in (or i could just make it happen with ids?)
+interface TestSchedule {
+    filename: {
+        clientScript: ClientScript;
+    };
 }
 
 const debugEnabled = false;
@@ -39,22 +54,22 @@ class Client {
     private static readonly ENDPOINT = 'http://127.0.0.1:6543/';
 
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-    private readonly updates: UpdateToSend[];
+    private readonly script: ClientScript;
     private readonly filename: string;
-    public readonly clientNum: number;
+    public readonly clientNum: number; // TODO clientID?
     private readonly receivedUpdates: Map<number, Update> = new Map();
     private readonly sentUpdates: Map<number, Update> = new Map();
 
     private raster?: Raster;
 
     public constructor(
-        updates: UpdateToSend[],
+        script: ClientScript,
         filename: string,
         clientNum: number
     ) {
         this.socket = io_package(Client.ENDPOINT);
-        this.updates = updates;
-        this.filename = filename;
+        this.script = script;
+        this.filename = filename; // TODO should this be in the interface?
         this.clientNum = clientNum;
 
         this.socket.on('connect', () => {
@@ -73,13 +88,12 @@ class Client {
         });
     }
 
-    public async joinPicture(
-        delayBeforeJoining: boolean = false,
-        delayMS: number = 0
-    ): Promise<Client> {
-        if (delayBeforeJoining) {
-            await delay(delayMS);
-            debug(`clientNum_${this.clientNum} done waiting ${delayMS}ms`);
+    public async joinPicture(): Promise<Client> {
+        if (this.script.initialWait) {
+            await delay(this.script.initialWait);
+            debug(
+                `clientNum_${this.clientNum} done waiting ${this.script.initialWait}ms`
+            );
         }
 
         return new Promise<Client>((resolve) => {
@@ -108,19 +122,22 @@ class Client {
     public async start(): Promise<void> {
         return new Promise<void>(async (resolve) => {
             // need to forloop to serialize these
-            for (let i = 0; i < this.updates.length; ++i) {
-                const u = this.updates[i];
+            for (let i = 0; i < this.script.actions.length; ++i) {
+                const currAction = this.script.actions[i];
 
-                u.sentAt = performance.now();
+                currAction.sentAt = performance.now();
 
                 debug(
-                    `sending update: ${u.pixelUpdate.uuid} @ ${u.sentAt} then waiting ${u.waitTimeMS}ms`
+                    `sending update: ${currAction.pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.waitTimeMS}ms`
                 );
 
-                this.socket.emit('client_to_server_udpate', u.pixelUpdate);
-                this.sentUpdates.set(u.sentAt, u.pixelUpdate);
+                this.socket.emit(
+                    'client_to_server_udpate',
+                    currAction.pixelUpdate
+                );
+                this.sentUpdates.set(currAction.sentAt, currAction.pixelUpdate);
 
-                await delay(u.waitTimeMS);
+                await delay(currAction.waitTimeMS);
             }
             resolve();
         });
@@ -169,7 +186,7 @@ class Client {
     public static makeRandomUpdate(
         clientNum: number,
         filename: string
-    ): UpdateToSend {
+    ): Action {
         const waitTimeMS = Client.randomNumberBetweenZeroAnd(100);
         const pixelUpdate = new PixelUpdate({
             filename: filename,
@@ -204,8 +221,6 @@ const startServer = async () => {
         });
     });
 };
-
-const testFilename = 'TODO REMOVE';
 
 describe('TJTAG broadcast test', () => {
     const testFilenames: string[] = [];
@@ -251,11 +266,7 @@ describe('TJTAG broadcast test', () => {
         );
     });
 
-    it('runs random test', async () => {
-        //        const numClients = 20;
-        //        const numUpdates = [
-        //            1, 45, 3, 8, 33, 14, 3, 9, 19, 20, 8, 12, 4, 1, 2, 2, 3, 4, 5, 7,
-        //        ];
+    it.only('runs random test', async () => {
         const numClients = 20;
         await testsFromSuperRandom(numClients, numClients);
     });
@@ -264,6 +275,8 @@ describe('TJTAG broadcast test', () => {
         numClients: number,
         maxUpdatesPerClient: number = 15
     ) => {
+        // TODO its not updates, its like a schedule or something else
+        // const updatesPerFiles
         const numUpdates = [];
         for (let i = 0; i < numClients; ++i) {
             numUpdates.push(
@@ -276,10 +289,10 @@ describe('TJTAG broadcast test', () => {
 
     // so it seems like it is inconsistently failing with this file
     // and whats weird is that clients will pass even when they have a different number of updates than the initial client
-    it.only('runs tests from file', async () => {
-        //        await testsFromFile(
-        //            'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)'
-        //        );
+    it('runs tests from file', async () => {
+        await testsFromFile(
+            'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)'
+        );
     });
 
     const testsFromFile = async (previousUpdatesFilename: string) => {
@@ -291,15 +304,15 @@ describe('TJTAG broadcast test', () => {
         // filenames need to be replaced becuase of a wrinkle
         // we use the filename in the update to determine where to broadcast
         // it should be pictureID instead of filename
-        const recoveredUpdates_replacedFilename: UpdateToSend[][] = [];
-        recoveredUpdates.forEach((updates: UpdateToSend[]) => {
+        const recoveredUpdates_replacedFilename: Action[][] = [];
+        recoveredUpdates.forEach((updates: Action[]) => {
             recoveredUpdates_replacedFilename.push(
-                updates.map((u: UpdateToSend) => {
+                updates.map((u: Action) => {
                     return {
                         waitTimeMS: u.waitTimeMS,
                         pixelUpdate: {
                             ...u.pixelUpdate,
-                            filename: testFilename,
+                            filename: testFilenames[0],
                         },
                     };
                 })
@@ -313,12 +326,12 @@ describe('TJTAG broadcast test', () => {
         numClients: number,
         numUpdates: number[]
     ) => {
-        let updatesForClients: UpdateToSend[][] = [];
+        let updatesForClients: Action[][] = [];
         for (let i = 0; i < numClients; ++i) {
             updatesForClients.push([]);
             for (let j = 0; j < numUpdates[i]; ++j) {
                 updatesForClients[i].push(
-                    Client.makeRandomUpdate(i, testFilename)
+                    Client.makeRandomUpdate(i, testFilenames[0])
                 );
             }
         }
@@ -333,7 +346,7 @@ describe('TJTAG broadcast test', () => {
         await runTestSuite(updatesForClients);
     };
 
-    const runTestSuite = async (updatesForClients: UpdateToSend[][]) => {
+    const runTestSuite = async (updatesForClients: Action[][]) => {
         // also need to test that picture is updated on server
         // also need to test multiple pictures at once
         // also need to test multipl pictures
@@ -355,12 +368,12 @@ describe('TJTAG broadcast test', () => {
     };
 
     const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
-        updatesForClients: UpdateToSend[][]
+        updatesForClients: Action[][]
     ) => {
         const clients: Client[] = [];
         let clientNum = 0;
         updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilename, clientNum++));
+            clients.push(new Client(updates, testFilenames[0], clientNum++));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
@@ -393,24 +406,24 @@ describe('TJTAG broadcast test', () => {
     };
 
     const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
-        updatesForClients: UpdateToSend[][]
+        updatesForClients: Action[][]
     ) => {
         // since udpates is empty, it will just give back the picture it receives
         // this one listens, we get actual (expected) from it
-        const initialPictureClient = new Client([], testFilename, 0);
+        const initialPictureClient = new Client([], testFilenames[0], 0);
         await initialPictureClient.joinPicture();
 
         const clients: Client[] = [];
         let clientNum = 0;
         updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilename, clientNum++));
+            clients.push(new Client(updates, testFilenames[0], clientNum++));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
         const clientWorkPromsies: Promise<void>[] = [];
         clients.forEach((c) =>
             clientConnectPromsies.push(
-                c.joinPicture(true, Client.randomNumberBetweenZeroAnd(500))
+                c.joinPicture() // Client.randomNumberBetweenZeroAnd(500)
             )
         );
         clientConnectPromsies.forEach((promise: Promise<Client>) => {
@@ -429,8 +442,6 @@ describe('TJTAG broadcast test', () => {
             await clients[i].close();
         }
 
-        // TODO the file doesn't capture all aspects of randomness
-
         const expectedRaster = initialPictureClient.getRaster();
         for (let i = 0; i < clients.length; ++i) {
             const client = clients[i];
@@ -444,10 +455,6 @@ describe('TJTAG broadcast test', () => {
             server.close((err: unknown) => {
                 console.log('server closing');
                 if (err) console.log(`err is: ${err}`);
-                // when i start server in broadcast test
-                // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
-                // but, if i start server in global setup,
-                // then err is undefined
                 resolve();
             });
         });
