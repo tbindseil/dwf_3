@@ -76,11 +76,8 @@ class Client {
         delayMS: number = 0
     ): Promise<Client> {
         if (delayBeforeJoining) {
-            // console.log(`@@ TJTAG @@ delayMS is: ${delayMS}`);
             await delay(delayMS);
-            console.log(
-                `@@ TJTAG @@ clientNum_${this.clientNum} done waiting ${delayMS}ms`
-            );
+            debug(`clientNum_${this.clientNum} done waiting ${delayMS}ms`);
         }
 
         return new Promise<Client>((resolve) => {
@@ -159,6 +156,12 @@ class Client {
                 `emitting leave_picture_request on socekt: ${this.socket.id}`
             );
         });
+    }
+
+    public makeUpdatesFileString(): string {
+        let ret = `printing picture update ids for client_${this.clientNum}`;
+        this.getReceivedUpdates().forEach((u) => (ret += `\n    ${u.uuid}`));
+        return ret;
     }
 
     public static makeRandomUpdate(
@@ -396,35 +399,18 @@ describe('TJTAG broadcast test', () => {
         await Promise.all(clientWorkPromsies);
 
         // let clients receive all updates
-        await delay(5000);
+        await delay(5000); // TODO wait for initial client to receive sum(updates)
 
         initialPictureClient.close();
         for (let i = 0; i < clients.length; ++i) {
             await clients[i].close();
         }
 
-        const makeUpdatesFileString = (c: Client): string => {
-            let ret = 'printing picture update ids';
-            c.getReceivedUpdates().forEach((u) => (ret += `\n    ${u.uuid}`));
-            return ret;
-        };
-
         // TODO the file doesn't capture all aspects of randomness
-
-        const inintialPictureString =
-            makeUpdatesFileString(initialPictureClient);
-        await fs.promises.writeFile('initial', inintialPictureString);
 
         const expectedRaster = initialPictureClient.getRaster();
         for (let i = 0; i < clients.length; ++i) {
             const client = clients[i];
-            const clientPictureString = makeUpdatesFileString(client);
-            await fs.promises.writeFile(
-                `client_${client.clientNum}`,
-                clientPictureString
-            );
-
-            console.log(`verifying client ${client.clientNum}`);
             const actualRaster = client.getRaster();
             expect(actualRaster).toEqual(expectedRaster);
         }
@@ -433,8 +419,8 @@ describe('TJTAG broadcast test', () => {
     afterAll(async () => {
         const p = new Promise<void>((resolve) => {
             server.close((err: unknown) => {
-                console.log('@@ TJTAG @@ server closing');
-                console.log(`@@ TJTAG @@ err is: ${err}`);
+                console.log('server closing');
+                if (err) console.log(`err is: ${err}`);
                 // when i start server in broadcast test
                 // then err is: Server is not running!>@>@>>!?>>>!>>?!?!?!
                 // but, if i start server in global setup,
