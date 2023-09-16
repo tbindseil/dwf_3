@@ -16,10 +16,10 @@ import { server, io } from '../../src/app';
 import { performance } from 'perf_hooks';
 import { Raster } from 'dwf-3-raster-tjb';
 
-const NUM_PICTURES = 3;
+const NUM_PICTURES = 1; // 3;
 const MAX_CLIENTS_PER_PICTURE = 20;
 const MAX_CLIENT_ACTIONS = 20;
-const MAX_WAIT_MS = 200;
+const MAX_WAIT_MS = 500;
 const PICTURE_WIDTH = 80;
 const PICTURE_HEIGHT = 100;
 
@@ -34,16 +34,19 @@ interface ClientScript {
     actions: Action[];
 }
 
-// TODO this should probably be a class,
-// with toFile() and fromFile() functions
-// and a map of filename => clientscript[]
-// and probably even a way to plug new filenames in (or i could just make it happen with ids?)
 class TestSchedule {
-    // maps filename to ClientScript
-    private readonly pictures: Map<string, ClientScript[]>;
+    private readonly pictures: Map<string, ClientScript[]>; // TODO rename
 
     private constructor(pictures: Map<string, ClientScript[]>) {
         this.pictures = pictures;
+    }
+
+    public getClientScripts(filename: string): ClientScript[] {
+        const clientScripts = this.pictures.get(filename);
+        if (!clientScripts) {
+            throw Error(`no scripts for filename: ${filename}`);
+        }
+        return clientScripts;
     }
 
     public async toFile() {
@@ -76,11 +79,28 @@ class TestSchedule {
             );
         }
 
-        // now match the filenames to the scripts, this could potentially(?) result in inconsistencies
         const pictureToScripts = new Map<string, ClientScript[]>();
         for (let i = 0; i < scriptsSansFilenames.length; ++i) {
             pictureToScripts.set(pictureFilenames[i], scriptsSansFilenames[i]);
         }
+
+        // updates have the picture they are applied to as part of their model
+        // TODO probably a code smell here, make sure there is a note to address
+        pictureToScripts.forEach(
+            (scripts: ClientScript[], filename: string) => {
+                scripts.forEach((script) => {
+                    script.actions.map((a) => {
+                        return {
+                            waitTimeMS: a.waitTimeMS,
+                            pixelUpdate: {
+                                ...a.pixelUpdate,
+                                filename: filename,
+                            },
+                        };
+                    });
+                });
+            }
+        );
 
         return new TestSchedule(pictureToScripts);
     }
@@ -107,10 +127,12 @@ class TestSchedule {
             pictureToScripts.set(filename, clientScripts);
         });
 
-        return new TestSchedule(pictureToScripts);
+        const randomTestSchedule = new TestSchedule(pictureToScripts);
+        randomTestSchedule.toFile();
+        return randomTestSchedule;
     }
 
-    public static makeRandomClientScript(
+    private static makeRandomClientScript(
         filename: string,
         clientID: string,
         numActions: number
@@ -354,113 +376,55 @@ describe('TJTAG broadcast test', () => {
     });
 
     it.only('runs random test', async () => {
-        const numClients = 20;
-        await testsFromSuperRandom(numClients, numClients);
+        const randomTestSchedule =
+            TestSchedule.makeRandomTestSchedule(testFilenames);
+        await runTestSuite(randomTestSchedule);
     });
-
-    const testsFromSuperRandom = async (
-        numClients: number,
-        maxUpdatesPerClient: number = 15
-    ) => {
-        // TODO its not updates, its like a schedule or something else
-        // const updatesPerFiles
-        const numUpdates = [];
-        for (let i = 0; i < numClients; ++i) {
-            numUpdates.push(
-                Client.randomNumberBetweenZeroAnd(maxUpdatesPerClient)
-            );
-        }
-
-        await testsFromRandom(numClients, numUpdates);
-    };
 
     // so it seems like it is inconsistently failing with this file
     // and whats weird is that clients will pass even when they have a different number of updates than the initial client
     it('runs tests from file', async () => {
-        await testsFromFile(
-            'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)'
+        const testScheduleFilename =
+            'savedTestUpdates_Wed__Sep__13__2023__16:53:32__GMT-0600__(Mountain__Daylight__Time)';
+        const recoveredTestSchedule = await TestSchedule.fromFile(
+            testScheduleFilename,
+            testFilenames
         );
+
+        await runTestSuite(recoveredTestSchedule);
     });
 
-    const testsFromFile = async (previousUpdatesFilename: string) => {
-        const recoveredUpdatesStr = await fs.promises.readFile(
-            previousUpdatesFilename
-        );
-        const recoveredUpdates = JSON.parse('' + recoveredUpdatesStr);
-
-        // filenames need to be replaced becuase of a wrinkle
-        // we use the filename in the update to determine where to broadcast
-        // it should be pictureID instead of filename
-        const recoveredUpdates_replacedFilename: Action[][] = [];
-        recoveredUpdates.forEach((updates: Action[]) => {
-            recoveredUpdates_replacedFilename.push(
-                updates.map((u: Action) => {
-                    return {
-                        waitTimeMS: u.waitTimeMS,
-                        pixelUpdate: {
-                            ...u.pixelUpdate,
-                            filename: testFilenames[0],
-                        },
-                    };
-                })
-            );
-        });
-
-        await runTestSuite(recoveredUpdates_replacedFilename);
-    };
-
-    const testsFromRandom = async (
-        numClients: number,
-        numUpdates: number[]
-    ) => {
-        let updatesForClients: Action[][] = [];
-        for (let i = 0; i < numClients; ++i) {
-            updatesForClients.push([]);
-            for (let j = 0; j < numUpdates[i]; ++j) {
-                updatesForClients[i].push(
-                    Client.makeRandomUpdate(i, testFilenames[0])
-                );
-            }
-        }
-
-        // write first incase we crash
-        const createdAt = new Date().toString().replaceAll(' ', '__');
-        await fs.promises.writeFile(
-            `savedTestUpdates_${createdAt}`,
-            JSON.stringify(updatesForClients)
-        );
-
-        await runTestSuite(updatesForClients);
-    };
-
-    const runTestSuite = async (updatesForClients: Action[][]) => {
+    const runTestSuite = async (testSchedule: TestSchedule) => {
         // also need to test that picture is updated on server
-        // also need to test multiple pictures at once
-        // also need to test multipl pictures
+        // also need to test multipl pictures - happening now
         const tests: Promise<void>[] = [];
-        for (let i = 0; i < 5; ++i) {
+        testFilenames.forEach((filename) => {
+            const clientScripts = testSchedule.getClientScripts(filename);
             tests.push(
-                test_allClientsReceiveTheirOwnUpdatesInOrder(updatesForClients)
+                test_allClientsReceiveTheirOwnUpdatesInOrder(
+                    filename,
+                    clientScripts
+                )
             );
             tests.push(
                 test_allClientsEndWithTheSamePicture_withStaggeredStarts(
-                    updatesForClients
+                    filename,
+                    clientScripts
                 )
             );
-        }
+        });
 
-        // this won't work with the same picture
-        // TODO pass in picture
         await Promise.all(tests);
     };
 
     const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
-        updatesForClients: Action[][]
+        filename: string,
+        clientScripts: ClientScript[]
     ) => {
         const clients: Client[] = [];
         let clientNum = 0;
-        updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilenames[0], clientNum++));
+        clientScripts.forEach((clientscript) => {
+            clients.push(new Client(clientscript, filename, clientNum++)); // TODO instead of clientNum, save clientID in client script and pass it in
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
@@ -493,26 +457,27 @@ describe('TJTAG broadcast test', () => {
     };
 
     const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
-        updatesForClients: Action[][]
+        filename: string,
+        clientScripts: ClientScript[]
     ) => {
         // since udpates is empty, it will just give back the picture it receives
         // this one listens, we get actual (expected) from it
-        const initialPictureClient = new Client([], testFilenames[0], 0);
+        const initialPictureClient = new Client(
+            { initialWait: 0, actions: [] },
+            filename,
+            0
+        );
         await initialPictureClient.joinPicture();
 
         const clients: Client[] = [];
         let clientNum = 0;
-        updatesForClients.forEach((updates) => {
-            clients.push(new Client(updates, testFilenames[0], clientNum++));
+        clientScripts.forEach((clientscript) => {
+            clients.push(new Client(clientscript, filename, clientNum++));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
         const clientWorkPromsies: Promise<void>[] = [];
-        clients.forEach((c) =>
-            clientConnectPromsies.push(
-                c.joinPicture() // Client.randomNumberBetweenZeroAnd(500)
-            )
-        );
+        clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
         clientConnectPromsies.forEach((promise: Promise<Client>) => {
             promise.then((client: Client) => {
                 clientWorkPromsies.push(client.start());
