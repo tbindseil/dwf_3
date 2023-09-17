@@ -2,33 +2,66 @@ import { Client } from './client';
 import { ClientScript } from './client_script';
 import { delay } from './misc';
 
-type Test = (clientScripts: ClientScript[], filename: string) => Promise<void>;
+// might need to be async eventually
+type Verification = (clients: Client[], expectedClient: Client) => void;
 
-const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
-    clientScripts: ClientScript[],
-    filename: string
-) => {
-    const clients: Client[] = [];
-    let clientNum = 0;
-    clientScripts.forEach((clientScript) => {
-        clients.push(new Client(clientScript, `client_${clientNum}`, filename));
-    });
-
-    const clientConnectPromsies: Promise<Client>[] = [];
-    clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
-    await Promise.all(clientConnectPromsies);
-
-    const clientWorkPromsies: Promise<void>[] = [];
-    clients.forEach((c) => clientWorkPromsies.push(c.start()));
-    await Promise.all(clientWorkPromsies);
-
-    // let clients receive all updates
-    await delay(1000);
-
-    for (let i = 0; i < clients.length; ++i) {
-        await clients[i].close();
+export class Test {
+    private readonly expectedClient: Client;
+    public constructor(
+        private readonly clientScripts: ClientScript[],
+        private readonly filename: string,
+        private readonly verifications: Verification[]
+    ) {
+        this.expectedClient = new Client(
+            {
+                initialWait: 0,
+                actions: [],
+            },
+            'expected_client',
+            filename
+        );
     }
 
+    public async run(): Promise<void> {
+        const clients = this.clientScripts.map(
+            (clientScript, index) =>
+                new Client(clientScript, `client_${index}`, this.filename)
+        );
+
+        const clientConnectPromsies: Promise<Client>[] = [];
+        const clientWorkPromsies: Promise<void>[] = [];
+        clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
+        clientConnectPromsies.forEach((promise: Promise<Client>) => {
+            promise.then((client: Client) => {
+                clientWorkPromsies.push(client.start());
+            });
+        });
+
+        await Promise.all(clientWorkPromsies);
+
+        // let clients receive all updates
+        await delay(5000); // TODO wait for initial client to receive sum(updates)
+
+        for (let i = 0; i < clients.length; ++i) {
+            await clients[i].close();
+        }
+        this.expectedClient.close();
+
+        this.verifications.forEach((v) => v(clients, this.expectedClient));
+    }
+
+    // I guess what i'm getting at is
+    // if i do this right, each picture can be mapped to a single
+    // list of client scripts. Those are executed for the picture,
+    // and then all tests are performed. So Tests are really verifications
+    // and the test is just below
+    // private async runClientScripts(clients: Client[]): Promise<Client[]> {
+}
+
+const verifyAllClientsReceiveTheirOwnUpdatesInOrder = (
+    clients: Client[],
+    _expectedClient: Client
+) => {
     clients.forEach((client) => {
         const sentUpdateIDs = Array.from(client.getSentUpdates().values()).map(
             (u) => u.uuid
@@ -43,47 +76,11 @@ const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
     });
 };
 
-const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
-    clientScripts: ClientScript[],
-    filename: string
+const verifyAllClientsEndWithTheSamePicture = (
+    clients: Client[],
+    expectedClient: Client
 ) => {
-    // this one listens, we get actual (expected) from it TODO rename to expectedPictureClient
-    const initialPictureClient = new Client(
-        {
-            initialWait: 0,
-            actions: [],
-        },
-        'initial_client',
-        filename
-    );
-    await initialPictureClient.joinPicture();
-
-    const clients: Client[] = [];
-    let clientNum = 0;
-    clientScripts.forEach((clientscript) => {
-        clients.push(new Client(clientscript, `client_${clientNum}`, filename));
-    });
-
-    const clientConnectPromsies: Promise<Client>[] = [];
-    const clientWorkPromsies: Promise<void>[] = [];
-    clients.forEach((c) => clientConnectPromsies.push(c.joinPicture()));
-    clientConnectPromsies.forEach((promise: Promise<Client>) => {
-        promise.then((client: Client) => {
-            clientWorkPromsies.push(client.start());
-        });
-    });
-
-    await Promise.all(clientWorkPromsies);
-
-    // let clients receive all updates
-    await delay(5000); // TODO wait for initial client to receive sum(updates)
-
-    initialPictureClient.close();
-    for (let i = 0; i < clients.length; ++i) {
-        await clients[i].close();
-    }
-
-    const expectedRaster = initialPictureClient.getRaster();
+    const expectedRaster = expectedClient.getRaster();
     for (let i = 0; i < clients.length; ++i) {
         const client = clients[i];
         const actualRaster = client.getRaster();
@@ -91,8 +88,16 @@ const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
     }
 };
 
-export const tests: Test[] = [
-    // TODO also need to test that picture is updated on server
-    test_allClientsReceiveTheirOwnUpdatesInOrder,
-    test_allClientsEndWithTheSamePicture_withStaggeredStarts,
+const verifyServerEndsUpWithCorrectPictureSaved = (
+    _clients: Client[],
+    expectedClient: Client
+) => {
+    const expectedRaster = expectedClient.getRaster();
+    // TODO - rejoin, and get raster, after sufficient time, it should be expectedRaster
+};
+
+export const verifications: Verification[] = [
+    verifyAllClientsReceiveTheirOwnUpdatesInOrder,
+    verifyAllClientsEndWithTheSamePicture,
+    verifyServerEndsUpWithCorrectPictureSaved,
 ];

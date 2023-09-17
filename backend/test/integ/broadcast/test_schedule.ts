@@ -13,47 +13,41 @@ import {
     PICTURE_HEIGHT,
     randomNumberBetweenZeroAnd,
 } from './misc';
-import { tests } from './tests';
+import { Test, verifications } from './tests';
 
 export class TestSchedule {
-    private readonly clientScriptsPerRound: ClientScript[][];
-    private readonly pictureFilenames: string[];
-
     private static async makeTestSchedule(
         clientScriptsPerRound: ClientScript[][]
     ): Promise<TestSchedule> {
         const pictureFilenames = await this.initializePictures(
             clientScriptsPerRound.length
         );
-        return new TestSchedule(clientScriptsPerRound, pictureFilenames);
+        const pictureScripts = new Map<string, ClientScript[]>();
+        pictureFilenames.forEach((filename, index) =>
+            pictureScripts.set(filename, clientScriptsPerRound[index])
+        );
+        return new TestSchedule(pictureScripts);
     }
 
     private constructor(
-        clientScriptsPerRound: ClientScript[][],
-        pictureFilenames: string[]
-    ) {
-        this.clientScriptsPerRound = clientScriptsPerRound;
-        this.pictureFilenames = pictureFilenames;
-    }
+        private readonly pictureScripts: Map<string, ClientScript[]>
+    ) {}
 
     public async runTests(): Promise<void> {
-        let currPicture = 0;
         const executions: Promise<void>[] = [];
-        this.clientScriptsPerRound.forEach((clientScripts: ClientScript[]) => {
-            tests.forEach((test) =>
-                executions.push(
-                    test(clientScripts, this.pictureFilenames[currPicture++])
-                )
-            );
-        });
+
+        this.pictureScripts.forEach(
+            (clientScripts: ClientScript[], filename: string) => {
+                const test = new Test(clientScripts, filename, verifications);
+                executions.push(test.run());
+            }
+        );
+
         await Promise.all(executions);
     }
 
     public async toFile() {
-        const scriptsSansFilenames: ClientScript[][] = [];
-        Array.from(this.clientScriptsPerRound.values()).forEach((scripts) =>
-            scriptsSansFilenames.push(scripts)
-        );
+        const scriptsSansFilenames = Array.from(this.pictureScripts.values());
         const createdAt = new Date().toString().replaceAll(' ', '__');
         await fs.promises.writeFile(
             `savedTestSchedule_${createdAt}`,
@@ -75,7 +69,7 @@ export class TestSchedule {
         numRounds: number
     ): Promise<TestSchedule> {
         const randomClientScriptsPerRound: ClientScript[][] = [];
-        for (let i = 0; i < numRounds * tests.length; ++i) {
+        for (let i = 0; i < numRounds; ++i) {
             const clientsInThisRound = randomNumberBetweenZeroAnd(
                 MAX_CLIENTS_PER_PICTURE
             );
@@ -101,10 +95,8 @@ export class TestSchedule {
     private static async initializePictures(
         numRounds: number
     ): Promise<string[]> {
-        const numPictures = numRounds * tests.length;
-
         const testPictures: any[] = [];
-        for (let i = 0; i < numPictures; ++i) {
+        for (let i = 0; i < numRounds; ++i) {
             testPictures.push({
                 name: `picture_${i}`,
                 createdBy: 'created_for_test',
@@ -114,7 +106,7 @@ export class TestSchedule {
         }
 
         // create a picture and make sure its there
-        for (let i = 0; i < numPictures; ++i) {
+        for (let i = 0; i < numRounds; ++i) {
             const testPicture = testPictures[i];
             const payload: PostPictureInput = {
                 name: testPicture.name,
@@ -135,7 +127,7 @@ export class TestSchedule {
         const { body: pictures } = await request(server)
             .get('/pictures')
             .expect(200);
-        expect(pictures.pictures.length).toEqual(numPictures);
+        expect(pictures.pictures.length).toEqual(numRounds);
 
         const pictureFilenames: string[] = [];
         pictures.pictures.forEach((p: PictureDatabaseShape) =>
