@@ -21,6 +21,9 @@ describe('TJTAG broadcast test', () => {
     beforeAll(async () => {
         await startServer();
         testSchedule = await TestSchedule.makeRandomTestSchedule(NUM_ROUNDS);
+        //        testSchedule = await TestSchedule.fromFile(
+        //            'savedTestSchedule_Sun__Sep__17__2023__10:32:29__GMT-0600__(Mountain__Daylight__Time)'
+        //        );
     });
 
     it('runs the tests simultaneously intentionally', async () => {

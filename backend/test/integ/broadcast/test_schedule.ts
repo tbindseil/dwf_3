@@ -91,7 +91,11 @@ export class TestSchedule {
             randomClientScriptsPerRound.push(clientScripts);
         }
 
-        return await this.makeTestSchedule(randomClientScriptsPerRound);
+        const testSchedule = await this.makeTestSchedule(
+            randomClientScriptsPerRound
+        );
+        await testSchedule.toFile();
+        return testSchedule;
     }
 
     private static async initializePictures(
