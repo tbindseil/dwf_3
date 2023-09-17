@@ -1,7 +1,6 @@
 import { Action, makeRandomAction } from './action';
-import { Client } from './client';
 
-import { MAX_WAIT_MS } from './constants';
+import { MAX_WAIT_MS, randomNumberBetweenZeroAnd } from './misc';
 
 export interface ClientScript {
     initialWait: number;
@@ -9,7 +8,7 @@ export interface ClientScript {
 }
 
 export const makeRandomClientScript = (numActions: number): ClientScript => {
-    const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS);
+    const initialWait = randomNumberBetweenZeroAnd(MAX_WAIT_MS);
     const actions: Action[] = [];
     for (let i = 0; i < numActions; ++i) {
         actions.push(makeRandomAction());

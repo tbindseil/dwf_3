@@ -1,6 +1,6 @@
 import { server, io } from '../../src/app';
 import { TestSchedule } from './broadcast/test_schedule';
-import { NUM_ROUNDS } from './broadcast/constants';
+import { NUM_ROUNDS } from './broadcast/misc';
 
 // start server, this needs to be done in global setup but its being whack
 const startServer = async () => {

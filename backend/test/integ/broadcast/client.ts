@@ -12,7 +12,7 @@ import { Raster } from 'dwf-3-raster-tjb';
 import { performance } from 'perf_hooks';
 
 import { ClientScript } from './client_script';
-import { delay } from './constants';
+import { delay } from './misc';
 
 export class Client {
     private static readonly ENDPOINT = 'http://127.0.0.1:6543/';
@@ -157,10 +157,5 @@ export class Client {
 
     public debug(msg: string, force = false) {
         if (force || this.debugEnabled) console.log(msg);
-    }
-
-    // TODO this shouldn't be in the client
-    public static randomNumberBetweenZeroAnd(high: number): number {
-        return Math.floor(high * Math.random());
     }
 }

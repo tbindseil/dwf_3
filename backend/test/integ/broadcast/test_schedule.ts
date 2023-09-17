@@ -5,14 +5,14 @@ import { PostPictureInput, PictureDatabaseShape } from 'dwf-3-models-tjb';
 import { ClientScript, makeRandomClientScript } from './client_script';
 
 import fs from 'fs';
-import { Client } from './client';
 
 import {
     MAX_CLIENTS_PER_PICTURE,
     MAX_CLIENT_ACTIONS,
     PICTURE_WIDTH,
     PICTURE_HEIGHT,
-} from './constants';
+    randomNumberBetweenZeroAnd,
+} from './misc';
 import { tests } from './tests';
 
 export class TestSchedule {
@@ -76,7 +76,7 @@ export class TestSchedule {
     ): Promise<TestSchedule> {
         const randomClientScriptsPerRound: ClientScript[][] = [];
         for (let i = 0; i < numRounds * tests.length; ++i) {
-            const clientsInThisRound = Client.randomNumberBetweenZeroAnd(
+            const clientsInThisRound = randomNumberBetweenZeroAnd(
                 MAX_CLIENTS_PER_PICTURE
             );
 
@@ -84,7 +84,7 @@ export class TestSchedule {
             for (let j = 0; j < clientsInThisRound; ++j) {
                 clientScripts.push(
                     makeRandomClientScript(
-                        Client.randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
+                        randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
                     )
                 );
             }

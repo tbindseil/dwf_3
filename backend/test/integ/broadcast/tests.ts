@@ -1,6 +1,6 @@
 import { Client } from './client';
 import { ClientScript } from './client_script';
-import { delay } from './constants';
+import { delay } from './misc';
 
 type Test = (clientScripts: ClientScript[], filename: string) => Promise<void>;
 
