@@ -20,6 +20,7 @@ export class Test {
             'expected_client',
             filename
         );
+        this.expectedClient.joinPicture();
     }
 
     public async run(): Promise<void> {
