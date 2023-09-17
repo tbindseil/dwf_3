@@ -2,7 +2,7 @@ import Picture, { PictureDatabaseShape } from './picture';
 import { GetPicturesInput, GetPicturesOutput } from './get_pictures';
 import { PostPictureInput, PostPictureOutput } from './post_picture';
 import { Update, UpdateProps } from './updates/update';
-import { PixelUpdate } from './updates/pixel_update';
+import { PixelUpdate, PixelUpdateProps } from './updates/pixel_update';
 import {
     ClientToServerEvents,
     ServerToClientEvents,
@@ -24,6 +24,7 @@ export {
     Update,
     UpdateProps,
     PixelUpdate,
+    PixelUpdateProps,
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,

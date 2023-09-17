@@ -5,6 +5,7 @@ import {
     ClientToServerEvents,
     JoinPictureResponse,
     Update,
+    PixelUpdate,
 } from 'dwf-3-models-tjb';
 import { Raster } from 'dwf-3-raster-tjb';
 
@@ -18,6 +19,8 @@ export class Client {
 
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private readonly script: ClientScript;
+    private readonly clientID: string;
+    private readonly filename: string;
     private readonly receivedUpdates: Map<number, Update> = new Map();
     private readonly sentUpdates: Map<number, Update> = new Map();
 
@@ -25,9 +28,16 @@ export class Client {
 
     private readonly debugEnabled: boolean;
 
-    public constructor(script: ClientScript, debugEnabled: boolean = false) {
+    public constructor(
+        script: ClientScript,
+        clientID: string,
+        filename: string,
+        debugEnabled: boolean = false
+    ) {
         this.socket = io(Client.ENDPOINT);
         this.script = script;
+        this.clientID = clientID;
+        this.filename = filename;
         this.debugEnabled = debugEnabled;
 
         this.socket.on('connect', () => {
@@ -52,7 +62,7 @@ export class Client {
         if (this.script.initialWait) {
             await delay(this.script.initialWait);
             this.debug(
-                `clientNum_${this.script.clientID} done waiting ${this.script.initialWait}ms`
+                `clientNum_${this.clientID} done waiting ${this.script.initialWait}ms`
             );
         }
 
@@ -74,7 +84,7 @@ export class Client {
                 }
             );
             this.socket.emit('join_picture_request', {
-                filename: this.script.filename,
+                filename: this.filename,
             });
         });
     }
@@ -86,16 +96,18 @@ export class Client {
                 const currAction = this.script.actions[i];
 
                 currAction.sentAt = performance.now();
+                const pixelUpdate = new PixelUpdate({
+                    ...currAction.unsentPixelUpdate,
+                    filename: this.filename,
+                    createdBy: this.clientID,
+                });
 
                 this.debug(
-                    `sending update: ${currAction.pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.postActionWaitMS}ms`
+                    `sending update: ${pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.postActionWaitMS}ms`
                 );
 
-                this.socket.emit(
-                    'client_to_server_udpate',
-                    currAction.pixelUpdate
-                );
-                this.sentUpdates.set(currAction.sentAt, currAction.pixelUpdate);
+                this.socket.emit('client_to_server_udpate', pixelUpdate);
+                this.sentUpdates.set(currAction.sentAt, pixelUpdate);
 
                 await delay(currAction.postActionWaitMS);
             }
@@ -129,7 +141,7 @@ export class Client {
                 resolve();
             });
             this.socket.emit('leave_picture_request', {
-                filename: this.script.filename,
+                filename: this.filename,
             });
             this.debug(
                 `emitting leave_picture_request on socekt: ${this.socket.id}`
@@ -138,7 +150,7 @@ export class Client {
     }
 
     public makeUpdatesFileString(): string {
-        let ret = `printing picture update ids for client_${this.script.clientID}`;
+        let ret = `printing picture update ids for client_${this.clientID}`;
         this.getReceivedUpdates().forEach((u) => (ret += `\n    ${u.uuid}`));
         return ret;
     }
@@ -147,6 +159,7 @@ export class Client {
         if (force || this.debugEnabled) console.log(msg);
     }
 
+    // TODO this shouldn't be in the client
     public static randomNumberBetweenZeroAnd(high: number): number {
         return Math.floor(high * Math.random());
     }

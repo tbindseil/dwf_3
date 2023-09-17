@@ -10,33 +10,48 @@ import { Client } from './client';
 import {
     MAX_CLIENTS_PER_PICTURE,
     MAX_CLIENT_ACTIONS,
-    NUM_PICTURES,
     PICTURE_WIDTH,
     PICTURE_HEIGHT,
 } from './constants';
 import { tests } from './tests';
 
 export class TestSchedule {
-    private readonly pictureScripts: Map<string, ClientScript[]>;
+    private readonly clientScriptsPerRound: ClientScript[][];
+    private readonly pictureFilenames: string[];
 
-    private constructor(pictureScripts: Map<string, ClientScript[]>) {
-        this.pictureScripts = pictureScripts;
+    private static async makeTestSchedule(
+        clientScriptsPerRound: ClientScript[][]
+    ): Promise<TestSchedule> {
+        const pictureFilenames = await this.initializePictures(
+            clientScriptsPerRound.length
+        );
+        return new TestSchedule(clientScriptsPerRound, pictureFilenames);
     }
 
-    public getClientScripts(filename: string): ClientScript[] {
-        const clientScripts = this.pictureScripts.get(filename);
-        if (!clientScripts) {
-            throw Error(`no scripts for filename: ${filename}`);
-        }
-        return clientScripts;
+    private constructor(
+        clientScriptsPerRound: ClientScript[][],
+        pictureFilenames: string[]
+    ) {
+        this.clientScriptsPerRound = clientScriptsPerRound;
+        this.pictureFilenames = pictureFilenames;
+    }
+
+    public async runTests(): Promise<void> {
+        let currPicture = 0;
+        const executions: Promise<void>[] = [];
+        this.clientScriptsPerRound.forEach((clientScripts: ClientScript[]) => {
+            tests.forEach((test) =>
+                executions.push(
+                    test(clientScripts, this.pictureFilenames[currPicture++])
+                )
+            );
+        });
+        await Promise.all(executions);
     }
 
     public async toFile() {
-        // well what's interesting is that the filename isn't consistent accross runs
-        // so we just need to keep the ClientScripts grouped together
-        // so we could probably just group them into an array of arrays
         const scriptsSansFilenames: ClientScript[][] = [];
-        Array.from(this.pictureScripts.values()).forEach((scripts) =>
+        Array.from(this.clientScriptsPerRound.values()).forEach((scripts) =>
             scriptsSansFilenames.push(scripts)
         );
         const createdAt = new Date().toString().replaceAll(' ', '__');
@@ -49,80 +64,41 @@ export class TestSchedule {
     public static async fromFile(
         testScheduleFile: string
     ): Promise<TestSchedule> {
-        // TODO maybe could associate types per round? rihgt now its implicit that
-        // there are m x n updates where m is concurrent pictures and n is types of test
-        // assuming one type of each test per round basically.
-        const scriptsSansFilenames: ClientScript[][] = JSON.parse(
+        const recoveredClientScriptsPerRound: ClientScript[][] = JSON.parse(
             '' + (await fs.promises.readFile(testScheduleFile))
         );
 
-        const pictureFilenames = await this.initializePictures(
-            scriptsSansFilenames.length * tests.length
-        );
-
-        const pictureScripts = new Map<string, ClientScript[]>();
-        let pictureFilenamesIndex = 0;
-        for (let i = 0; i < scriptsSansFilenames.length; ++i) {
-            pictureScripts.set(
-                pictureFilenames[pictureFilenamesIndex++],
-                scriptsSansFilenames[i]
-            );
-        }
-        // this compromises further stuff
-
-        // each schedule runs through all tests, so we have to apply them multiple times
-
-        // updates have the picture they are applied to as part of their model
-        // TODO probably a code smell here, make sure there is a note to address
-        pictureScripts.forEach((scripts: ClientScript[], filename: string) => {
-            scripts.forEach((script) => {
-                script.filename = filename;
-                script.actions.map((a) => {
-                    return {
-                        postActionWaitMS: a.postActionWaitMS,
-                        pixelUpdate: {
-                            ...a.pixelUpdate,
-                            filename: filename,
-                        },
-                    };
-                });
-            });
-        });
-
-        return new TestSchedule(pictureScripts);
+        return await this.makeTestSchedule(recoveredClientScriptsPerRound);
     }
 
     public static async makeRandomTestSchedule(
-        numPictures: number
+        numRounds: number
     ): Promise<TestSchedule> {
-        const pictureScripts = await this.initializePictures(numPictures);
-
-        pictureScripts.forEach((clientScripts, filename) => {
-            const clientsInThisPicture = Client.randomNumberBetweenZeroAnd(
+        const randomClientScriptsPerRound: ClientScript[][] = [];
+        for (let i = 0; i < numRounds * tests.length; ++i) {
+            const clientsInThisRound = Client.randomNumberBetweenZeroAnd(
                 MAX_CLIENTS_PER_PICTURE
             );
 
-            for (let j = 0; j < clientsInThisPicture; ++j) {
+            const clientScripts: ClientScript[] = [];
+            for (let j = 0; j < clientsInThisRound; ++j) {
                 clientScripts.push(
                     makeRandomClientScript(
-                        filename,
-                        `${filename}__client_${j}`,
                         Client.randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
                     )
                 );
             }
+            randomClientScriptsPerRound.push(clientScripts);
+        }
 
-            pictureScripts.set(filename, clientScripts);
-        });
-
-        const randomTestSchedule = new TestSchedule(pictureScripts);
-        randomTestSchedule.toFile();
-        return randomTestSchedule;
+        return await this.makeTestSchedule(randomClientScriptsPerRound);
     }
 
     private static async initializePictures(
-        numPictures: number
+        numRounds: number
     ): Promise<string[]> {
+        const numPictures = numRounds * tests.length;
+
         const testPictures: any[] = [];
         for (let i = 0; i < numPictures; ++i) {
             testPictures.push({
@@ -134,7 +110,7 @@ export class TestSchedule {
         }
 
         // create a picture and make sure its there
-        for (let i = 0; i < NUM_PICTURES; ++i) {
+        for (let i = 0; i < numPictures; ++i) {
             const testPicture = testPictures[i];
             const payload: PostPictureInput = {
                 name: testPicture.name,
@@ -155,13 +131,13 @@ export class TestSchedule {
         const { body: pictures } = await request(server)
             .get('/pictures')
             .expect(200);
-        expect(pictures.pictures.length).toEqual(NUM_PICTURES);
+        expect(pictures.pictures.length).toEqual(numPictures);
 
-        const pictureScripts: string[] = [];
+        const pictureFilenames: string[] = [];
         pictures.pictures.forEach((p: PictureDatabaseShape) =>
-            pictureScripts.push(p.filename)
+            pictureFilenames.push(p.filename)
         );
 
-        return pictureScripts;
+        return pictureFilenames;
     }
 }

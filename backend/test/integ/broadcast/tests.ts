@@ -2,14 +2,16 @@ import { Client } from './client';
 import { ClientScript } from './client_script';
 import { delay } from './constants';
 
-type Test = (clientScripts: ClientScript[]) => Promise<void>;
+type Test = (clientScripts: ClientScript[], filename: string) => Promise<void>;
 
 const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
-    clientScripts: ClientScript[]
+    clientScripts: ClientScript[],
+    filename: string
 ) => {
     const clients: Client[] = [];
+    let clientNum = 0;
     clientScripts.forEach((clientScript) => {
-        clients.push(new Client(clientScript));
+        clients.push(new Client(clientScript, `client_${clientNum}`, filename));
     });
 
     const clientConnectPromsies: Promise<Client>[] = [];
@@ -42,23 +44,24 @@ const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
 };
 
 const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
-    clientScripts: ClientScript[]
+    clientScripts: ClientScript[],
+    filename: string
 ) => {
-    // this one listens, we get actual (expected) from it
-    const filename = clientScripts[0].filename; // kinda whack
-
-    const initialPictureClient = new Client({
-        // TODO rename to expectedPictureClient?
-        filename,
-        clientID: 'initialPictureClient',
-        initialWait: 0,
-        actions: [],
-    });
+    // this one listens, we get actual (expected) from it TODO rename to expectedPictureClient
+    const initialPictureClient = new Client(
+        {
+            initialWait: 0,
+            actions: [],
+        },
+        'initial_client',
+        filename
+    );
     await initialPictureClient.joinPicture();
 
     const clients: Client[] = [];
+    let clientNum = 0;
     clientScripts.forEach((clientscript) => {
-        clients.push(new Client(clientscript));
+        clients.push(new Client(clientscript, `client_${clientNum}`, filename));
     });
 
     const clientConnectPromsies: Promise<Client>[] = [];
@@ -89,6 +92,7 @@ const test_allClientsEndWithTheSamePicture_withStaggeredStarts = async (
 };
 
 export const tests: Test[] = [
+    // TODO also need to test that picture is updated on server
     test_allClientsReceiveTheirOwnUpdatesInOrder,
     test_allClientsEndWithTheSamePicture_withStaggeredStarts,
 ];
