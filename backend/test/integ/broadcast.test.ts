@@ -28,6 +28,23 @@ interface Action {
     pixelUpdate: PixelUpdate;
     postActionWaitMS: number;
 }
+const makeRandomAction = (clientID: string, filename: string): Action => {
+    const postActionWaitMS = Client.randomNumberBetweenZeroAnd(100);
+    const pixelUpdate = new PixelUpdate({
+        filename: filename,
+        createdBy: clientID,
+        x: Client.randomNumberBetweenZeroAnd(PICTURE_WIDTH),
+        y: Client.randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
+        red: Client.randomNumberBetweenZeroAnd(255),
+        green: Client.randomNumberBetweenZeroAnd(255),
+        blue: Client.randomNumberBetweenZeroAnd(255),
+    });
+
+    return {
+        postActionWaitMS,
+        pixelUpdate,
+    };
+};
 
 interface ClientScript {
     clientID: string;
@@ -35,6 +52,24 @@ interface ClientScript {
     initialWait: number;
     actions: Action[];
 }
+const makeRandomClientScript = (
+    filename: string,
+    clientID: string,
+    numActions: number
+): ClientScript => {
+    const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS);
+    const actions: Action[] = [];
+    for (let i = 0; i < numActions; ++i) {
+        actions.push(makeRandomAction(clientID, filename));
+    }
+
+    return {
+        clientID,
+        filename,
+        initialWait,
+        actions,
+    };
+};
 
 class TestSchedule {
     private readonly pictureScripts: Map<string, ClientScript[]>;
@@ -76,6 +111,10 @@ class TestSchedule {
 
         // TODO NUM_PICTURES is kinda tied in here
         // see: test schedule should determine the initial picture creation
+        // so, test schedule has initialize pictures function
+        // which is
+        // const prefix = 'test_picture_'
+        // for
         if (scriptsSansFilenames.length !== pictureFilenames.length) {
             throw Error(
                 `recovered ${scriptsSansFilenames.length} sets of updates but expected ${pictureFilenames.length}`
@@ -118,7 +157,7 @@ class TestSchedule {
             const clientScripts: ClientScript[] = [];
             for (let j = 0; j < clientsInThisPicture; ++j) {
                 clientScripts.push(
-                    this.makeRandomClientScript(
+                    makeRandomClientScript(
                         filename,
                         `${filename}__client_${j}`,
                         Client.randomNumberBetweenZeroAnd(MAX_CLIENT_ACTIONS)
@@ -132,25 +171,6 @@ class TestSchedule {
         const randomTestSchedule = new TestSchedule(pictureScripts);
         randomTestSchedule.toFile();
         return randomTestSchedule;
-    }
-
-    private static makeRandomClientScript(
-        filename: string,
-        clientID: string,
-        numActions: number
-    ): ClientScript {
-        const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS); // TODO I don't think this should be in the Client class
-        const actions: Action[] = [];
-        for (let i = 0; i < numActions; ++i) {
-            actions.push(Client.makeRandomAction(clientID));
-        }
-
-        return {
-            clientID,
-            filename,
-            initialWait,
-            actions,
-        };
     }
 }
 
@@ -288,24 +308,6 @@ class Client {
         return ret;
     }
 
-    public static makeRandomAction(clientID: string, filename: string): Action {
-        const postActionWaitMS = Client.randomNumberBetweenZeroAnd(100);
-        const pixelUpdate = new PixelUpdate({
-            filename: filename,
-            createdBy: clientID,
-            x: Client.randomNumberBetweenZeroAnd(PICTURE_WIDTH),
-            y: Client.randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-            red: Client.randomNumberBetweenZeroAnd(255),
-            green: Client.randomNumberBetweenZeroAnd(255),
-            blue: Client.randomNumberBetweenZeroAnd(255),
-        });
-
-        return {
-            postActionWaitMS,
-            pixelUpdate,
-        };
-    }
-
     public static randomNumberBetweenZeroAnd(high: number): number {
         return Math.floor(high * Math.random());
     }
@@ -398,10 +400,7 @@ describe('TJTAG broadcast test', () => {
             // so really, the test schedule should determine the initial picture creation
 
             tests.push(
-                test_allClientsReceiveTheirOwnUpdatesInOrder(
-                    filename,
-                    clientScripts
-                )
+                test_allClientsReceiveTheirOwnUpdatesInOrder(clientScripts)
             );
             //tests.push(
             //    test_allClientsEndWithTheSamePicture_withStaggeredStarts(
