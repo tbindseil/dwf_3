@@ -1,4 +1,4 @@
-export const NUM_ROUNDS = 1; // 3;
+export const NUM_ROUNDS = 5;
 export const MAX_CLIENTS_PER_PICTURE = 20;
 export const MAX_CLIENT_ACTIONS = 20;
 export const MAX_WAIT_MS = 500;
