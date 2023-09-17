@@ -15,7 +15,7 @@ const startServer = async () => {
     });
 };
 
-describe('TJTAG broadcast test', async () => {
+describe('TJTAG broadcast test', () => {
     let testSchedule: TestSchedule;
 
     beforeAll(async () => {
