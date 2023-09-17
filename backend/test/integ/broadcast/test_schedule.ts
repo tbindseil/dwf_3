@@ -1,9 +1,20 @@
+import { server } from '../../../src/app';
+import request from 'supertest';
+
+import { PostPictureInput, PictureDatabaseShape } from 'dwf-3-models-tjb';
 import { ClientScript, makeRandomClientScript } from './client_script';
 
 import fs from 'fs';
 import { Client } from './client';
 
-import { MAX_CLIENTS_PER_PICTURE, MAX_CLIENT_ACTIONS } from './constants';
+import {
+    MAX_CLIENTS_PER_PICTURE,
+    MAX_CLIENT_ACTIONS,
+    NUM_PICTURES,
+    PICTURE_WIDTH,
+    PICTURE_HEIGHT,
+} from './constants';
+import { tests } from './tests';
 
 export class TestSchedule {
     private readonly pictureScripts: Map<string, ClientScript[]>;
@@ -36,29 +47,30 @@ export class TestSchedule {
     }
 
     public static async fromFile(
-        testScheduleFile: string,
-        pictureFilenames: string[]
+        testScheduleFile: string
     ): Promise<TestSchedule> {
+        // TODO maybe could associate types per round? rihgt now its implicit that
+        // there are m x n updates where m is concurrent pictures and n is types of test
+        // assuming one type of each test per round basically.
         const scriptsSansFilenames: ClientScript[][] = JSON.parse(
             '' + (await fs.promises.readFile(testScheduleFile))
         );
 
-        // TODO NUM_PICTURES is kinda tied in here
-        // see: test schedule should determine the initial picture creation
-        // so, test schedule has initialize pictures function
-        // which is
-        // const prefix = 'test_picture_'
-        // for
-        if (scriptsSansFilenames.length !== pictureFilenames.length) {
-            throw Error(
-                `recovered ${scriptsSansFilenames.length} sets of updates but expected ${pictureFilenames.length}`
-            );
-        }
+        const pictureFilenames = await this.initializePictures(
+            scriptsSansFilenames.length * tests.length
+        );
 
         const pictureScripts = new Map<string, ClientScript[]>();
+        let pictureFilenamesIndex = 0;
         for (let i = 0; i < scriptsSansFilenames.length; ++i) {
-            pictureScripts.set(pictureFilenames[i], scriptsSansFilenames[i]);
+            pictureScripts.set(
+                pictureFilenames[pictureFilenamesIndex++],
+                scriptsSansFilenames[i]
+            );
         }
+        // this compromises further stuff
+
+        // each schedule runs through all tests, so we have to apply them multiple times
 
         // updates have the picture they are applied to as part of their model
         // TODO probably a code smell here, make sure there is a note to address
@@ -80,15 +92,16 @@ export class TestSchedule {
         return new TestSchedule(pictureScripts);
     }
 
-    public static makeRandomTestSchedule(filenames: string[]): TestSchedule {
-        const pictureScripts = new Map<string, ClientScript[]>();
+    public static async makeRandomTestSchedule(
+        numPictures: number
+    ): Promise<TestSchedule> {
+        const pictureScripts = await this.initializePictures(numPictures);
 
-        filenames.forEach((filename) => {
+        pictureScripts.forEach((clientScripts, filename) => {
             const clientsInThisPicture = Client.randomNumberBetweenZeroAnd(
                 MAX_CLIENTS_PER_PICTURE
             );
 
-            const clientScripts: ClientScript[] = [];
             for (let j = 0; j < clientsInThisPicture; ++j) {
                 clientScripts.push(
                     makeRandomClientScript(
@@ -105,5 +118,50 @@ export class TestSchedule {
         const randomTestSchedule = new TestSchedule(pictureScripts);
         randomTestSchedule.toFile();
         return randomTestSchedule;
+    }
+
+    private static async initializePictures(
+        numPictures: number
+    ): Promise<string[]> {
+        const testPictures: any[] = [];
+        for (let i = 0; i < numPictures; ++i) {
+            testPictures.push({
+                name: `picture_${i}`,
+                createdBy: 'created_for_test',
+                width: PICTURE_WIDTH,
+                height: PICTURE_HEIGHT,
+            });
+        }
+
+        // create a picture and make sure its there
+        for (let i = 0; i < NUM_PICTURES; ++i) {
+            const testPicture = testPictures[i];
+            const payload: PostPictureInput = {
+                name: testPicture.name,
+                createdBy: testPicture.createdBy,
+                width: testPicture.width,
+                height: testPicture.height,
+            };
+
+            await request(server)
+                .post('/picture')
+                .send(payload)
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(200);
+        }
+
+        // look at all posted pictures
+        const { body: pictures } = await request(server)
+            .get('/pictures')
+            .expect(200);
+        expect(pictures.pictures.length).toEqual(NUM_PICTURES);
+
+        const pictureScripts: string[] = [];
+        pictures.pictures.forEach((p: PictureDatabaseShape) =>
+            pictureScripts.push(p.filename)
+        );
+
+        return pictureScripts;
     }
 }
