@@ -31,6 +31,7 @@ interface Action {
 
 interface ClientScript {
     clientID: string;
+    filename: string;
     initialWait: number;
     actions: Action[];
 }
@@ -90,9 +91,10 @@ class TestSchedule {
         // TODO probably a code smell here, make sure there is a note to address
         pictureScripts.forEach((scripts: ClientScript[], filename: string) => {
             scripts.forEach((script) => {
+                script.filename = filename;
                 script.actions.map((a) => {
                     return {
-                        waitTimeMS: a.postActionWaitMS,
+                        postActionWaitMS: a.postActionWaitMS,
                         pixelUpdate: {
                             ...a.pixelUpdate,
                             filename: filename,
@@ -140,11 +142,12 @@ class TestSchedule {
         const initialWait = Client.randomNumberBetweenZeroAnd(MAX_WAIT_MS); // TODO I don't think this should be in the Client class
         const actions: Action[] = [];
         for (let i = 0; i < numActions; ++i) {
-            actions.push(Client.makeRandomAction(clientID, filename));
+            actions.push(Client.makeRandomAction(clientID));
         }
 
         return {
             clientID,
+            filename,
             initialWait,
             actions,
         };
@@ -165,16 +168,14 @@ class Client {
 
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private readonly script: ClientScript;
-    private readonly filename: string;
     private readonly receivedUpdates: Map<number, Update> = new Map();
     private readonly sentUpdates: Map<number, Update> = new Map();
 
     private raster?: Raster;
 
-    public constructor(script: ClientScript, filename: string) {
+    public constructor(script: ClientScript) {
         this.socket = io_package(Client.ENDPOINT);
         this.script = script;
-        this.filename = filename; // TODO should this be in the interface?
 
         this.socket.on('connect', () => {
             debug(`connected callback and sid is: ${this.socket.id}`);
@@ -218,7 +219,7 @@ class Client {
                 }
             );
             this.socket.emit('join_picture_request', {
-                filename: this.filename,
+                filename: this.script.filename,
             });
         });
     }
@@ -273,7 +274,7 @@ class Client {
                 resolve();
             });
             this.socket.emit('leave_picture_request', {
-                filename: this.filename,
+                filename: this.script.filename,
             });
             debug(
                 `emitting leave_picture_request on socekt: ${this.socket.id}`
@@ -288,7 +289,7 @@ class Client {
     }
 
     public static makeRandomAction(clientID: string, filename: string): Action {
-        const waitTimeMS = Client.randomNumberBetweenZeroAnd(100);
+        const postActionWaitMS = Client.randomNumberBetweenZeroAnd(100);
         const pixelUpdate = new PixelUpdate({
             filename: filename,
             createdBy: clientID,
@@ -300,7 +301,7 @@ class Client {
         });
 
         return {
-            postActionWaitMS: waitTimeMS,
+            postActionWaitMS,
             pixelUpdate,
         };
     }
@@ -414,12 +415,11 @@ describe('TJTAG broadcast test', () => {
     };
 
     const test_allClientsReceiveTheirOwnUpdatesInOrder = async (
-        filename: string,
         clientScripts: ClientScript[]
     ) => {
         const clients: Client[] = [];
         clientScripts.forEach((clientScript) => {
-            clients.push(new Client(clientScript, filename));
+            clients.push(new Client(clientScript));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
@@ -457,15 +457,17 @@ describe('TJTAG broadcast test', () => {
     ) => {
         // since udpates is empty, it will just give back the picture it receives
         // this one listens, we get actual (expected) from it
-        const initialPictureClient = new Client(
-            { clientID: 'initialPictureClient', initialWait: 0, actions: [] },
-            filename
-        );
+        const initialPictureClient = new Client({
+            filename,
+            clientID: 'initialPictureClient',
+            initialWait: 0,
+            actions: [],
+        });
         await initialPictureClient.joinPicture();
 
         const clients: Client[] = [];
         clientScripts.forEach((clientscript) => {
-            clients.push(new Client(clientscript, filename));
+            clients.push(new Client(clientscript));
         });
 
         const clientConnectPromsies: Promise<Client>[] = [];
