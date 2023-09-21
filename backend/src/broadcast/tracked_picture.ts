@@ -32,16 +32,62 @@ export class TrackedPicture {
         this.filename = filename;
     }
 
+    // why do i want to go back to offloading this onto another
+    // service?
+    // what would that service do?
+    // well, it would write the raster to s3
+    // what does that entail?
+    // it has to know the updates, it receives the stuff from local raster
+    //
+    // that services integ tests are as follows:
+    // throw updaters at it, expect them to get to disc (s3)
+    // sqs
+    //
+    // sqs
+    //
+    // sqs
+    //
+    // sqs
+    //
+    // sqs
+    //
+    //
+    // sqs
+    //
+    // is it really that simple?
+    // enqueue it, and the lambda will dequeue, update picture and enqueue ot another topic
+    // that other topic is a writer that also has access to the picture, so  i guess its another endpoint on the lambda
+    //
+    // this writer endpoint waits..... how does it do this? every X times it gets called it actually writes, and it is also subscribed
+    // to end events? or maybe it has a force flag and the main (broadcast) service calls the endpoint directly instead of it
+    // getting called as a part of the sqs response
+    //
+    // then, we can stub out the picture sync service (above) when integ testing this thing and that way we know
+    // that it is sending those update main picture messages
+    //
+    // first i guess i will do some cdk
+
     public enqueueWrite(priority: Priority, force = false) {
+        console.log(
+            `enqueueWrite with
+            priority: ${priority}
+            force: ${force}
+            this.writeEnqueued: ${this.writeEnqueued}
+            this.dirty: ${this.dirty}
+            raster?: ${this.raster}
+            this.idToClientMap: ${this.idToClientMap}`
+        );
         if (force || !this.writeEnqueued) {
             this.workQueue.push(priority, async () => {
                 if (this.raster && this.dirty) {
+                    console.log('@@ TJTAG @@ WRITING RASTER');
                     await this.pictureAccessor.writeRaster(
                         this.raster,
                         this.filename
                     );
 
                     this.dirty = false;
+                    console.log('setting writeEnqueued to false');
                     this.writeEnqueued = false;
 
                     // if we write and there are no clients, release the raster
@@ -54,6 +100,7 @@ export class TrackedPicture {
                 }
             });
 
+            console.log('setting writeEnqueued to true');
             this.writeEnqueued = true;
         }
     }

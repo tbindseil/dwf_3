@@ -35,7 +35,11 @@ export default class BroadcastMediator {
                 // if we didn't do that, a very active picture
                 // could have its write delayed indefinitely
 
+                // there is a bug here,
+                // if i do a single update after the series and still, it won't get written
+
                 if (trackedPicture.stopped()) {
+                    console.log(`deleting tp: ${filename}`);
                     this.trackedPictures.delete(filename);
                 } else {
                     const highPriorityWrite =
