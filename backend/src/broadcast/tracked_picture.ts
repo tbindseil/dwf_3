@@ -66,6 +66,29 @@ export class TrackedPicture {
     // that it is sending those update main picture messages
     //
     // first i guess i will do some cdk
+    //
+    // that's all good but how will new clients who join get the raster?
+    // well, I think the existing mechanism will have to remain
+    //
+    // and upon a new one starting up (new tracked_picture that is:)
+    // we get it from s3
+    //
+    // that leaves coordination with the sqs and knowing that it is done processing
+    //
+    //
+    //
+    // ok here it is,
+    // it stays untouched, until the writer is done with the force (ie close?)
+    // then, it calls remove client which happens if and only if there are no newly added
+    // clients
+    //
+    //
+    // and it removes the tracked picture
+    //
+    // that only happens after a clean write
+    //
+    //
+    // and there is no need for this stopped crap or putting that write somewhere else crap
 
     public enqueueWrite(priority: Priority, force = false) {
         console.log(
