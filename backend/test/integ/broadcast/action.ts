@@ -4,6 +4,7 @@ import {
     PICTURE_WIDTH,
     PICTURE_HEIGHT,
     randomNumberBetweenZeroAnd,
+    MAX_COLOR_VALUE,
 } from './misc';
 
 type UnsentPixelUpdate = Omit<PixelUpdateProps, 'filename' | 'createdBy'>;
@@ -19,9 +20,9 @@ export const makeRandomAction = (): Action => {
     const unsentPixelUpdate: UnsentPixelUpdate = {
         x: randomNumberBetweenZeroAnd(PICTURE_WIDTH),
         y: randomNumberBetweenZeroAnd(PICTURE_HEIGHT),
-        red: randomNumberBetweenZeroAnd(255),
-        green: randomNumberBetweenZeroAnd(255),
-        blue: randomNumberBetweenZeroAnd(255),
+        red: randomNumberBetweenZeroAnd(MAX_COLOR_VALUE),
+        green: randomNumberBetweenZeroAnd(MAX_COLOR_VALUE),
+        blue: randomNumberBetweenZeroAnd(MAX_COLOR_VALUE),
     };
 
     return {
