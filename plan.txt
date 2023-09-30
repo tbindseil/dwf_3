@@ -531,3 +531,31 @@ i think the psuedo code solution above is way clearer
 
 
 
+=============================================================================
+
+"Maintaining an up to date copy while not bogging down the system"
+
+Requirements:
+* broadcast update
+* add client
+* remove client
+* write picture periodically
+
+Constraints:
+* broadcast updates in order that they are received
+* broadcast updates from any client in the order that that particular client sent them
+* can add clients
+** when a client is added, it is synchronized, where synchronized means that after some time,
+*** it will be receiving the same update stream as previously registered clients
+*** once those updates are applied, it has the same picture
+* can remove a client
+* picture is written:
+** periodically
+** upon the last client leaving
+
+^^ this is it, just solve it, deploy it, and scale it
+
+
+
+
+
