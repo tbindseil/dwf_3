@@ -127,6 +127,10 @@ and since the queue doesn't start something until the current thing is finished,
 and there fore the incoming get picture request to return to a new client would be FIFOed before any handle update
 or write operations from the queued.
 
+Note, its interesting and worth calling out that the getPicture request could run while the PPS is blocked on
+writing to s3. I think it still works, both are reading from a picture, so its not being updated by either. and
+getPicture is nonblocking.
+
 ##### Opt2: PPS doesn't return until update is applied
 pros:
 * only a single queue of pending updates to track (BS' primaryPendingUpdates)
@@ -150,12 +154,39 @@ two options and briefly describe what PPS would be doing in each situation.
 ##### Choice
 Opt1: PPS batches updates
 
+#### should BS initiate the writes, or should PPS initiate
+
+I think just philosophically we should have PPS initiate
 
 
+### What happens to BS?
 
+Once PPS is created, BS will just broadcast and enqueue in order to send to PPS.
+It will also add and remove clients. This requires a bit of thought.
 
+Adding the first client requires PPS to initialize the picture. Adding a subsequent
+client requires getting the latest picture from PPS, as well as both queues (PPS' and BS').
+And removing the last client requires a write and a deinitialization of the picture.
 
+So, PPS needs three (two?) synchronous operations.
 
+initialize:
+  read picture from s3
+  empty queue
+
+getPicture:
+  if not initialized
+    initialize
+  return { picture, updatesQueue }
+
+deinitialize:
+  wait for queue to be empty
+  write picture
+  return
+
+I think I will leave the idea of cold vs hot start for later. In other words, if
+the picture is in the process of deinitialization when a new first client joins,
+the picture will still complete the deinitialieation and then reinitialize.
 
 
 
