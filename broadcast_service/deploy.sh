@@ -16,9 +16,9 @@ npm run lint
 echo "packaging:"
 npm pack
 
-# echo "beaming artifacts to the cloud:"
-# scp -r ./artifacts ec2-user@IP_ADDRESS/where/to/put/artifacts
-# 
+echo "beaming artifacts to the cloud:"
+scp -i "ec2-key-pair.pem" ./dwf_backend-1.0.0.tgz ec2-user@44.215.67.60:/home/ec2-user
+
 # echo "sshing into box:"
 # ssh ec2-user@IP_ADDRESS
 # 
