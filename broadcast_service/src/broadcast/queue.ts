@@ -12,14 +12,14 @@ export enum Priority {
     FOUR = 4,
     FIVE = 5,
     SIX = 6,
-    MAX = SIX
+    MAX = SIX,
 }
 
 export class Queue {
     private readonly waitForCompletionIntervalMS: number;
     private readonly jobs: Map<Priority, Job[]>;
 
-    public constructor(waitForCompletionIntervalMS: number = 1000) {
+    public constructor(waitForCompletionIntervalMS = 1000) {
         this.waitForCompletionIntervalMS = waitForCompletionIntervalMS;
         this.jobs = new Map();
 
@@ -52,7 +52,7 @@ export class Queue {
 
     private getNumberOfJobs(): number {
         let numberOfJobs = 0;
-        this.jobs.forEach(jobs => numberOfJobs += jobs.length);
+        this.jobs.forEach((jobs) => (numberOfJobs += jobs.length));
         return numberOfJobs;
     }
 

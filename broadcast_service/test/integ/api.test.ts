@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { JoinPictureResponse, PostPictureInput } from 'dwf-3-models-tjb';
-import { io, server } from '../../src/app';
+import { server } from '../../src/app';
 import { io as io_package } from 'socket.io-client';
 import { Raster } from 'dwf-3-raster-tjb';
 

@@ -15,6 +15,13 @@ import {
 } from './misc';
 import { Test, verifications } from './tests';
 
+interface PictureCreationData {
+    name: string;
+    createdBy: string;
+    width: number;
+    height: number;
+}
+
 export class TestSchedule {
     private static async makeTestSchedule(
         clientScriptsPerRound: ClientScript[][]
@@ -95,7 +102,7 @@ export class TestSchedule {
     private static async initializePictures(
         numRounds: number
     ): Promise<string[]> {
-        const testPictures: any[] = [];
+        const testPictures: PictureCreationData[] = [];
         for (let i = 0; i < numRounds; ++i) {
             testPictures.push({
                 name: `picture_${i}`,

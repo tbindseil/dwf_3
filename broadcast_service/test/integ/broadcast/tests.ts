@@ -61,8 +61,10 @@ export class Test {
 
 const verifyAllClientsReceiveTheirOwnUpdatesInOrder = (
     clients: Client[],
-    _expectedClient: Client
+    expectedClient: Client
 ) => {
+    expectedClient;
+
     clients.forEach((client) => {
         const sentUpdateIDs = Array.from(client.getSentUpdates().values()).map(
             (u) => u.uuid
@@ -90,10 +92,12 @@ const verifyAllClientsEndWithTheSamePicture = (
 };
 
 const verifyServerEndsUpWithCorrectPictureSaved = (
-    _clients: Client[],
+    clients: Client[],
     expectedClient: Client
 ) => {
-    const expectedRaster = expectedClient.getRaster();
+    clients;
+    expectedClient;
+    // const expectedRaster = expectedClient.getRaster();
     // TODO - rejoin, and get raster, after sufficient time, it should be expectedRaster
 };
 

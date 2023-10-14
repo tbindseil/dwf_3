@@ -4,6 +4,8 @@ export const waitUntil = async (
     intervalMS: number
 ): Promise<boolean> => {
     let totalWaitTimeMS = 0;
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         await new Promise((r) => setTimeout(r, intervalMS));
         totalWaitTimeMS += intervalMS;

@@ -32,7 +32,7 @@ export class Client {
         script: ClientScript,
         clientID: string,
         filename: string,
-        debugEnabled: boolean = false
+        debugEnabled = false
     ) {
         this.socket = io(Client.ENDPOINT);
         this.script = script;
@@ -90,29 +90,30 @@ export class Client {
     }
 
     public async start(): Promise<void> {
-        return new Promise<void>(async (resolve) => {
-            // need to forloop to serialize these
-            for (let i = 0; i < this.script.actions.length; ++i) {
-                const currAction = this.script.actions[i];
+        // TODO do i even need this to be wrapped in a promise? isn't that what async await is for?
+        // return new Promise<void>(async (resolve) => {
+        // need to forloop to serialize these
+        for (let i = 0; i < this.script.actions.length; ++i) {
+            const currAction = this.script.actions[i];
 
-                currAction.sentAt = performance.now();
-                const pixelUpdate = new PixelUpdate({
-                    ...currAction.unsentPixelUpdate,
-                    filename: this.filename,
-                    createdBy: this.clientID,
-                });
+            currAction.sentAt = performance.now();
+            const pixelUpdate = new PixelUpdate({
+                ...currAction.unsentPixelUpdate,
+                filename: this.filename,
+                createdBy: this.clientID,
+            });
 
-                this.debug(
-                    `sending update: ${pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.postActionWaitMS}ms`
-                );
+            this.debug(
+                `sending update: ${pixelUpdate.uuid} @ ${currAction.sentAt} then waiting ${currAction.postActionWaitMS}ms`
+            );
 
-                this.socket.emit('client_to_server_udpate', pixelUpdate);
-                this.sentUpdates.set(currAction.sentAt, pixelUpdate);
+            this.socket.emit('client_to_server_udpate', pixelUpdate);
+            this.sentUpdates.set(currAction.sentAt, pixelUpdate);
 
-                await delay(currAction.postActionWaitMS);
-            }
-            resolve();
-        });
+            await delay(currAction.postActionWaitMS);
+        }
+        // resolve();
+        // });
     }
 
     public getReceivedUpdates(): Map<number, Update> {

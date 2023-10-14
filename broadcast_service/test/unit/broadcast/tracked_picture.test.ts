@@ -209,7 +209,7 @@ describe('TrackedPicture Tests', () => {
         await pushedJob();
     };
 
-    const writeRaster = async (force: boolean = false) => {
+    const writeRaster = async (force = false) => {
         trackedPicture.enqueueWrite(priority, force);
         await pushedJob();
     };

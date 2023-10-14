@@ -10,9 +10,9 @@ npm run tsc
 echo "testing:"
 npm run test
 
-# echo "linting:"
-# npm run lint
-# 
+echo "linting:"
+npm run lint
+
 # echo "beaming artifacts to the cloud:"
 # scp -r ./artifacts ec2-user@IP_ADDRESS/where/to/put/artifacts
 # 

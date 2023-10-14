@@ -16,7 +16,7 @@ export class TrackedPicture {
     private readonly workQueue: Queue;
     private readonly pictureAccessor: PictureAccessor;
     private readonly filename: string;
-    private dirty: boolean = false;
+    private dirty = false;
     private writeEnqueued = false;
     private raster?: Raster;
 
