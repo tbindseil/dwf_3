@@ -13,6 +13,9 @@ npm run test
 echo "linting:"
 npm run lint
 
+echo "packaging:"
+npm pack
+
 # echo "beaming artifacts to the cloud:"
 # scp -r ./artifacts ec2-user@IP_ADDRESS/where/to/put/artifacts
 # 
