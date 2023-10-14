@@ -72,5 +72,8 @@ export class CdkStarterStack extends cdk.Stack {
     // add the User Data script to the Instance
     ec2Instance.addUserData(userDataScript);
 
+    // force failure to see what happens
+    const forceFailureScript = readFileSync('./lib/fail.sh', 'utf8');
+    ec2Instance.addUserData(forceFailureScript)
   }
 }
