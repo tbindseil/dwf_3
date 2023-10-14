@@ -1,13 +1,15 @@
 #!/bin/bash
 
+set -e
+
 echo "script start"
 
 echo "building:"
 npm run tsc
 
-# echo "testing:"
-# npm run test
-# 
+echo "testing:"
+npm run test
+
 # echo "linting:"
 # npm run lint
 # 

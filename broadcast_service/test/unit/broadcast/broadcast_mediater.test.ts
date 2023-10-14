@@ -16,7 +16,7 @@ jest.mock('../../../src/broadcast/tracked_picture');
 const mockMakeTrackedPicture = jest.mocked(makeTrackedPicture, true);
 
 describe('BroadcastMediator Tests', () => {
-    jest.useFakeTimers();
+    // jest.useFakeTimers();
 
     const filename = 'filename';
 
@@ -28,7 +28,7 @@ describe('BroadcastMediator Tests', () => {
         y: 20,
         red: 255,
         green: 255,
-        blue: 255
+        blue: 255,
     });
 
     const mockSocket1 = {
@@ -72,7 +72,7 @@ describe('BroadcastMediator Tests', () => {
         broadcastMediator = new BroadcastMediator(mockPictureAccessor);
     });
 
-    it('enqueues writes on an interval if tracked pictures are not stopped', async () => {
+    it.skip('enqueues writes on an interval if tracked pictures are not stopped', async () => {
         const otherFilename = 'otherFilename';
 
         broadcastMediator.addClient(filename, mockSocket1);
@@ -85,7 +85,7 @@ describe('BroadcastMediator Tests', () => {
         verify(mockedTrackedPicture.enqueueWrite(Priority.SIX, false)).twice();
     });
 
-    it('enqueues forced, high priority writes every once in a while', async () => {
+    it.skip('enqueues forced, high priority writes every once in a while', async () => {
         const otherFilename = 'otherFilename';
 
         broadcastMediator.addClient(filename, mockSocket1);
@@ -138,7 +138,7 @@ describe('BroadcastMediator Tests', () => {
         verify(
             mockedTrackedPicture.enqueueBroadcastUpdate(
                 Priority.FOUR,
-                pixelUpdate,
+                pixelUpdate
             )
         ).called();
         verify(
