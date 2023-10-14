@@ -56,3 +56,9 @@ So, what are some questions?
 4. just invoke npm run when doing (or after) the scp
 
 So maybe, its not quite CI/CD, but just an automated script, and I can run it when I please from anywhere in the code
+
+Yeah but, where do we start?
+
+do I just run it with the repo in whatever state?
+
+lets do that first
