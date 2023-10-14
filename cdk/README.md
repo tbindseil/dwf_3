@@ -34,3 +34,25 @@ Once we have this setup, I would like a pipeline that:
 * deploys to test
 * runs the integ tests
 * deploys to production
+
+#### Thoughts
+Ok, so I need to find a way to get get my backend code running on the cloud.
+That way, I can point my local web page to it, and test that way. Then, I
+can do some work to get the web page code to deploy to the cloud and test that
+part. But, if I deploy the webpage first, I don't know that the live internet
+can find my laptop on the internet.
+
+So, what all needs to happen for deployment of the backend?
+
+* run build, test, lint on code at a commit
+* take artifacts, copy to ec2 on the cloud
+* invoke commands to run new artifacts
+
+So, what are some questions?
+
+1. what are standard formats for node artifacts?
+2. running build and test and lint in a script with failure stopping things sounds good
+3. scp for copying
+4. just invoke npm run when doing (or after) the scp
+
+So maybe, its not quite CI/CD, but just an automated script, and I can run it when I please from anywhere in the code
